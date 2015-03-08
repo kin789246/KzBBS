@@ -525,19 +525,23 @@ namespace KzBBS
             reader.InputStreamOptions = InputStreamOptions.Partial;
             try
             {
-                int repeat0 = 0;
-                while (repeat0 < 6)
+                //int repeat0 = 0;
+                while (true)
                 {
-                    uint Message = await reader.LoadAsync((uint)MAXBuffer);
+                    uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(PTTSocket.cts.Token);
 
                     rawdata = new byte[Message];
                     reader.ReadBytes(rawdata);
                     if (rawdata.Length != 0)
                     {
                         await goTouchVersion(rawdata);
-                        repeat0 = 0;
+                        //repeat0 = 0;
                     }
-                    repeat0++;
+                    else
+                    {
+                        PTTSocket.cts.Cancel();
+                    }
+                    //repeat0++;
                 }
             }
             catch (Exception exception)
