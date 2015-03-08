@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="aboutBuy.Content" xml:space="preserve">
+    <value>購買</value>
+  </data>
+  <data name="aboutClose.Content" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="aboutContent.Text" xml:space="preserve">
+    <value>KzBBS是個可以連線BBS的APP, 如果你是第一次連上該BBS站台, 請在連上該BBS站台後依照指示註冊帳號登入. 感謝您的使用.</value>
+    <comment>about this APP.</comment>
+  </data>
+  <data name="aboutContent.Width" xml:space="preserve">
+    <value>300</value>
+  </data>
+  <data name="Conn" xml:space="preserve">
+    <value>已連線</value>
+  </data>
+  <data name="connecting" xml:space="preserve">
+    <value>連線中...</value>
+  </data>
+  <data name="nextTimeContent.Content" xml:space="preserve">
+    <value>APP開啟時不顯示</value>
+  </data>
+  <data name="unConn" xml:space="preserve">
+    <value>未連線</value>
+  </data>
+  <data name="unConn2.Text" xml:space="preserve">
+    <value>未連線</value>
+  </data>
+  <data name="aboutBtn.Content" xml:space="preserve">
+    <value>關於</value>
+  </data>
+  <data name="account.Text" xml:space="preserve">
+    <value>帳號:</value>
+  </data>
+  <data name="accountTbox.Width" xml:space="preserve">
+    <value>120</value>
+  </data>
+  <data name="addressTag.Text" xml:space="preserve">
+    <value>位址:</value>
+  </data>
+  <data name="addressTbox.Width" xml:space="preserve">
+    <value>120</value>
+  </data>
+  <data name="alreadybuy" xml:space="preserve">
+    <value>感謝, 你已經買過了.</value>
+  </data>
+  <data name="alreadyconnect" xml:space="preserve">
+    <value>已經連線了好嗎!</value>
+  </data>
+  <data name="backTo" xml:space="preserve">
+    <value>回到瀏覽</value>
+  </data>
+  <data name="buyfailed" xml:space="preserve">
+    <value>購買失敗</value>
+  </data>
+  <data name="cantfind" xml:space="preserve">
+    <value>找不到已儲存的帳號密碼.</value>
+  </data>
+  <data name="clearSaved.Content" xml:space="preserve">
+    <value>清除已存</value>
+  </data>
+  <data name="connBtn.Content" xml:space="preserve">
+    <value>連線</value>
+  </data>
+  <data name="connBtn.FontSize" xml:space="preserve">
+    <value>26</value>
+  </data>
+  <data name="disconnBtn.Content" xml:space="preserve">
+    <value>斷線</value>
+  </data>
+  <data name="disconnBtn.FontSize" xml:space="preserve">
+    <value>26</value>
+  </data>
+  <data name="existaccount" xml:space="preserve">
+    <value>已經存在帳號:</value>
+  </data>
+  <data name="getInput.Content" xml:space="preserve">
+    <value>輸入文字</value>
+  </data>
+  <data name="hideadvance2" xml:space="preserve">
+    <value>隱藏進階</value>
+  </data>
+  <data name="hideconn.Content" xml:space="preserve">
+    <value>隱藏連線</value>
+  </data>
+  <data name="hideconn2" xml:space="preserve">
+    <value>隱藏連線</value>
+  </data>
+  <data name="hidehotkey2" xml:space="preserve">
+    <value>隱藏操作</value>
+  </data>
+  <data name="infoNotify" xml:space="preserve">
+    <value>訊息通知</value>
+  </data>
+  <data name="itdoesntsaved" xml:space="preserve">
+    <value>位址, 帳號, 密碼未存入</value>
+  </data>
+  <data name="itsaved" xml:space="preserve">
+    <value>位址, 帳號, 密碼已存</value>
+  </data>
+  <data name="needoverwrite" xml:space="preserve">
+    <value>, 要覆蓋嗎?</value>
+  </data>
+  <data name="noconnnodisconn" xml:space="preserve">
+    <value>沒有連線就沒有斷線</value>
+  </data>
+  <data name="notdeleted" xml:space="preserve">
+    <value>帳號密碼未刪除</value>
+  </data>
+  <data name="password.Text" xml:space="preserve">
+    <value>密碼:</value>
+  </data>
+  <data name="passwordTbox.Width" xml:space="preserve">
+    <value>120</value>
+  </data>
+  <data name="plsreinput" xml:space="preserve">
+    <value>帳號密碼都要輸入的啦! 請重發, 謝謝.</value>
+  </data>
+  <data name="remember.Content" xml:space="preserve">
+    <value>記住</value>
+  </data>
+  <data name="sayno" xml:space="preserve">
+    <value>不好</value>
+  </data>
+  <data name="sayok" xml:space="preserve">
+    <value>好</value>
+  </data>
+  <data name="selWords.Content" xml:space="preserve">
+    <value>選取文字</value>
+  </data>
+  <data name="selWords2" xml:space="preserve">
+    <value>選取文字</value>
+  </data>
+  <data name="showadvance.Content" xml:space="preserve">
+    <value>顯示進階</value>
+  </data>
+  <data name="showadvance2" xml:space="preserve">
+    <value>顯示進階</value>
+  </data>
+  <data name="showconn2" xml:space="preserve">
+    <value>顯示連線</value>
+  </data>
+  <data name="showhotkey.Content" xml:space="preserve">
+    <value>顯示操作</value>
+  </data>
+  <data name="showhotkey2" xml:space="preserve">
+    <value>顯示操作</value>
+  </data>
+  <data name="thanksforbuy" xml:space="preserve">
+    <value>感謝你的購買</value>
+  </data>
+  <data name="todecide" xml:space="preserve">
+    <value>作決定吧</value>
+  </data>
+  <data name="todeleteacct" xml:space="preserve">
+    <value>要刪除帳號:</value>
+  </data>
+  <data name="yesornot" xml:space="preserve">
+    <value>嗎?</value>
+  </data>
+  <data name="aboutContentWP.Text" xml:space="preserve">
+    <value>KzBBS是個可以連線BBS的APP, 如果你是第一次連上該BBS站台, 請在連上該BBS站台後依照指示註冊帳號登入. 感謝您的使用.</value>
+    <comment>about this APP.</comment>
+  </data>
+  <data name="aboutContentWP.Width" xml:space="preserve">
+    <value>200</value>
+  </data>
+  <data name="connBtnWP.Content" xml:space="preserve">
+    <value>連線</value>
+  </data>
+  <data name="disconnBtnWP.Content" xml:space="preserve">
+    <value>斷線</value>
+  </data>
+  <data name="accountTboxWP.Width" xml:space="preserve">
+    <value>60</value>
+  </data>
+  <data name="addressTboxWP.Width" xml:space="preserve">
+    <value>60</value>
+  </data>
+  <data name="pwdTboxWP.Width" xml:space="preserve">
+    <value>60</value>
+  </data>
+</root>

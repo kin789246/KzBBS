@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>2828bdcc-a108-494f-b944-27c173f9b36c</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>KzBBS</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="$(MSBuildThisFileDirectory)App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="$(MSBuildThisFileDirectory)AnsiAttr.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Big5Util.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PTTDisplay.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelnetANSIParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelnetANSIParserCanvas.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelnetData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelnetParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelnetSocket.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)ApiData\WindowsStoreProxy.xml" />
+    <Content Include="$(MSBuildThisFileDirectory)BIG5ToUNI.TXT" />
+    <Content Include="$(MSBuildThisFileDirectory)kaiu.ttf" />
+    <Content Include="$(MSBuildThisFileDirectory)moz18-b2u.txt" />
+    <Content Include="$(MSBuildThisFileDirectory)moz18-u2b.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="$(MSBuildThisFileDirectory)Strings\en-US\Resources.resw" />
+    <PRIResource Include="$(MSBuildThisFileDirectory)Strings\zh-TW\Resources.resw" />
+  </ItemGroup>
+</Project>
