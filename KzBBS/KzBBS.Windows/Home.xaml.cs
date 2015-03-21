@@ -124,7 +124,7 @@ namespace KzBBS
                 string command = PTTDisplay.getSelectedID(getID);
                 if (command == "") return;
 
-                int voffset = (int)TelnetANSIParserCanvas.curPos.X - lineNum;
+                int voffset = (int)TelnetANSIParser.curPos.X - lineNum;
                 if (voffset > 0) //up arrow
                 {
                     for (int r = 0; r < voffset; r++)
@@ -203,13 +203,13 @@ namespace KzBBS
                 if (pointToCursor != null)
                 { PTTCanvas.Children.Remove(pointToCursor); }
                 //Set the cursor
-                PTTDisplay.showBlinking(PTTCanvas, "_", Colors.White, TelnetANSIParserCanvas.bg, telnetFontSize / 2
-                    , (int)TelnetANSIParserCanvas.curPos.X, (int)TelnetANSIParserCanvas.curPos.Y, 1);
+                PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
+                    , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
                 pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
                 //move textbox
-                Canvas.SetLeft(sendCmd, TelnetANSIParserCanvas.curPos.Y * telnetFontSize / 4
+                Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 4
                     + canvasOffset);
-                Canvas.SetTop(sendCmd, (TelnetANSIParserCanvas.curPos.X - 1) * telnetFontSize / 2 + Canvas.GetTop(PTTCanvas));
+                Canvas.SetTop(sendCmd, (TelnetANSIParser.curPos.X - 1) * telnetFontSize / 2 + Canvas.GetTop(PTTCanvas));
             });
         }
 
@@ -368,29 +368,29 @@ namespace KzBBS
             }
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                //reset BBSPage
-                for (int line = 0; line < 24; line++)
-                {
-                    if (TelnetANSIParserCanvas.BBSPage[line] == null) continue;
-                    foreach (TelnetData block in TelnetANSIParserCanvas.BBSPage[line])
-                    {
-                        foreach (UIElement ui in block.BBSUI)
-                        { PTTCanvas.Children.Remove(ui); }
-                        block.BBSUI.Clear();
-                    }
-                }
-                PTTDisplay.showAll(PTTCanvas, TelnetANSIParserCanvas.BBSPage);
+                ////reset BBSPage
+                //for (int line = 0; line < 24; line++)
+                //{
+                //    if (TelnetANSIParser.BBSPage[line] == null) continue;
+                //    foreach (TelnetData block in TelnetANSIParser.BBSPage[line])
+                //    {
+                //        foreach (UIElement ui in block.BBSUI)
+                //        { PTTCanvas.Children.Remove(ui); }
+                //        block.BBSUI.Clear();
+                //    }
+                //}
+                //PTTDisplay.showAll(PTTCanvas, TelnetANSIParser.BBSPage);
 
                 //remove the cursor
                 if (pointToCursor != null)
                 { PTTCanvas.Children.Remove(pointToCursor); }
                 //Set the cursor
-                PTTDisplay.showBlinking(PTTCanvas, "_", Colors.White, TelnetANSIParserCanvas.bg, telnetFontSize / 2
-                    , (int)TelnetANSIParserCanvas.curPos.X, (int)TelnetANSIParserCanvas.curPos.Y, 1);
+                PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
+                    , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
                 pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
                 //move textbox
-                Canvas.SetLeft(sendCmd, TelnetANSIParserCanvas.curPos.Y * telnetFontSize / 2 + canvasOffset);
-                Canvas.SetTop(sendCmd, (TelnetANSIParserCanvas.curPos.X - 1) * telnetFontSize + Canvas.GetTop(PTTCanvas));
+                Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 2 + canvasOffset);
+                Canvas.SetTop(sendCmd, (TelnetANSIParser.curPos.X - 1) * telnetFontSize + Canvas.GetTop(PTTCanvas));
             });
         }
 
@@ -525,7 +525,6 @@ namespace KzBBS
             reader.InputStreamOptions = InputStreamOptions.Partial;
             try
             {
-                //int repeat0 = 0;
                 while (true)
                 {
                     uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(PTTSocket.cts.Token);
@@ -535,13 +534,11 @@ namespace KzBBS
                     if (rawdata.Length != 0)
                     {
                         await goTouchVersion(rawdata);
-                        //repeat0 = 0;
                     }
                     else
                     {
                         PTTSocket.cts.Cancel();
                     }
-                    //repeat0++;
                 }
             }
             catch (Exception exception)
@@ -605,27 +602,28 @@ namespace KzBBS
         static UIElement pointToCursor;
         private async Task goTouchVersion(byte[] rdata)
         {
+            TelnetANSIParser.HandleAnsiESC(rdata);
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 //remove last cursor
                 if (pointToCursor != null)
                 { PTTCanvas.Children.Remove(pointToCursor); }
-                TelnetANSIParserCanvas.HandleAnsiESC(rdata, PTTCanvas);
+                
                 //PTTDisplay._currentMode = PTTDisplay.checkMode();
-                PTTDisplay.showAll(PTTCanvas, TelnetANSIParserCanvas.BBSPage);
+                PTTDisplay.DisplayLanscape(PTTCanvas, TelnetANSIParser.BBSPage);
 
                 clipB.Inlines.Clear();
                 PTTDisplay.getText();
                 PTTDisplay.generateHyperlink(PTTDisplay.forClipBoard, clipB, Colors.Transparent);
                 //Set the cursor
-                PTTDisplay.showBlinking(PTTCanvas, "_", Colors.White, TelnetANSIParserCanvas.bg, telnetFontSize / 2
-                    , (int)TelnetANSIParserCanvas.curPos.X, (int)TelnetANSIParserCanvas.curPos.Y, 1);
+                PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
+                    , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
                 pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
 
-                //Canvas.SetLeft(sendCmd, TelnetANSIParserCanvas.curPos.Y * telnetFontSize / 2
+                //Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 2
                 //    + (Window.Current.Bounds.Width - PTTCanvas.Width) / 2);
-                Canvas.SetLeft(sendCmd, TelnetANSIParserCanvas.curPos.Y * telnetFontSize / 2 + canvasOffset);
-                Canvas.SetTop(sendCmd, TelnetANSIParserCanvas.curPos.X * telnetFontSize + Canvas.GetTop(PTTCanvas));
+                Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 2 + canvasOffset);
+                Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * telnetFontSize + Canvas.GetTop(PTTCanvas));
 
                 //if (PTTDisplay.isPushable)
                 //{ pushKey.Visibility = Windows.UI.Xaml.Visibility.Visible; }
@@ -639,6 +637,30 @@ namespace KzBBS
                 autoLogin = false;
             }
             
+        }
+
+        private void displayPage()
+        {
+            for (int i = 0; i < 24; i++)
+            {
+                for (int j = 0; j < 80; j++)
+                {
+                    if (TelnetANSIParser.BBSPage[i, j] == null) 
+                        TelnetANSIParser.BBSPage[i, j] = new TelnetData();
+                    TextBlock tb = new TextBlock();
+                    tb.FontSize = 30;
+                    tb.LineHeight = 30;
+                    tb.Foreground = new SolidColorBrush(Colors.White);
+                    tb.DataContext = TelnetANSIParser.BBSPage[i, j];
+                    tb.SetBinding(TextBlock.TextProperty,
+                        new Binding() { Path = new PropertyPath("Text") });
+                    //tb.SetBinding(TextBlock.ForegroundProperty, 
+                    //    new Binding() { Path = new PropertyPath("ForeColor") });
+                    Canvas.SetLeft(tb, j * 30 / 2);
+                    Canvas.SetTop(tb, i * 30);
+                    PTTCanvas.Children.Add(tb);
+                }
+            }
         }
 
         private async void cmdOrText_KeyUp(object sender, KeyRoutedEventArgs e)
@@ -841,7 +863,7 @@ namespace KzBBS
                 connBtn.IsEnabled = true;
                 PTTCanvas.Children.Clear();
                 PTTDisplay.forClipBoard = "";
-                TelnetANSIParserCanvas.resetAllSetting();
+                TelnetANSIParser.resetAllSetting();
             });
         }
 

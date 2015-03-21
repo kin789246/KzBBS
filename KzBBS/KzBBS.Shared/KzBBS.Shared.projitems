@@ -19,7 +19,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Big5Util.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PTTDisplay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetANSIParser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TelnetANSIParserCanvas.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetSocket.cs" />

@@ -5,6 +5,10 @@ using System.Diagnostics;
 using System.Text;
 using Windows.UI;
 using Windows.Foundation;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 
 namespace KzBBS
 {
@@ -85,22 +89,22 @@ namespace KzBBS
             return ANSI;
         }
 
-        static Color nBlack = Color.FromArgb(255, 0, 0, 0);
-        static Color nRed = Color.FromArgb(255, 128, 0, 0);
-        static Color nGreen = Color.FromArgb(255, 0, 128, 0);
-        static Color nYellow = Color.FromArgb(255, 128, 128, 0);
-        static Color nBlue = Color.FromArgb(255, 0, 0, 128);
-        static Color nMagenta = Color.FromArgb(255, 128, 0, 128);
-        static Color nCyan = Color.FromArgb(255, 0, 128, 128);
-        static Color nGray = Color.FromArgb(255, 192, 192, 192);
-        static Color bDarkgray = Color.FromArgb(255, 128, 128, 128);
-        static Color bRed = Color.FromArgb(255, 255, 0, 0);
-        static Color bGreen = Color.FromArgb(255, 0, 255, 0);
-        static Color bYellow = Color.FromArgb(255, 255, 255, 0);
-        static Color bBlue = Color.FromArgb(255, 0, 0, 255);
-        static Color bMagenta = Color.FromArgb(255, 255, 0, 255);
-        static Color bCyan = Color.FromArgb(255, 0, 255, 255);
-        static Color bWhite = Color.FromArgb(255, 255, 255, 255);
+        public static Color nBlack = Color.FromArgb(255, 0, 0, 0);
+        public static Color nRed = Color.FromArgb(255, 128, 0, 0);
+        public static Color nGreen = Color.FromArgb(255, 0, 128, 0);
+        public static Color nYellow = Color.FromArgb(255, 128, 128, 0);
+        public static Color nBlue = Color.FromArgb(255, 0, 0, 128);
+        public static Color nMagenta = Color.FromArgb(255, 128, 0, 128);
+        public static Color nCyan = Color.FromArgb(255, 0, 128, 128);
+        public static Color nGray = Color.FromArgb(255, 192, 192, 192);
+        public static Color bDarkgray = Color.FromArgb(255, 128, 128, 128);
+        public static Color bRed = Color.FromArgb(255, 255, 0, 0);
+        public static Color bGreen = Color.FromArgb(255, 0, 255, 0);
+        public static Color bYellow = Color.FromArgb(255, 255, 255, 0);
+        public static Color bBlue = Color.FromArgb(255, 0, 0, 255);
+        public static Color bMagenta = Color.FromArgb(255, 255, 0, 255);
+        public static Color bCyan = Color.FromArgb(255, 0, 255, 255);
+        public static Color bWhite = Color.FromArgb(255, 255, 255, 255);
 
         private static void analyzeWordAttr(int[] ansiCode)
         {
@@ -182,83 +186,162 @@ namespace KzBBS
             #endregion
         }
 
+        public static void resetAllSetting()
+        {
+            curPos = new Point(0, 0);
+            //pointTo = new TelnetData();
+            AnsiCode = new List<byte>();
+            forAppliedAnsi = new int[] { 37, 40, 255, 255, 255, 255 };
+            lastAttr = new AnsiAttr();
+            savedPos = new Point(0, 0);
+            fg = nGray;
+            bg = nBlack;
+            isBlinking = false;
+            isDualColor = false;
+            bright = false;
+            IACNego = false;
+            highByte = 0;
+            beforeSus = new Point(0, 0);
+            for (int i = 0; i < ROW; i++)
+            {
+                for (int j = 0; j < COL; j++)
+                {
+                    if (BBSPage[i, j] == null)
+                    {
+                        BBSPage[i, j] = new TelnetData();
+                    }
+                }
+            }
+            //startPos = new Point(0, 0);
+        }
+
+        const int ROW = 24;
+        const int COL = 80;
+        public static TelnetData[,] BBSPage = new TelnetData[ROW,COL];
         public static Point curPos = new Point(0, 0);
         static Point beforeMoveCursor = new Point(24,0);
-        public static double fontSize = 30;
         private static List<byte> AnsiCode = new List<byte>();
         private static bool AnsiZone = false;
         private static int[] forAppliedAnsi = { 37, 40, 255, 255, 255, 255 };
         private static AnsiAttr lastAttr = new AnsiAttr();
         private static Point savedPos = new Point(0, 0);
-        static Color fg = nGray, bg = nBlack;
+        public static Color fg = nGray, bg = nBlack;
         static bool isBlinking = false;
+        static bool isDualColor = false;
         static bool bright = false;
-        static bool IACNigo = false;
+        static bool IACNego = false;
         static byte highByte = 0;
-        static TelnetData pointTo = new TelnetData();
-        //static int startTick;
-        public static void HandleAnsiESC(byte[] withoutIAC, List<TelnetData>[] BBSPage)
+        static Point hiPosition = new Point(0, 0);
+        //public static TelnetData pointTo = new TelnetData();
+        public static Point beforeSus = new Point(0, 0);
+
+        public static void HandleAnsiESC(byte[] rawdata)
         {
-            int currentIndex = 0;
-            for (int i = 0; i < 24; i++)
+            #region debug 
+            ////raw bytes
+            //StringBuilder rdataString = new StringBuilder();
+            //for (int i = 0; i < rawdata.Length; i++)
+            //{
+            //    rdataString.Append(rawdata[i].ToString() + " ");
+            //    if (rawdata[i] == 10)
+            //    { rdataString.Append("\n"); }
+            //}
+            //Debug.WriteLine(rdataString.ToString());
+            //raw text
+            //List<byte> noCmd = new List<byte>();
+            //noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
+            //string removeIAC = Big5Util.ToUni(noCmd.ToArray());
+            //if (!string.IsNullOrEmpty(removeIAC))
+            //{
+            //    string printIt = "";
+            //    foreach (char byteword in removeIAC)
+            //    {
+            //        if (byteword == '\n')
+            //        {
+            //            printIt += "\\n\n";
+            //        }
+            //        else if (byteword == '\r')
+            //        { printIt += "\\r"; }
+            //        else if (byteword == '\b')
+            //        {
+            //            printIt += "\\b";
+            //        }
+            //        else
+            //        {
+            //            printIt += byteword;
+            //        }
+            //    }
+            //    printIt += "-received.";
+            //    Debug.WriteLine(printIt);
+            //}
+            ////////////////////////////////////
+
+            #endregion
+
+            beforeSus = curPos;
+            for (int i = 0; i < ROW; i++)
             {
-                if (BBSPage[i] == null)
+                for (int j = 0; j < COL; j++)
                 {
-                    BBSPage[i] = new List<TelnetData>();
+                    if (BBSPage[i, j] == null)
+                    {
+                        BBSPage[i, j] = new TelnetData();
+                    }
                 }
             }
-            //startTick = Environment.TickCount;
+
+            int currentIndex = 0;
             //start handling ANSI ESC Sequences
-            while (currentIndex < withoutIAC.Length)
+            while (currentIndex < rawdata.Length)
             {
-                if (withoutIAC[currentIndex] == 27) //start ESC sequences
+                if (rawdata[currentIndex] == 27) //start ESC sequences
                 {
                     AnsiZone = true;
                     currentIndex++;
                 }
                 //if last time ended with ESC(27), this time start with [ (91)
-                else if (AnsiZone == true && withoutIAC[currentIndex] == 91)
+                else if (AnsiZone == true && rawdata[currentIndex] == 91)
                 {
                     currentIndex++;
                 }
 
                     //handle IAC code
-                else if (withoutIAC[currentIndex] == (byte)Telnet.IAC)
+                else if (rawdata[currentIndex] == (byte)Telnet.IAC)
                 {
-                    if (currentIndex + 1 < withoutIAC.Length && withoutIAC[currentIndex + 1] == 255)
+                    if (currentIndex + 1 < rawdata.Length && rawdata[currentIndex + 1] == 255)
                     {
                         //tempWords.Add(255);
                         currentIndex += 2;
                     }
-                    else if (currentIndex + 1 < withoutIAC.Length && (
-                        withoutIAC[currentIndex + 1] == (byte)Telnet.DO || withoutIAC[currentIndex + 1] == (byte)Telnet.DONT
-                        || withoutIAC[currentIndex + 1] == (byte)Telnet.WILL || withoutIAC[currentIndex + 1] == (byte)Telnet.WONT))
+                    else if (currentIndex + 1 < rawdata.Length && (
+                        rawdata[currentIndex + 1] == (byte)Telnet.DO || rawdata[currentIndex + 1] == (byte)Telnet.DONT
+                        || rawdata[currentIndex + 1] == (byte)Telnet.WILL || rawdata[currentIndex + 1] == (byte)Telnet.WONT))
                     {
                         currentIndex += 3;
                     }
-                    else if (currentIndex + 1 < withoutIAC.Length && withoutIAC[currentIndex + 1] == (byte)Telnet.SB)
+                    else if (currentIndex + 1 < rawdata.Length && rawdata[currentIndex + 1] == (byte)Telnet.SB)
                     {
-                        IACNigo = true;
+                        IACNego = true;
                         currentIndex += 2;
                     }
-                    else if (IACNigo == true && currentIndex + 1 < withoutIAC.Length
-                        && withoutIAC[currentIndex + 1] == (byte)Telnet.SE)
+                    else if (IACNego == true && currentIndex + 1 < rawdata.Length
+                        && rawdata[currentIndex + 1] == (byte)Telnet.SE)
                     {
-                        IACNigo = false;
+                        IACNego = false;
+                        currentIndex += 2;
+                    }
+                    else if(currentIndex + 1 < rawdata.Length && rawdata[currentIndex + 1] == (byte)Telnet.GoAhead)
+                    {
                         currentIndex += 2;
                     }
                 }
-                else if (AnsiZone == true && withoutIAC[currentIndex] >= 64 && withoutIAC[currentIndex] <= 127)
+                else if (AnsiZone == true && rawdata[currentIndex] >= 64 && rawdata[currentIndex] <= 127)
                 //end of Ansi zone
                 {
-                    if (withoutIAC[currentIndex] == 72) // *[ H
+                    beforeMoveCursor = new Point(curPos.X, curPos.Y - 1);
+                    if (rawdata[currentIndex] == 72) // *[ H
                     {
-                        if (pointTo.Text != "")
-                        {
-                            findReplace(BBSPage, pointTo);
-                            BBSPage[(int)curPos.X].Add(pointTo);
-                            pointTo = new TelnetData();
-                        }
+                        checkHiByte();
                         if (AnsiCode.Count == 0) // move cursor to (0,0)
                         {
                             curPos.X = 0;
@@ -279,33 +362,30 @@ namespace KzBBS
                                 curPos.Y = tempAnsi[1] - 1;
                             }
                         }
-                        
-                        pointTo.setData(fg, bg, isBlinking, curPos);
                     }
-                    else if (withoutIAC[currentIndex] == 74) // *[ J
+                    else if (rawdata[currentIndex] == 74) // *[ J
                     {
+                        beforeMoveCursor = new Point(curPos.X, curPos.Y - 1);
                         int[] tempAnsi = new int[6];
                         tempAnsi = analyzeAnsiCode(AnsiCode);
                         //clear entire screen = delete all stored words
                         if (tempAnsi[0] == 2)
                         {
                             curPos.Y = 0; curPos.X = 0;
-                            for(int i=0; i<24; i++)
-                            { BBSPage[i] = new List<TelnetData>(); }
+                            for (int row = 0; row < ROW; row++)
+                            {
+                                for (int col = 0; col < COL; col++)
+                                {
+                                    BBSPage[row, col].resetData();
+                                }
+                            }
                         }
                     }
-                    else if (withoutIAC[currentIndex] == 75) // *[ K
+                    else if (rawdata[currentIndex] == 75) // *[ K
                     {
-                        if (pointTo.Text != "")
-                        {
-                            findReplace(BBSPage, pointTo);
-                            BBSPage[(int)curPos.X].Add(pointTo);
-                            pointTo = new TelnetData();
-                        }
-                        pointTo.setData(fg, bg, isBlinking, curPos);
-                        escapeK(BBSPage);
+                        escapeK();
                     }
-                    else if (withoutIAC[currentIndex] == 109) // *[ m
+                    else if (rawdata[currentIndex] == 109) // *[ m
                     {
                         if (AnsiCode.Count != 0)
                         {
@@ -317,35 +397,38 @@ namespace KzBBS
                             forAppliedAnsi = resetColor;
                         }
                         analyzeWordAttr(forAppliedAnsi);
-                        if (pointTo.Text != "")
-                        {
-                            findReplace(BBSPage, pointTo);
-                            BBSPage[(int)curPos.X].Add(pointTo);
-                            pointTo = new TelnetData();
-                        }
-                        pointTo.setData(fg, bg, isBlinking, curPos);
                     }
-                    else if (withoutIAC[currentIndex] == 77) // *[ M scroll up one line
+                    else if (rawdata[currentIndex] == 77) // *[ M scroll up one line (line 24 = line 23, line0.reset())
                     {
                         if (AnsiCode.Count == 0)
                         {
-                            for (int i = 23; i >0; i-- )
+                            for (int row = ROW-1; row > 0; row--)
                             {
-                                BBSPage[i] = BBSPage[i - 1];
+                                for (int col = 0; col < COL; col++)
+                                {
+                                    BBSPage[row, col] = BBSPage[row - 1, col];
+                                    BBSPage[row, col].Position = BBSPage[row - 1, col].Position;
+                                }
                             }
-                            BBSPage[0] = new List<TelnetData>();
+                            for (int col = 0; col < COL; col++)
+                            {
+                                BBSPage[0, col] = new TelnetData();
+                            }
                         }
                     }
-                    else if (withoutIAC[currentIndex] == 115) //*[s save cursor
+                    else if (rawdata[currentIndex] == 115) //*[s save cursor
                     {
                         savedPos = curPos;
                     }
-                    else if (withoutIAC[currentIndex] == 117) //*[u load cursor
+                    else if (rawdata[currentIndex] == 117) //*[u load cursor
                     {
+                        checkHiByte();
                         curPos = savedPos;
                     }
-                    else if (withoutIAC[currentIndex] == 65) //*[nA move cursor n up
+                    else if (rawdata[currentIndex] == 65) //*[nA move cursor n up
                     {
+                        checkHiByte();
+                        beforeMoveCursor = new Point(curPos.X, curPos.Y - 1);
                         if (AnsiCode.Count == 0) //*[A
                         {
                             curPos.X--;
@@ -359,8 +442,10 @@ namespace KzBBS
                             if (curPos.X < 0) curPos.X = 0;
                         }
                     }
-                    else if (withoutIAC[currentIndex] == 66) //*[nB move cursor n down
+                    else if (rawdata[currentIndex] == 66) //*[nB move cursor n down
                     {
+                        checkHiByte();
+                        beforeMoveCursor = new Point(curPos.X, curPos.Y - 1);
                         if (AnsiCode.Count == 0) //*[B
                         {
                             curPos.X++;
@@ -374,8 +459,10 @@ namespace KzBBS
                             if (curPos.X >= 24) curPos.X = 23;
                         }
                     }
-                    else if (withoutIAC[currentIndex] == 67) //*[nC move cursor n right
+                    else if (rawdata[currentIndex] == 67) //*[nC move cursor n right
                     {
+                        checkHiByte();
+                        beforeMoveCursor = new Point(curPos.X, curPos.Y - 1);
                         if (AnsiCode.Count == 0) //*[C
                         {
                             curPos.Y++;
@@ -389,8 +476,10 @@ namespace KzBBS
                             if (curPos.Y >= 80) curPos.Y = 79;
                         }
                     }
-                    else if (withoutIAC[currentIndex] == 68) //*[nD move cursor n left
+                    else if (rawdata[currentIndex] == 68) //*[nD move cursor n left
                     {
+                        checkHiByte();
+                        beforeMoveCursor = new Point(curPos.X, curPos.Y - 1);
                         if (AnsiCode.Count == 0) //*[D
                         {
                             curPos.Y--;
@@ -406,92 +495,82 @@ namespace KzBBS
                     }
                     else
                     {
-                        Debug.WriteLine(withoutIAC[currentIndex]);
+                        Debug.WriteLine(rawdata[currentIndex]);
                     }
                     currentIndex++;
                     AnsiZone = false;
                     AnsiCode.Clear();
                 }
-                else
+                else //non-ansi or non-IACNegotiation
                 {
-                    if (AnsiZone == true && IACNigo == false)
+                    if (AnsiZone == true && IACNego == false)
                     {
-                        AnsiCode.Add(withoutIAC[currentIndex++]);
+                        AnsiCode.Add(rawdata[currentIndex++]);
                     }
-                    else if (IACNigo == false && AnsiZone == false)
+                    else if (IACNego == false && AnsiZone == false)
                     {
                         //store word
                         if (highByte != 0) //dual color low-byte
                         {
-                            string big5Word = Big5Util.ToUni(new byte[] { highByte, withoutIAC[currentIndex] });
-                            pointTo.setData(lastAttr.fgColor, lastAttr.bgColor, lastAttr.isBlinking,
-                                new Point(curPos.X, curPos.Y - 1));
-                            pointTo.Text = big5Word;
-                            pointTo.Count = 2;
-                            pointTo.DualColor = true;
-                            findReplace(BBSPage, pointTo);
-                            //pointTo.Count--;
-                            BBSPage[(int)curPos.X].Add(pointTo);
-                            
-                            pointTo = new TelnetData();
-                            pointTo.setData(fg, bg, isBlinking, curPos);
-                            pointTo.Text = big5Word;
-                            pointTo.Count = 2;
-                            pointTo.DualColor = true;
-                            pointTo.Position.Y--;
-                            BBSPage[(int)curPos.X].Add(pointTo);
+                            if (rawdata[currentIndex] > 0x3F) //big5 low-byte
+                            {
+                                string big5Word = Big5Util.ToUni(new byte[] { highByte, rawdata[currentIndex] });
+                                storeDualBytes(big5Word, (int)hiPosition.X, (int)hiPosition.Y, lastAttr);
+                                isDualColor = true;
+                                storeDualBytes(big5Word, (int)curPos.X, (int)curPos.Y, new AnsiAttr(fg, bg, isBlinking));
+                                curPos.Y++;
+                            }
+                            else //non-big-low-byte
+                            {
+                                storeASCII(0x3F, (int)hiPosition.X, (int)hiPosition.Y, lastAttr);
+                                curPos.Y--;
+                                storeASCII(rawdata[currentIndex], (int)curPos.X, (int)curPos.Y,new AnsiAttr(fg, bg, isBlinking)); //0x3F=='?'
+                            }
                             highByte = 0;
-                            curPos.Y++;
-
-                            pointTo = new TelnetData();
-                            pointTo.setData(fg, bg, isBlinking, curPos);
+                            hiPosition = new Point(0, 0);
                             
                             currentIndex++;
                             continue;
                         }
-                        if (withoutIAC[currentIndex] < 128) //ASCII
-                        {                            
-                            storeASCII(BBSPage, withoutIAC[currentIndex]);
+                        if (rawdata[currentIndex] < 128) //ASCII
+                        {
+                            storeASCII(rawdata[currentIndex], (int)curPos.X, (int)curPos.Y, new AnsiAttr(fg, bg, isBlinking));
                             currentIndex++;
                         }
-                        else if (currentIndex + 1 < withoutIAC.Length)
+                        else if (currentIndex + 1 < rawdata.Length)
                         {
-                            if (withoutIAC[currentIndex + 1] != 27) //Big5
+                            if (rawdata[currentIndex + 1] != 27) //Big5
                             {
-                                pointTo.Text += Big5Util.ToUni(new byte[] { withoutIAC[currentIndex], withoutIAC[currentIndex + 1] });
-                                pointTo.Count += 2;
-                                curPos.Y += 2;
+                                if (rawdata[currentIndex + 1] > 0x3F) //big5 low-byte
+                                {
+                                    string big5Word = Big5Util.ToUni(new byte[] { rawdata[currentIndex], rawdata[currentIndex + 1] });
+                                    storeDualBytes(big5Word, (int)curPos.X, (int)curPos.Y, new AnsiAttr(fg, bg, isBlinking));
+                                    storeDualBytes("", (int)curPos.X, (int)(curPos.Y + 1), new AnsiAttr(fg, bg, isBlinking));
+                                    curPos.Y += 2;
+                                }
+                                else
+                                {
+                                    storeASCII(0x3F, (int)curPos.X, (int)curPos.Y, new AnsiAttr(fg, bg, isBlinking));
+                                    storeASCII(rawdata[currentIndex + 1], (int)curPos.X, (int)curPos.Y, new AnsiAttr(fg, bg, isBlinking));
+                                }
+                                
                                 currentIndex += 2;
                             }
                             else //Dual color
                             {
-                                if(pointTo.Text != "")
-                                {
-                                    findReplace(BBSPage, pointTo);
-                                    BBSPage[(int)curPos.X].Add(pointTo);
-                                    pointTo = new TelnetData();
-                                }
-                                pointTo.setData(fg, bg, isBlinking, curPos);
-                                highByte = withoutIAC[currentIndex];
+                                highByte = rawdata[currentIndex];
                                 lastAttr.setAtt(fg, bg, isBlinking);
+                                hiPosition = curPos;
                                 curPos.Y++;
                                 currentIndex++;
                             }
                         }
-                        else
+                        else //if the 79th byte > 128
                         {
-                            if (pointTo.Text != "")
-                            {
-                                findReplace(BBSPage, pointTo);
-                                BBSPage[(int)curPos.X].Add(pointTo);
-                                pointTo = new TelnetData();
-
-                            }
-                            pointTo.setData(fg, bg, isBlinking, curPos);
-                            highByte = withoutIAC[currentIndex];
+                            highByte = rawdata[currentIndex];
                             lastAttr.setAtt(fg, bg, isBlinking);
+                            hiPosition = curPos;
                             curPos.Y++;
-
                             currentIndex++;
                         }
                     }
@@ -499,216 +578,253 @@ namespace KzBBS
                     { currentIndex++; }
                 }
             }
-            if (pointTo.Text != "")
-            {
-                findReplace(BBSPage, pointTo);
-                BBSPage[(int)curPos.X].Add(pointTo);
-                pointTo = new TelnetData();
-            }
-            pointTo.setData(fg, bg, isBlinking, curPos);
-            //Debug.WriteLine("ansi parser spend time = {0}", Environment.TickCount - startTick);
-        }
-
-        private static void escapeK(List<TelnetData>[] BBSPage)
-        {
-            int line = (int)curPos.X;
             
-            if (BBSPage[line].Count == 0)
-                return;
-            TelnetData toSave;
-            List<TelnetData> temp= new List<TelnetData>();
-            foreach(TelnetData block in BBSPage[line])
-            {
-                if (block.Position.Y + block.Count - 1 < curPos.Y)
-                {
-                    temp.Add(block);
-                }
-                if (block.Position.Y < curPos.Y && curPos.Y <= block.Position.Y + block.Count - 1)
-                {
-                    toSave = new TelnetData();
-                    toSave.setData(block.ForeColor, block.BackColor, block.Blinking, block.Position);
-                    toSave.Text = CropText(block.Text, 0, (int)curPos.Y - (int)block.Position.Y - 1);
-                    toSave.Count = (int)curPos.Y - (int)block.Position.Y;
-                    temp.Add(toSave);
-                }
-            }
-            BBSPage[line].Clear();
-            BBSPage[line] = temp;
+            //#region debug2
+            //StringBuilder sb = new StringBuilder();
+            //for (int row = 0; row < ROW; row++)
+            //{
+            //    for (int col = 0; col < COL; col++)
+            //    {
+            //        sb.Append(BBSPage[row, col].Text);
+            //    }
+            //    sb.Append("\n");
+            //}
+            //Debug.WriteLine(sb.ToString());
+            //#endregion
         }
 
-        private static void findReplace(List<TelnetData>[] BBSPage, TelnetData willInsert)
+        private static void checkHiByte()
         {
-            int line = (int)curPos.X;
-            if (BBSPage[line].Count == 0 || willInsert.Text == "")
-                return;            
-            TelnetData toSave;
-            int count;
-            int curY, blockY;
-            string text;
-            curY = (int)willInsert.Position.Y;
-            List<TelnetData> temp = new List<TelnetData>();
-            foreach (TelnetData block in BBSPage[line])
+            if (highByte != 0)
             {
-                blockY = (int)block.Position.Y;
-                if(blockY + block.Count -1 < curY )
-                {
-                    temp.Add(block);
-                }
-                if(curY+willInsert.Count-1 < blockY)
-                {
-                    temp.Add(block);
-                }
-                else if (blockY < curY &&  curY <= blockY+block.Count -1 && blockY+block.Count -1 <= curY+willInsert.Count-1 )
-                {
-                    toSave = new TelnetData();
-                    toSave.setData(block.ForeColor, block.BackColor, block.Blinking, block.Position);
-                    text = CropText(block.Text, 0, curY - blockY - 1);
-                    count = curY - blockY;
-                    toSave.Text = text;
-                    toSave.Count = count;
-                    temp.Add(toSave);
-                }
-                if (curY <= blockY && blockY <= curY + willInsert.Count - 1 && curY+willInsert.Count-1 < blockY+block.Count-1)
-                {
-                    toSave = new TelnetData();
-                    toSave.setData(block.ForeColor, block.BackColor, block.Blinking, block.Position);
-                    text = CropText(block.Text, curY + willInsert.Count - blockY, block.Count - 1);
-                    count = blockY + block.Count - curY - willInsert.Count;
-                    toSave.Text = text;
-                    toSave.Count = count;
-                    toSave.Position = new Point(line, curY + willInsert.Count);
-                    temp.Add(toSave);
-                }
-                if (blockY < curY && curY + willInsert.Count - 1 < blockY + block.Count - 1)
-                {
-                    toSave = new TelnetData();
-                    toSave.cloneFrom(block);
-                    text = CropText(block.Text, 0, curY - blockY - 1);
-                    count = curY - blockY;
-                    toSave.Text = text;
-                    toSave.Count = count;
-                    temp.Add(toSave);
-                    toSave = new TelnetData();
-                    toSave.setData(block.ForeColor, block.BackColor, block.Blinking, block.Position);
-                    text = CropText(block.Text, curY + willInsert.Count - blockY, block.Count - 1);
-                    count = blockY + block.Count - curY - willInsert.Count;
-                    toSave.Text = text;
-                    toSave.Count = count;
-                    toSave.Position = new Point(line, curY + willInsert.Count);
-                    temp.Add(toSave);
-                }
+                storeASCII(0x3F, (int)hiPosition.X, (int)hiPosition.Y, lastAttr);
+                highByte = 0;
+                hiPosition = new Point(0, 0);
+                curPos.Y--;
             }
-            
-            BBSPage[line].Clear();
-            BBSPage[line] = temp;
-        }
+        } 
 
-        private static string CropText(string source, int start, int end)
+        private static void storeASCII(byte word, int row, int col, AnsiAttr attr)
         {
-            StringBuilder result = new StringBuilder();
-            int current = 0, index = 0;
-            while(index < source.Length)
+            if (word == 13) //for "\r"
             {
-                if (current >= start)
-                { result.Append(source[index]); }
-
-                if(source[index] < 128)
-                { current++; }
-                else if(source[index] == 160)
-                { current++; }
-                else
-                { 
-                    current += 2;
-                    if (current - 1 == start)
-                        result.Append((char)0xA0);
-                }
-
-                if (current > end)
-                    break;
-                
-                index++;
+                checkHiByte();
+                curPos.Y = 0;
             }
-            return result.ToString();
-        }
+            else if (word == 10) //for "\n"
+            {
+                checkHiByte();
+                curPos.X++;
 
-        private static void storeASCII(List<TelnetData>[] BBSPage, byte word)
-        {
-                if (word == 13) //for "\r"
+                if (curPos.X == 24) //scroll down one line (line24.reset(), line1=line2)
                 {
-                    curPos.Y = 0;
-                    if(pointTo.Text != "")
-                    { 
-                        findReplace(BBSPage, pointTo);
-                        BBSPage[(int)curPos.X].Add(pointTo);
-                        pointTo = new TelnetData();
-                    }
-                    pointTo.setData(fg, bg, isBlinking, curPos);
-                }
-                else if (word == 10) //for "\n"
-                {
-                    if (pointTo.Text != "")
+                    curPos.X = 23;
+                    for (int r = 0; r < ROW-1; r++)
                     {
-                        findReplace(BBSPage, pointTo);
-                        BBSPage[(int)curPos.X].Add(pointTo);
-                        pointTo = new TelnetData();
-                    }
-                    curPos.X++;
-                    pointTo.setData(fg, bg, isBlinking, curPos);
-                    
-                    if (curPos.X == 24) //scroll down one line
-                    {
-                        curPos.X = 23;
-                        for (int i = 0; i < 23; i++)
+                        for (int c = 0; c < COL; c++)
                         {
-                            BBSPage[i] = BBSPage[i + 1];
+                            BBSPage[r, c] = BBSPage[r + 1, c];
+                            BBSPage[r, c].Position = BBSPage[r + 1, c].Position;
                         }
-                        BBSPage[23] = new List<TelnetData>();
                     }
-                }
-                else if (word == 8) //back space "\b"
-                {
-                    if (pointTo.Text != "")
+                    for (int c = 0; c < COL; c++)
                     {
-                        findReplace(BBSPage, pointTo);
-                        BBSPage[(int)curPos.X].Add(pointTo);
-                        pointTo = new TelnetData();
+                        BBSPage[23, c] = new TelnetData();
                     }
-                    curPos.Y--;
-                    pointTo.setData(fg, bg, isBlinking, curPos);
-                }
-                else if (word == 0)
-                {
-                    Debug.WriteLine(word);
-                }
-                else if (word == 7) //bel code "\a"
-                {
-                    Debug.WriteLine(word);
-                }
-                else if (word == 9)
-                {
-                    Debug.WriteLine(word);
-                }
-                else if (word == 11)
-                {
-                    Debug.WriteLine(word);
-                }
-                else if (word == 12)
-                {
-                    Debug.WriteLine(word);
-                }
-                else
-                {
-                    if (word == 32) //non-breaking space
-                        word = 0xA0;
-                    pointTo.Text += (char)word;
-                    pointTo.Count++;
-                    curPos.Y++;
-                    //if (curPos.Y == 80 && curPos.X == 23)
-                    //{
-                    //    curPos.Y = 0;
-                    //    curPos.X = 0;
-                    //}
                 }
             }
+            else if (word == 8) //back space "\b"
+            {
+                checkHiByte();
+                curPos.Y--;
+            }
+            else if (word == 0)
+            {
+                Debug.WriteLine(word);
+            }
+            else if (word == 7) //bel code "\a"
+            {
+                Debug.WriteLine(word);
+            }
+            else if (word == 9)
+            {
+                Debug.WriteLine(word);
+            }
+            else if (word == 11)
+            {
+                Debug.WriteLine(word);
+            }
+            else if (word == 12)
+            {
+                Debug.WriteLine(word);
+            }
+            else
+            {
+                if (word == 32) //non-breaking space
+                    word = 0xA0;
+                BBSPage[row, col].Text = (char)word + "";
+                BBSPage[row, col].Count = 1;
+                BBSPage[row, col].setData(attr.FgColor, attr.BgColor, attr.IsBlinking, false, new Point(row, col));
+                BBSPage[row, col].DualColor = false;
+                curPos.Y++;
+            }
+        }
+
+        private static void escapeK() //erase current line from cursor
+        {
+            int row = (int)curPos.X;
+            for (int col = (int)curPos.Y; col < COL; col++)
+            {
+                BBSPage[row, col].resetData();
+            }
+        }
+
+        //private static void findReplace(Canvas BBSCanvas, TelnetData toInsert)
+        //{
+        //    int line = (int)curPos.X;
+        //    if (BBSPage[line].Count == 0 || toInsert.Text == "")
+        //        return;
+        //    TelnetData toSave;
+        //    int count;
+        //    int curY, blockY;
+        //    string text;
+        //    curY = (int)toInsert.Position.Y;
+        //    List<TelnetData> toRemove = new List<TelnetData>();
+        //    List<TelnetData> toAdd = new List<TelnetData>();
+        //    foreach (TelnetData block in BBSPage[line])
+        //    { 
+        //        blockY = (int)block.Position.Y;
+        //        //if (blockY + block.Count - 1 < curY) //reserve
+        //        //{
+        //        //    toAdd.Add(block);
+        //        //    block.BBSBackground = null;
+        //        //}
+        //        //if (curY + toInsert.Count - 1 < blockY) //reserve
+        //        //{
+        //        //    toAdd.Add(block);
+        //        //    block.BBSBackground = null;
+        //        //}
+        //        if (blockY < curY && curY <= blockY + block.Count - 1 && blockY + block.Count - 1 <= curY + toInsert.Count - 1)
+        //        {
+        //            block.Text = CropText(block.Text, 0, curY - blockY - 1);
+        //            block.Count = curY - blockY;
+        //            //toAdd.Add(block);
+        //            foreach (UIElement ui in block.BBSUI)
+        //            { BBSCanvas.Children.Remove(ui); }
+        //            block.BBSUI.Clear();
+        //            continue;
+        //        }
+        //        if (curY <= blockY && blockY <= curY + toInsert.Count - 1 && curY + toInsert.Count - 1 < blockY + block.Count - 1)
+        //        {
+        //            block.Text = CropText(block.Text, curY + toInsert.Count - blockY, block.Count - 1);
+        //            block.Count = blockY + block.Count - curY - toInsert.Count;
+        //            //toSave.Text = text;
+        //            //toSave.Count = count;
+        //            block.Position = new Point(line, curY + toInsert.Count);
+        //            //toAdd.Add(block);
+                    
+        //            foreach (UIElement ui in block.BBSUI)
+        //            { BBSCanvas.Children.Remove(ui); }
+        //            block.BBSUI.Clear();
+        //            continue;
+        //        }
+        //        if (blockY < curY && curY + toInsert.Count - 1 < blockY + block.Count - 1)
+        //        {
+        //            toSave = new TelnetData();
+        //            toSave.cloneFrom(block);
+        //            text = CropText(block.Text, 0, curY - blockY - 1);
+        //            count = curY - blockY;
+        //            toSave.Text = text;
+        //            toSave.Count = count;
+        //            toAdd.Add(toSave);
+        //            block.Text = CropText(block.Text, curY + toInsert.Count - blockY, block.Count - 1);
+        //            block.Count = blockY + block.Count - curY - toInsert.Count;
+        //            block.Position = new Point(line, curY + toInsert.Count);
+        //            //toAdd.Add(block);
+        //            foreach (UIElement ui in block.BBSUI)
+        //            { BBSCanvas.Children.Remove(ui); }
+        //            block.BBSUI.Clear();
+        //            continue;
+        //        }
+        //        if (curY <= blockY && blockY + block.Count - 1 <= curY + toInsert.Count - 1)
+        //        {
+        //            toRemove.Add(block);
+        //            foreach (UIElement ui in block.BBSUI)
+        //            { BBSCanvas.Children.Remove(ui); }
+        //            block.BBSUI.Clear();
+        //            continue;
+        //        }
+        //    }
+        //    //BBSPage[line].Clear();
+        //    foreach (TelnetData bk in toRemove)
+        //    { BBSPage[line].Remove(bk); }
+        //    foreach (TelnetData bk in toAdd)
+        //    { BBSPage[line].Add(bk); }
+        //    toRemove.Clear();
+        //    toAdd.Clear();
+        //}
+
+        //public static int transferQty(string source)
+        //{
+        //    int count = 0;
+        //    foreach(char ch in source)
+        //    {
+        //        if(ch < 256)
+        //        { count++; }
+        //        else
+        //        { count += 2; }
+        //    }
+        //    return count;
+        //}
+
+        //public static string CropText(string source, int start, int end)
+        //{
+        //    StringBuilder result = new StringBuilder();
+        //    int current = 0, index = 0;
+        //    while(index < source.Length)
+        //    {
+        //        if (current >= start)
+        //        { result.Append(source[index]); }
+
+        //        if(source[index] < 256)
+        //        { current++; }
+        //        else
+        //        { 
+        //            current += 2;
+        //            if (current - 1 == start)
+        //                result.Append((char)0xA0);
+        //        }
+
+        //        if (current > end)
+        //            break;
+                
+        //        index++;
+        //    }
+        //    return result.ToString();
+        //}
+
+        private static void storeDualBytes(string word, int row, int col, AnsiAttr attr)
+        {
+            bool isTwWord;
+            if(word == "")
+            {
+                isTwWord = BBSPage[row, col - 1].TwWord;
+            }
+            else if (word[0] > 0x3040)
+            {
+                isTwWord = true;
+            }
+            else
+            { isTwWord = false; }
+            BBSPage[row, col].setData(attr.FgColor, attr.BgColor, attr.IsBlinking, isTwWord, new Point(row, col));
+            BBSPage[row, col].DualColor = false;
+            BBSPage[row, col].Text = word;
+            BBSPage[row, col].Count = 1;
+            if (isDualColor)
+            {
+                BBSPage[row, col].DualColor = true;
+                isDualColor = false;
+            }
+        }
     }
 }

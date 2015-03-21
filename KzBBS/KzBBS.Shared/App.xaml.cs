@@ -65,7 +65,7 @@ namespace KzBBS
                 rootFrame = new Frame();
                 SuspensionManager.RegisterFrame(rootFrame, "appFrame");
                 // TODO: change this value to a cache size that is appropriate for your application
-                rootFrame.CacheSize = 2;
+                rootFrame.CacheSize = 1;
 
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {

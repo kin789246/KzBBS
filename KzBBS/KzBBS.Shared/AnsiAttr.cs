@@ -7,11 +7,15 @@ namespace KzBBS
 {
     class AnsiAttr
     {
-        public Color fgColor;
-        public Color bgColor;
-        public bool isBlinking;
+        private Color fgColor;
+        private Color bgColor;
+        private bool isBlinking;
         //public bool brightColor;
         //public bool normalColor;
+        public Color FgColor { get { return fgColor; } set { fgColor = value; } }
+        public Color BgColor { get { return bgColor; } set { bgColor = value; } }
+        public bool IsBlinking { get { return isBlinking; } set { isBlinking = value; } }
+
         public AnsiAttr()
         {
             fgColor = Color.FromArgb(255, 170, 170, 170);
@@ -19,6 +23,13 @@ namespace KzBBS
             isBlinking = false;
             //brightColor = false;
             //normalColor = true;
+        }
+
+        public AnsiAttr(Color fg, Color bg, bool blinking)
+        {
+            fgColor = fg;
+            bgColor = bg;
+            isBlinking = blinking;
         }
 
         public void setAtt(Color fg, Color bg, bool blink)
