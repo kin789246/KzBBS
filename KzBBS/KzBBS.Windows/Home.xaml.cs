@@ -63,6 +63,7 @@ namespace KzBBS
             get { return this.navigationHelper; }
         }
 
+        public static Home Current;
         private double telnetFontSize = 30;
         public Home()
         {
@@ -71,6 +72,7 @@ namespace KzBBS
             this.navigationHelper.LoadState += navigationHelper_LoadState;
             this.navigationHelper.SaveState += navigationHelper_SaveState;
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
+            Current = this;
 
             if (!Big5Util.TableSeted)
             {
@@ -85,10 +87,10 @@ namespace KzBBS
             pushKey.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             boundControlBtns.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
 
-            appCanvas.ManipulationDelta += swipeUI_ManipulationDelta;
-            appCanvas.ManipulationCompleted += swipeUI_ManipulationCompleted;
-            appCanvas.ManipulationMode = ManipulationModes.TranslateRailsX | ManipulationModes.TranslateRailsY
-            | ManipulationModes.TranslateX | ManipulationModes.TranslateY;
+            //appCanvas.ManipulationDelta += swipeUI_ManipulationDelta;
+            //appCanvas.ManipulationCompleted += swipeUI_ManipulationCompleted;
+            //appCanvas.ManipulationMode = ManipulationModes.TranslateRailsX | ManipulationModes.TranslateRailsY
+            //| ManipulationModes.TranslateX | ManipulationModes.TranslateY;
             PTTCanvas.DoubleTapped += PTTCanvas_DoubleTapped;
             PTTCanvas.Tapped += PTTCanvas_Tapped;
 
@@ -99,6 +101,8 @@ namespace KzBBS
             PackageVersion version = packageId.Version;
             versionText.Text = String.Format("Version: {0}.{1}.{2}.{3}\n",
                 version.Major, version.Minor, version.Build, version.Revision);
+
+            disconnBtn.IsEnabled = false;
         }
 
         async void PTTCanvas_Tapped(object sender, TappedRoutedEventArgs e)
@@ -204,7 +208,7 @@ namespace KzBBS
                 { PTTCanvas.Children.Remove(pointToCursor); }
                 //Set the cursor
                 PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
-                    , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
+                    , TelnetANSIParser.curPos.X * telnetFontSize, TelnetANSIParser.curPos.Y * telnetFontSize / 2, 1));
                 pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
                 //move textbox
                 Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 4
@@ -386,7 +390,7 @@ namespace KzBBS
                 { PTTCanvas.Children.Remove(pointToCursor); }
                 //Set the cursor
                 PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
-                    , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
+                    , TelnetANSIParser.curPos.X * telnetFontSize, TelnetANSIParser.curPos.Y * telnetFontSize / 2, 1));
                 pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
                 //move textbox
                 Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 2 + canvasOffset);
@@ -521,13 +525,13 @@ namespace KzBBS
         private async void ClientWaitForMessage()
         {
             int MAXBuffer = 6000;
-            DataReader reader = new DataReader(PTTSocket.ClientSocket.InputStream);
+            DataReader reader = new DataReader(TelnetSocket.PTTSocket.ClientSocket.InputStream);
             reader.InputStreamOptions = InputStreamOptions.Partial;
             try
             {
                 while (true)
                 {
-                    uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(PTTSocket.cts.Token);
+                    uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(TelnetSocket.PTTSocket.cts.Token);
 
                     rawdata = new byte[Message];
                     reader.ReadBytes(rawdata);
@@ -537,17 +541,16 @@ namespace KzBBS
                     }
                     else
                     {
-                        PTTSocket.cts.Cancel();
+                        TelnetSocket.PTTSocket.cts.Cancel();
                     }
                 }
             }
             catch (Exception exception)
             {
                 //TelnetSocket.ShowMessage(exception.Message);
-                if (PTTSocket != null)
+                if (TelnetSocket.PTTSocket.IsConnected)
                 {
-                    PTTSocket.Disconnect();
-                    PTTSocket = null;
+                    TelnetSocket.PTTSocket.Disconnect();
                 }
 
                 Debug.WriteLine("Read stream failed with error: " + exception.Message);
@@ -558,23 +561,17 @@ namespace KzBBS
         static Windows.ApplicationModel.Resources.ResourceLoader loader = 
             new Windows.ApplicationModel.Resources.ResourceLoader();
         bool autoLogin = false;
-        static TelnetSocket PTTSocket = new TelnetSocket();
         public async Task OnConnect(string tIP, string tPort)
         {
-            if (PTTSocket == null)
-            {
-                PTTSocket = new TelnetSocket();
-            }
-            PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
+            TelnetSocket.PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
 
-            if (!PTTSocket.IsConnected)
+            if (!TelnetSocket.PTTSocket.IsConnected)
             {
                 //connStatus.Text = "連線中...";
                 connStatus.Text = loader.GetString("connecting");
                 try
                 {
-                    await PTTSocket.Connect(tIP, tPort);
-                    //PTTDisplay.SocketProp = PTTSocket;
+                    await TelnetSocket.PTTSocket.Connect(tIP, tPort);
                     //await Task.Factory.StartNew(ClientWaitForMessage);
                     ClientWaitForMessage();
                     //connStatus.Text = "已連線";
@@ -603,21 +600,25 @@ namespace KzBBS
         private async Task goTouchVersion(byte[] rdata)
         {
             TelnetANSIParser.HandleAnsiESC(rdata);
+            //PTTDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
+            //this.DefaultViewModel["PTTLines"] = PTTDisplay.Lines;
+  
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 //remove last cursor
                 if (pointToCursor != null)
                 { PTTCanvas.Children.Remove(pointToCursor); }
-                
+
+                //PTTDisplay.DisplayLanscape(PTTCanvas, TelnetANSIParser.BBSPage);
                 //PTTDisplay._currentMode = PTTDisplay.checkMode();
-                PTTDisplay.DisplayLanscape(PTTCanvas, TelnetANSIParser.BBSPage);
+                PTTDisplay.showAll(PTTCanvas, TelnetANSIParser.BBSPage);
 
                 clipB.Inlines.Clear();
                 PTTDisplay.getText();
                 PTTDisplay.generateHyperlink(PTTDisplay.forClipBoard, clipB, Colors.Transparent);
                 //Set the cursor
                 PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
-                    , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
+                    , TelnetANSIParser.curPos.X * telnetFontSize, TelnetANSIParser.curPos.Y * telnetFontSize / 2, 1));
                 pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
 
                 //Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 2
@@ -811,9 +812,8 @@ namespace KzBBS
         }
         private async Task sendCommand(byte[] interpretByte)
         {
-            if (PTTSocket == null) return;
-            if (!PTTSocket.IsConnected) return;
-            DataWriter writer = new DataWriter(PTTSocket.ClientSocket.OutputStream);
+            if (!TelnetSocket.PTTSocket.IsConnected) return;
+            DataWriter writer = new DataWriter(TelnetSocket.PTTSocket.ClientSocket.OutputStream);
             writer.WriteBytes(interpretByte);
 
             try
@@ -824,18 +824,16 @@ namespace KzBBS
             catch (Exception exception)
             {
                 ShowMessage(exception.Message);
-                PTTSocket.Disconnect();
-                PTTSocket = null;
+                TelnetSocket.PTTSocket.Disconnect();
                 //ClientAddLine("Send failed with message: " + exception.Message);
             }
         }
 
         private async Task sendCommand(string sourceString)
         {
-            if (PTTSocket == null) return;
-            if (!PTTSocket.IsConnected) return;
+            if (!TelnetSocket.PTTSocket.IsConnected) return;
             byte[] interpretByte = interpreteToByte(sourceString);
-            DataWriter writer = new DataWriter(PTTSocket.ClientSocket.OutputStream);
+            DataWriter writer = new DataWriter(TelnetSocket.PTTSocket.ClientSocket.OutputStream);
             writer.WriteBytes(interpretByte);
 
             try
@@ -847,8 +845,7 @@ namespace KzBBS
             {
                 string source = exception.Message;
                 ShowMessage(source);
-                PTTSocket.Disconnect();
-                PTTSocket = null;
+                TelnetSocket.PTTSocket.Disconnect();
                 //ClientAddLine("Send failed with message: " + exception.Message);
             }
         }
@@ -913,28 +910,6 @@ namespace KzBBS
                     await sendCommand(cmd);
                     sendCmd.Text = "";
                     statusBar.Text = "";
-                }
-            }
-        }
-
-        void OnDisconnect()
-        {
-            if (PTTSocket == null)
-                //ShowMessage("沒有連線就沒有斷線");
-                ShowMessage(loader.GetString("noconnnodisconn"));
-            else
-            {
-                if (!PTTSocket.IsConnected)
-                {
-                //    //ShowMessage("沒有連線就沒有斷線");
-                //    ShowMessage(loader.GetString("noconnnodisconn"));
-                    PTTSocket.cts.Cancel();
-                    PTTSocket = null;
-                }
-                else
-                {
-                    PTTSocket.Disconnect();
-                    PTTSocket = null;
                 }
             }
         }
@@ -1036,24 +1011,47 @@ namespace KzBBS
 
         private async void connect_Click(object sender, RoutedEventArgs e)
         {
-            //PTTDisplay.showDualColor2(PTTCanvas, "尛", Colors.White, 100, 10, 10);
-            //PTTDisplay.showDualColor2(PTTCanvas, "尛", Colors.Yellow, 50, 10, 10);
+            #region test ListView
+            //Uri dataUri = new Uri("ms-appx:///bahamut_sample.txt");
+            //StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(dataUri);
+            //string sample = await FileIO.ReadTextAsync(file);
+            //List<byte> rdata = new List<byte>();
+            //foreach (string item in sample.Split(' '))
+            //{
+            //    if (item == "\r" || item == "\n" || item == "\r\n")
+            //    {
+            //        continue;
+            //    }
+            //    rdata.Add(byte.Parse(item));
+            //}
+            //await goTouchVersion(rdata.ToArray());
+            #endregion
             if (string.IsNullOrEmpty(tIP.Text) || string.IsNullOrEmpty(tPort.Text)) return;
             connBtn.IsEnabled = false;
+            disconnBtn.IsEnabled = true;
             await OnConnect(tIP.Text, tPort.Text);
-            if (PTTSocket == null) return;
-            if (PTTSocket.IsConnected)
+            if (TelnetSocket.PTTSocket.IsConnected)
             {
                 connCtrlUI.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
                 connMiniSize = true;
                 //connButton.Content = "顯示連線";
                 connButton.Content = loader.GetString("showconn2");
             }
-            
         }
         private void disconnect_Click(object sender, RoutedEventArgs e)
         {
-            OnDisconnect();
+            if (TelnetSocket.PTTSocket.IsConnected)
+            {
+                //    //ShowMessage("沒有連線就沒有斷線");
+                //    ShowMessage(loader.GetString("noconnnodisconn"));
+                TelnetSocket.PTTSocket.cts.Cancel();
+            }
+            else
+            {
+                TelnetSocket.PTTSocket.Disconnect();
+            }
+            disconnBtn.IsEnabled = false;
+            //OnDisconnect();
         }
 
         bool canvasHide = false;
@@ -1321,6 +1319,11 @@ namespace KzBBS
         private void push_Click(object sender, RoutedEventArgs e)
         {
             statusBar.Text = "push key pressed";
+        }
+
+        private void ItemView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            return;
         }
     }
 }

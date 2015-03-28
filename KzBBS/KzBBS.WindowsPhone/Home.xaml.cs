@@ -100,6 +100,8 @@ namespace KzBBS
             PackageVersion version = packageId.Version;
             versionText.Text = String.Format("Version: {0}.{1}.{2}.{3}\n",
                 version.Major, version.Minor, version.Build, version.Revision);
+
+            disconnBtn.IsEnabled = false;
         }
 
         async void PTTCanvas_Tapped(object sender, TappedRoutedEventArgs e)
@@ -521,13 +523,13 @@ namespace KzBBS
         private async void ClientWaitForMessage()
         {
             int MAXBuffer = 6000;
-            DataReader reader = new DataReader(PTTSocket.ClientSocket.InputStream);
+            DataReader reader = new DataReader(TelnetSocket.PTTSocket.ClientSocket.InputStream);
             reader.InputStreamOptions = InputStreamOptions.Partial;
             try
             {
                 while (true)
                 {
-                    uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(PTTSocket.cts.Token);
+                    uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(TelnetSocket.PTTSocket.cts.Token);
 
                     rawdata = new byte[Message];
                     reader.ReadBytes(rawdata);
@@ -540,10 +542,9 @@ namespace KzBBS
             catch (Exception exception)
             {
                 //TelnetSocket.ShowMessage(exception.Message);
-                if (PTTSocket != null)
+                if (TelnetSocket.PTTSocket.IsConnected)
                 {
-                    PTTSocket.Disconnect();
-                    PTTSocket = null;
+                    TelnetSocket.PTTSocket.Disconnect();
                 }
 
                 Debug.WriteLine("Read stream failed with error: " + exception.Message);
@@ -552,22 +553,17 @@ namespace KzBBS
         }
 
         bool autoLogin = false;
-        static TelnetSocket PTTSocket = new TelnetSocket();
         public async Task OnConnect(string tIP, string tPort)
         {
-            if (PTTSocket == null)
-            {
-                PTTSocket = new TelnetSocket();
-            }
-            PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
+            TelnetSocket.PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
 
-            if (!PTTSocket.IsConnected)
+            if (!TelnetSocket.PTTSocket.IsConnected)
             {
                 //connStatus.Text = "連線中...";
                 connStatus.Text = loader.GetString("connecting");
                 try
                 {
-                    await PTTSocket.Connect(tIP, tPort);
+                    await TelnetSocket.PTTSocket.Connect(tIP, tPort);
                     //await Task.Factory.StartNew(ClientWaitForMessage);
                     ClientWaitForMessage();
                     //connStatus.Text = "已連線";
@@ -603,8 +599,9 @@ namespace KzBBS
                 { PTTCanvas.Children.Remove(pointToCursor); }
 
                 //PTTDisplay._currentMode = PTTDisplay.checkMode();
-                PTTDisplay.DisplayLanscape(PTTCanvas, TelnetANSIParser.BBSPage); 
-                
+                //PTTDisplay.DisplayLanscape(PTTCanvas, TelnetANSIParser.BBSPage); 
+                PTTDisplay.showAll(PTTCanvas, TelnetANSIParser.BBSPage);
+
                 clipB.Inlines.Clear();
                 PTTDisplay.getText();
                 PTTDisplay.generateHyperlink(PTTDisplay.forClipBoard, clipB, Colors.Transparent);
@@ -773,9 +770,8 @@ namespace KzBBS
 
         private async Task sendCommand(byte[] interpretByte)
         {
-            if (PTTSocket == null) return;
-            if (!PTTSocket.IsConnected) return;
-            DataWriter writer = new DataWriter(PTTSocket.ClientSocket.OutputStream);
+            if (!TelnetSocket.PTTSocket.IsConnected) return;
+            DataWriter writer = new DataWriter(TelnetSocket.PTTSocket.ClientSocket.OutputStream);
             writer.WriteBytes(interpretByte);
 
             try
@@ -786,18 +782,16 @@ namespace KzBBS
             catch (Exception exception)
             {
                 ShowMessage(exception.Message);
-                PTTSocket.Disconnect();
-                PTTSocket = null;
+                TelnetSocket.PTTSocket.Disconnect();
                 //ClientAddLine("Send failed with message: " + exception.Message);
             }
         }
 
         private async Task sendCommand(string sourceString)
         {
-            if (PTTSocket == null) return;
-            if (!PTTSocket.IsConnected) return;
+            if (!TelnetSocket.PTTSocket.IsConnected) return;
             byte[] interpretByte = interpreteToByte(sourceString);
-            DataWriter writer = new DataWriter(PTTSocket.ClientSocket.OutputStream);
+            DataWriter writer = new DataWriter(TelnetSocket.PTTSocket.ClientSocket.OutputStream);
             writer.WriteBytes(interpretByte);
 
             try
@@ -809,8 +803,7 @@ namespace KzBBS
             {
                 string source = exception.Message;
                 ShowMessage(source);
-                PTTSocket.Disconnect();
-                PTTSocket = null;
+                TelnetSocket.PTTSocket.Disconnect();
                 //ClientAddLine("Send failed with message: " + exception.Message);
             }
         }
@@ -876,32 +869,6 @@ namespace KzBBS
                     await sendCommand(cmd);
                     sendCmd.Text = "";
                     statusBar.Text = "";
-                }
-            }
-        }
-
-       
-       
-
-       
-        public static void OnDisconnect()
-        {
-            if (PTTSocket == null)
-                //ShowMessage("沒有連線就沒有斷線");
-                ShowMessage(loader.GetString("noconnnodisconn"));
-            else
-            {
-                if (!PTTSocket.IsConnected)
-                {
-                    //ShowMessage("沒有連線就沒有斷線");
-                    //ShowMessage(loader.GetString("noconnnodisconn"));
-                    PTTSocket.cts.Cancel();
-                    PTTSocket = null;
-                }
-                else
-                {
-                    PTTSocket.Disconnect();
-                    PTTSocket = null;
                 }
             }
         }
@@ -1004,9 +971,9 @@ namespace KzBBS
         {
             if (string.IsNullOrEmpty(tIP.Text) || string.IsNullOrEmpty(tPort.Text)) return;
             connBtn.IsEnabled = false;
+            disconnBtn.IsEnabled = true;
             await OnConnect(tIP.Text, tPort.Text);
-            if (PTTSocket == null) return;
-            if (PTTSocket.IsConnected)
+            if (TelnetSocket.PTTSocket.IsConnected)
             {
                 connCtrlUI.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
                 connMiniSize = true;
@@ -1016,7 +983,18 @@ namespace KzBBS
         }
         private void disconnect_Click(object sender, RoutedEventArgs e)
         {
-            OnDisconnect();
+            if (TelnetSocket.PTTSocket.Connecting)
+            {
+                //ShowMessage("沒有連線就沒有斷線");
+                //ShowMessage(loader.GetString("noconnnodisconn"));
+                TelnetSocket.PTTSocket.cts.Cancel();
+            }
+            else
+            {
+                TelnetSocket.PTTSocket.Disconnect();
+            }
+            disconnBtn.IsEnabled = false;
+            //OnDisconnect();
         }
 
         bool canvasHide = false;

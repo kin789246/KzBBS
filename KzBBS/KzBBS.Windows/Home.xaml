@@ -13,6 +13,17 @@
     <Page.Resources>
         <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
         <x:String x:Key="AppName">KzPTT Client</x:String>
+        
+        <DataTemplate x:Key="singleBlockTemplate">
+            <Canvas>
+                <Border Width="{Binding Width}" Background="{Binding BackColor}" Height="30"
+                        Canvas.Left="{Binding LeftPoint}" Canvas.ZIndex="{Binding ZIndex}"/>
+                <TextBlock Width="{Binding Width}" Height="30" Foreground="{Binding ForeColor}"
+                           Canvas.Left="{Binding LeftPoint}" Canvas.ZIndex="{Binding ZIndex}"
+                           Text="{Binding Text}" FontFamily="{Binding FontName}" FontSize="30" 
+                           LineStackingStrategy="BaselineToBaseline" LineHeight="30" />
+            </Canvas>
+        </DataTemplate>
     </Page.Resources>
 
     <!--
@@ -35,16 +46,11 @@
 
     <Canvas Width="1280" Height="800" Name="appCanvas" Background="Black" >
         <Canvas Name="swipeUI" Background="Transparent" Width="1280" Height="800" />
-        <!--<Viewbox Name="TelnetViewbox" Width="1200" Height="720" Stretch="Uniform">-->
-            <!-- <ScrollViewer Name="pageScrollViewer" Width="1200" Height="720" ZoomMode="Disabled" Canvas.Top="20" Canvas.Left="40"
-                          HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto"> -->
             <Canvas Name="PTTCanvas" Width="1200" Height="720" Canvas.Top="10" Canvas.Left="40" >
                 <TextBlock Name="clipB" FontFamily="kaiu.ttf#DFKai-SB" FontSize="30" LineStackingStrategy="BaselineToBaseline"
                            LineHeight="30" IsTextSelectionEnabled="False" Foreground="Transparent" Canvas.ZIndex="5" />
             </Canvas>
-            <!-- </ScrollViewer> -->
-        <!--</Viewbox>-->
-        
+     
         <Viewbox Name="boundControlBtns" Width="1200" Height="720" Canvas.ZIndex="9" Stretch="Uniform" >
             <Canvas Name="boundCtrlCanvas" Width="600" Height="360">
                 <RepeatButton Content="▲" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
@@ -114,7 +120,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="4,5,0,5">
                     <Button x:Uid="connBtn" Name="connBtn" Content="Conn" FontSize="20" Click="connect_Click" Margin="5,0"/>
-                    <Button x:Uid="disconnBtn" Content="Disconn" FontSize="20" Click="disconnect_Click" Margin="5,0" />
+                    <Button x:Uid="disconnBtn" Name="disconnBtn" Content="Disconn" FontSize="20" Click="disconnect_Click" Margin="5,0" />
                 </StackPanel>
             </StackPanel>
         </Grid>

@@ -206,10 +206,7 @@ namespace KzBBS
             {
                 for (int j = 0; j < COL; j++)
                 {
-                    if (BBSPage[i, j] == null)
-                    {
-                        BBSPage[i, j] = new TelnetData();
-                    }
+                    BBSPage[i, j] = new TelnetData();
                 }
             }
             //startPos = new Point(0, 0);
@@ -234,11 +231,11 @@ namespace KzBBS
         static Point hiPosition = new Point(0, 0);
         //public static TelnetData pointTo = new TelnetData();
         public static Point beforeSus = new Point(0, 0);
-
+        //static int debugstart;
         public static void HandleAnsiESC(byte[] rawdata)
         {
             #region debug 
-            ////raw bytes
+            //raw bytes
             //StringBuilder rdataString = new StringBuilder();
             //for (int i = 0; i < rawdata.Length; i++)
             //{
@@ -277,7 +274,7 @@ namespace KzBBS
             ////////////////////////////////////
 
             #endregion
-
+            //debugstart = Environment.TickCount;
             beforeSus = curPos;
             for (int i = 0; i < ROW; i++)
             {
@@ -578,7 +575,7 @@ namespace KzBBS
                     { currentIndex++; }
                 }
             }
-            
+            //Debug.WriteLine("handle ansi escape time: {0}", Environment.TickCount - debugstart);
             //#region debug2
             //StringBuilder sb = new StringBuilder();
             //for (int row = 0; row < ROW; row++)
@@ -805,7 +802,7 @@ namespace KzBBS
 
         private static void storeDualBytes(string word, int row, int col, AnsiAttr attr)
         {
-            bool isTwWord;
+            bool isTwWord = false;
             if(word == "")
             {
                 isTwWord = BBSPage[row, col - 1].TwWord;

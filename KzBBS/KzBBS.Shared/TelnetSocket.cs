@@ -15,13 +15,18 @@ namespace KzBBS
 {
     class TelnetSocket
     {
+        public static TelnetSocket PTTSocket = new TelnetSocket();
+
         private StreamSocket clientSocket;
         private HostName serverHost;
         private string serverPort;
         private bool connected = false;
+        private bool connecting = false;
+
         public CancellationTokenSource cts { get; set; }
-        public StreamSocket ClientSocket { get { return this.clientSocket; } }
-        public bool IsConnected { get { return this.connected; } }
+        public StreamSocket ClientSocket { get { return clientSocket; } }
+        public bool IsConnected { get { return connected; } }
+        public bool Connecting { get { return connecting; } }
 
         //public TelnetSocket(string host, string port)
         //{
@@ -30,25 +35,35 @@ namespace KzBBS
         //    serverPort = port;
         //}
 
-        public TelnetSocket()
-        {
-            clientSocket = new StreamSocket();
-            cts = new CancellationTokenSource();
-        }
+        //public TelnetSocket()
+        //{
+        //    clientSocket = new StreamSocket();
+        //    cts = new CancellationTokenSource();
+        //}
 
         public async Task Connect(string host, string port)
         {
             serverHost = new HostName(host);
             serverPort = port;
-            if (connected)
-            {
-                ShowMessage("本來就連線了阿!");
-                return;
-            }
+            //if (connected)
+            //{
+            //    ShowMessage("本來就連線了阿!");
+            //    return;
+            //}
             // Try to connect to the PTT
+            if (clientSocket == null)
+            {
+                clientSocket = new StreamSocket();
+            }
+            if (cts == null)
+            {
+                cts = new CancellationTokenSource();
+            }
             try
             {
+                connecting = true;
                 await clientSocket.ConnectAsync(serverHost, serverPort).AsTask(cts.Token);
+                connecting = false;
                 connected = true;
             }
 
@@ -78,20 +93,25 @@ namespace KzBBS
 
         public void Disconnect()
         {
-            if (connected)
+            if (connected || connecting)
             {
                 clientSocket.Dispose();
                 clientSocket = null;
+                cts = null;
                 connected = false;
+                connecting = false;
                 //ShowMessage("已經斷線");
             }
             onSocketDisconnect(new EventArgs());
-        } 
+        }
 
+        static Windows.ApplicationModel.Resources.ResourceLoader loader =
+            new Windows.ApplicationModel.Resources.ResourceLoader();
         public async static void ShowMessage(string msg)
         {
             var messageDialog = new MessageDialog(msg);
-            messageDialog.Title = "訊息通知";
+            //messageDialog.Title = "訊息通知";
+            messageDialog.Title = loader.GetString("infoNotify");
             await messageDialog.ShowAsync();
         }
 

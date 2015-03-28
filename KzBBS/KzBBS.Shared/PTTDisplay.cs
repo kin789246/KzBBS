@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Data;
+using System.Collections.ObjectModel;
 
 namespace KzBBS
 {
@@ -28,6 +29,28 @@ namespace KzBBS
         Other,
     };
 
+    class PTTBlock
+    {
+        public string Text { get; set; }
+        public int LeftPoint { get; set; }
+        public int TopPoint { get; set; }
+        public SolidColorBrush ForeColor { get; set; }
+        public SolidColorBrush BackColor { get; set; }
+        public double Width { get; set; }
+        public string FontName { get; set; }
+        public int ZIndex { get; set; }
+        public bool Blinking { get; set; }
+        public bool DualColor { get; set; }
+    }
+
+    class PTTLine
+    {
+        public int No { get; set; }
+        public string Title { get; set; }
+        public int UniqueId { get; set; }
+        public ObservableCollection<PTTBlock> Blocks { get; set; }
+    }
+
     class PTTDisplay
     {
 //#if WINDOWS_PHONE_APP
@@ -39,6 +62,79 @@ namespace KzBBS
 //        public static string cht_fontFamily = "Arial";
 //        public static string ansi_fontFamily = "DFKai-SB";
 //#endif
+
+        public static PTTDisplay pttDisplay = new PTTDisplay();
+        private static ObservableCollection<PTTLine> lines = new ObservableCollection<PTTLine>();
+        public static ObservableCollection<PTTLine> Lines
+        {
+            get { return lines; }
+        }
+
+        public static void LoadFromSource(TelnetData[,] BBSPage)
+        {
+            TelnetData point;
+            lines.Clear();
+            for (int row = 0; row < 24; row++)
+            {
+                PTTLine pttline = new PTTLine();
+                pttline.Blocks = new ObservableCollection<PTTBlock>();
+                pttline.No = row;
+                point = new TelnetData();
+                point.cloneFrom(BBSPage[row, 0]);
+                point.Position = new Point(row, 0);
+                for (int col = 1; col < 80; col++)
+                {
+                    if (point == BBSPage[row, col]) //only check backColor, forColor, blinking, dualcolor, isTwWord
+                    {
+                        point.Text += BBSPage[row, col].Text;
+                    }
+                    else
+                    {
+                        point.Count = col - (int)point.Position.Y;
+                        if (point.Text == "")
+                        { point.Text = (char)0xA0 + ""; }
+                        pttline.Blocks.Add(getBlock(point));
+                        point = new TelnetData();
+                        point.cloneFrom(BBSPage[row, col]);
+                        point.Position = new Point(row, col);
+                    }
+                }
+                if (point.Text == "") //record the final portion
+                {
+                    point.Text = (char)0xA0 + "";
+                }
+                point.Count = 80 - (int)point.Position.Y;
+                pttline.Blocks.Add(getBlock(point));
+                lines.Add(pttline);
+            }
+        }
+
+        private static PTTBlock getBlock(TelnetData point)
+        {
+            PTTBlock pb = new PTTBlock();
+
+            pb.Text = point.Text;
+            pb.TopPoint = (int)(point.Position.X * _fontSize);
+            pb.LeftPoint = (int)(point.Position.Y * _fontSize / 2);
+            pb.Width = point.Count * _fontSize / 2;
+            pb.ForeColor = new SolidColorBrush(point.ForeColor);
+            pb.BackColor = new SolidColorBrush(point.BackColor);
+            pb.ZIndex = 1;
+            if (point.TwWord)
+            {
+                pb.FontName = cht_fontFamily;
+            }
+            else
+            {
+                pb.FontName = ansi_fontFamily;
+            }
+            pb.Blinking = point.Blinking;
+            pb.DualColor = point.DualColor;
+
+            return pb;
+            
+        }
+
         //private static TelnetSocket _ptt;
         public static BBSMode _currentMode;
         public static bool isPushable = false;
@@ -104,66 +200,39 @@ namespace KzBBS
         }
 
         public static bool isPortrait = false;
-        public static void showAll(Canvas PTTCanvas, List<TelnetData>[] BBSPage)
+        public static void showAll(Canvas PTTCanvas, TelnetData[,] BBSPage)
         {
+            PTTCanvas.Children.Clear();
             getText();
-            _currentMode = checkMode();
-            //if (!isPortrait)
-            //{ buildScreen(PTTCanvas, BBSPage); }
-            //{
-            //    TextBlock tempTB = new TextBlock();
-            //    tempTB.FontSize = 30;
-            //    tempTB.Text = "瀏覽瀏覽開放開放";
-            //    tempTB.FontFamily = new FontFamily(cht_fontFamily);
-            //    //tempTB.Height = 30;
-            //    Canvas.SetTop(tempTB, 30);
-            //    Canvas.SetLeft(tempTB, 100);
-            //    PTTCanvas.Children.Add(tempTB);
-
-            //    TextBlock tempTB2 = new TextBlock();
-            //    tempTB2.FontSize = 30;
-            //    tempTB2.Text = "開放開放";
-            //    tempTB2.FontFamily = new FontFamily(cht_fontFamily);
-            //    //tempTB2.Height = 30;
-            //    Canvas.SetTop(tempTB2, 60);
-            //    Canvas.SetLeft(tempTB2, 100);
-            //    PTTCanvas.Children.Add(tempTB2);
-
-            //    TextBlock tempTB3 = new TextBlock();
-            //    tempTB3.FontSize = 30;
-            //    tempTB3.Text = "abcdefgAAA";
-            //    tempTB3.FontFamily = new FontFamily(ansi_fontFamily);
-            //    //tempTB3.Height = 30;
-            //    Canvas.SetTop(tempTB3, 60);
-            //    Canvas.SetLeft(tempTB3, 220);
-            //    PTTCanvas.Children.Add(tempTB3);
-
-            //    TextBlock tempTB4 = new TextBlock();
-            //    tempTB4.FontSize = 30;
-            //    tempTB4.Text = "開放開放開放開放";
-            //    tempTB4.FontFamily = new FontFamily(cht_fontFamily);
-            //    //tempTB4.Height = 30;
-            //    Canvas.SetTop(tempTB4, 90);
-            //    Canvas.SetLeft(tempTB4, 100);
-            //    PTTCanvas.Children.Add(tempTB4);
-            //}
-            //else
-            //{ buildScreen(PTTCanvas, BBSPage); }
-            //{ buildPortrait(PTTCanvas, BBSPage); }
+            //_currentMode = checkMode();
+            if (!isPortrait)
+            { 
+                DisplayLanscape(PTTCanvas, BBSPage);
+            }
+            else
+            {
+                DisplayPortrait(PTTCanvas, BBSPage);
+            }
+            
         }
 
-        //static int debugStart;
+        private static void DisplayPortrait(Canvas PTTCanvas, TelnetData[,] BBSPage)
+        {
+            PTTCanvas.Children.Clear();
+        }
+
+        static int debugStart;
         //static string lastID = "";
         
         public static void DisplayLanscape(Canvas PTTCanvas, TelnetData[,] BBSPage)
         {
-            List<TelnetData>[] final = new List<TelnetData>[24];
-            PTTCanvas.Children.Clear();
-            //compress the bbs data
-            CompressBBSData(BBSPage, final);
-
+            debugStart = Environment.TickCount;
+            LoadFromSource(BBSPage);
+            Debug.WriteLine("load to display model time: {0}", Environment.TickCount - debugStart);
             //display on the Canvas
-            ProcessCanvas(PTTCanvas, final);
+            debugStart = Environment.TickCount;
+            ProcessCanvas(PTTCanvas);
+            Debug.WriteLine("process canvas time: {0}", Environment.TickCount - debugStart);
         }
 
         private static void CompressBBSData(TelnetData[,] BBSPage, List<TelnetData>[] final)
@@ -214,35 +283,33 @@ namespace KzBBS
             }
         }
 
-        private static void ProcessCanvas(Canvas PTTCanvas, List<TelnetData>[] final)
+        private static void ProcessCanvas(Canvas PTTCanvas)
         {
-            foreach (List<TelnetData> line in final)
+            foreach (var line in Lines)
             {
-                foreach (TelnetData item in line)
+                foreach (var block in line.Blocks)
                 {
                     //display background
-                    PTTCanvas.Children.Add(showBackground(item.BackColor, item.Count * _fontSize / 2,
-                        (int)item.Position.X, (int)item.Position.Y, 0));
+                    PTTCanvas.Children.Add(showBackground(block.BackColor.Color, block.Width, block.TopPoint, block.LeftPoint, 0));
                     //display text
-                    if (item.Blinking && item.DualColor) // half blinking
+                    if (block.Blinking && block.DualColor) // half blinking
                     {
-                        PTTCanvas.Children.Add(showBlinking(item.Text, item.ForeColor, item.BackColor, item.Count * _fontSize,
-                            (int)item.Position.X, (int)(item.Position.Y - 1), 1));
+                        PTTCanvas.Children.Add(showBlinking(block.Text, block.ForeColor.Color, block.BackColor.Color, 
+                            block.Width*2, block.TopPoint, block.LeftPoint - (int)_fontSize / 2, 1));
                     }
-                    else if (item.DualColor) // half color
+                    else if (block.DualColor) // half color
                     {
-                        PTTCanvas.Children.Add(showWord(item.Text, item.ForeColor, item.Count * _fontSize,
-                           (int)item.Position.X, (int)(item.Position.Y - 1), 1));
+                        PTTCanvas.Children.Add(showWord(block.Text, block.ForeColor.Color, 
+                            block.Width*2, block.TopPoint, block.LeftPoint - (int)_fontSize / 2, 1));
                     }
-                    else if (item.Blinking) // full blinking
+                    else if (block.Blinking) // full blinking
                     {
-                        PTTCanvas.Children.Add(showBlinking(item.Text, item.ForeColor, item.BackColor, item.Count * _fontSize / 2,
-                           (int)item.Position.X, (int)item.Position.Y, 2));
+                        PTTCanvas.Children.Add(showBlinking(block.Text, block.ForeColor.Color, block.BackColor.Color,
+                            block.Width, block.TopPoint, block.LeftPoint, 2));
                     }
                     else //normal
                     {
-                        PTTCanvas.Children.Add(showWord(item.Text, item.ForeColor, item.Count * _fontSize / 2,
-                           (int)item.Position.X, (int)item.Position.Y, 2));
+                        PTTCanvas.Children.Add(showWord(block.Text, block.ForeColor.Color, block.Width, block.TopPoint, block.LeftPoint, 2));
                     }
                 }
             }
@@ -436,8 +503,7 @@ namespace KzBBS
             Canvas.SetTop(tb3, 6 * _fontSize);
         }
 
-        public static UIElement showBlinking(string word, Color fg, Color bg,
-            double tbWidth, int curX, int curY, int zIndex)
+        public static UIElement showBlinking(string word, Color fg, Color bg, double tbWidth, double top, double left, int zIndex)
         {
             TextBlock btb = new TextBlock();
             btb.Text = word;
@@ -455,8 +521,8 @@ namespace KzBBS
             //btb.LineStackingStrategy = lineStackingStrategy;
             //btb.LineHeight = _fontSize;
 
-            Canvas.SetLeft(btb, curY * _fontSize / 2);
-            Canvas.SetTop(btb, curX * _fontSize);
+            Canvas.SetLeft(btb, left);
+            Canvas.SetTop(btb, top);
             Canvas.SetZIndex(btb, zIndex);
             //PTTCanvas.Children.Add(btb);
 
@@ -478,8 +544,25 @@ namespace KzBBS
             return btb;
         }
 
-        public static UIElement showWord(string big5Word, Color fg,
-            double tbWidth, int curX, int curY, int zIndex)
+        public static Inline runText(string big5Word, Color fg)
+        {
+            Run r = new Run();
+            r.Text = big5Word;
+            if(r.Text[0] > 0x3040)
+            {
+                r.FontFamily = new FontFamily(cht_fontFamily);
+            }
+            else
+            {
+                r.FontFamily = new FontFamily(ansi_fontFamily);
+            }
+            r.FontSize = _fontSize;
+            r.Foreground = new SolidColorBrush(fg);
+
+            return r;
+        }
+
+        public static UIElement showWord(string big5Word, Color fg, double tbWidth, double top, double left, int zIndex)
         {
             TextBlock tb = new TextBlock();
             //twoColor1.LineStackingStrategy = lineStackingStrategy;
@@ -496,21 +579,21 @@ namespace KzBBS
             tb.FontSize = _fontSize;
             tb.Width = tbWidth;
             tb.Foreground = new SolidColorBrush(fg);
-            Canvas.SetLeft(tb, curY * _fontSize / 2);
-            Canvas.SetTop(tb, curX * _fontSize);
+            Canvas.SetLeft(tb, left);
+            Canvas.SetTop(tb, top);
             Canvas.SetZIndex(tb, zIndex);
             //PTTCanvas.Children.Add(twoColor1);
             return tb;
         }
 
-        public static UIElement showBackground(Color bg, double bgWidth, int curX, int curY, int zIndex)
+        public static UIElement showBackground(Color bg, double bgWidth, double top, double left, int zIndex)
         {
             Border border = new Border();
             border.Height = _fontSize;
             border.Width = bgWidth;
             border.Background = new SolidColorBrush(bg);
-            Canvas.SetTop(border, curX * _fontSize);
-            Canvas.SetLeft(border, curY * _fontSize / 2);
+            Canvas.SetTop(border, top);
+            Canvas.SetLeft(border, left);
             return border;
         }
 
