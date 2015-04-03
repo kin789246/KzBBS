@@ -107,7 +107,7 @@ namespace KzBBS
 
         async void PTTCanvas_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (PTTDisplay._currentMode == BBSMode.BoardList)
+            if (PTTDisplay.currentMode == BBSMode.BoardList)
             {
                 string getID = "";
                 //Point current = e.GetPosition(TelnetViewbox);
@@ -229,7 +229,7 @@ namespace KzBBS
                     if (iDown % 10 == 0)
                     {
                         statusBar.Text = "slide down ";
-                        if (PTTDisplay._currentMode == BBSMode.ArticleBrowse)
+                        if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
                         { await sendCommand("j"); }
                         else
                         { await sendCommand(new byte[] { 27, 91, 66 }); }
@@ -242,7 +242,7 @@ namespace KzBBS
                     if (iUp % 10 == 0)
                     {
                         statusBar.Text = "slide up ";
-                        if (PTTDisplay._currentMode == BBSMode.ArticleBrowse)
+                        if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
                         { await sendCommand("k"); }
                         else
                         { await sendCommand(new byte[] { 27, 91, 65 }); }

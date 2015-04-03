@@ -14,12 +14,10 @@ namespace KzBBS
         public string port { get; set; }
         public string account { get; set; }
         public string password { get; set; }
+        public bool autoLogin = false;
 
         static Windows.ApplicationModel.Resources.ResourceLoader loader =
             new Windows.ApplicationModel.Resources.ResourceLoader();
-        bool autoLogin = false;
-
-
 
         internal void OnDisconnect()
         {
@@ -32,6 +30,8 @@ namespace KzBBS
                 TelnetSocket.PTTSocket.Disconnect();
             }
             TelnetANSIParser.resetAllSetting();
+            PTTDisplay.resetAllSetting();
+            TelnetConnect.connection.autoLogin = false;
         }
 
         public async Task OnConnect(string tIP, string tPort)
@@ -84,13 +84,13 @@ namespace KzBBS
             catch (Exception exception)
             {
                 //TelnetSocket.ShowMessage(exception.Message);
-                //if (TelnetSocket.PTTSocket.IsConnected)
-                //{
-                //    TelnetSocket.PTTSocket.Disconnect();
-                //}
+                if (TelnetSocket.PTTSocket.IsConnected)
+                {
+                    TelnetSocket.PTTSocket.Disconnect();
+                }
 
                 Debug.WriteLine("Read stream failed with error: " + exception.Message);
-                throw;
+                //throw;
             }
         }
 

@@ -26,6 +26,7 @@ namespace KzBBS
         ArticleBrowse, //文章瀏覽
         AnimationPlay, //動畫播放
         Editor, //編輯文章
+        Login, //登入畫面
         Other,
     };
 
@@ -65,6 +66,9 @@ namespace KzBBS
         /*---------- define properties ----------*/
         public static double _fontSize = 30; //default font size =30
         public static double chtOffset = 1;
+        public static BBSMode LastMode = BBSMode.Other;
+        public static BBSMode currentMode;
+        public static bool LoginScreen = false;
         /*---------------------------------------*/
 
         public static PTTDisplay pttDisplay = new PTTDisplay();
@@ -74,10 +78,18 @@ namespace KzBBS
             get { return lines; }
         }
 
+        internal static void resetAllSetting()
+        {
+            LastMode = BBSMode.Other;
+            currentMode = BBSMode.Other;
+            LoginScreen = false;
+            lines.Clear();
+        }
+
         public void LoadFromSource(TelnetData[,] BBSPage)
         {
-            TelnetData point;
             lines.Clear();
+            TelnetData point;
             lastID = new PTTLine();
             for (int row = 0; row < 24; row++)
             {
@@ -114,6 +126,7 @@ namespace KzBBS
                 lines.Add(pttline);
             }
             onLinesChanged(new EventArgs());
+            Debug.WriteLine("mode: {0}", currentMode.ToString());
         }
 
         PTTLine lastID = new PTTLine();
@@ -124,13 +137,24 @@ namespace KzBBS
             {
                 pttline.Text += item.Text;
             }
-            if (!string.IsNullOrWhiteSpace(pttline.Text) && pttline.No == 23)
+
+            //check login screen
+            if (pttline.No == 22 || pttline.No == 20 || pttline.No == 23)
             {
-                checkMode(pttline.Text);
+                if (pttline.Text.Contains("guest") || pttline.Text.Contains("勇者代號"))
+                { LoginScreen = true; }
             }
-            if(pttline.No == 0)
+            if (pttline.No == 23)
             {
-                checkMode(pttline.Text);
+                if (!string.IsNullOrWhiteSpace(pttline.Text))
+                {
+                    checkMode(pttline.Text);
+                }
+                else
+                {
+                    PTTLine line = Lines.First(x => x.No == 0);
+                    checkMode(line.Text);
+                }
             }
             string getId = pttline.Text;
             if (pttline.Text.Contains("★"))
@@ -138,7 +162,7 @@ namespace KzBBS
                 getId = pttline.Text.Substring(0, 9);
             }
             pttline.UniqueId = getSelectedID(getId);
-            if (pttline.UniqueId == "★")
+            if (pttline.UniqueId == "★" && !string.IsNullOrEmpty(lastID.UniqueId))
             {
                 int id = pttline.No - lastID.No + int.Parse(lastID.UniqueId);
                 pttline.UniqueId = id.ToString();
@@ -175,9 +199,6 @@ namespace KzBBS
             
         }
 
-        //private static TelnetSocket _ptt;
-        public static BBSMode _currentMode;
-
         public static bool isPushable = false;
         private static List<string> bottomTitle = new List<string>();
         public static Windows.UI.Xaml.LineStackingStrategy lineStackingStrategy = LineStackingStrategy.BlockLineHeight;
@@ -185,41 +206,41 @@ namespace KzBBS
         public static string forClipBoard = "";
         public static void checkMode(string text)
         {
+            LastMode = currentMode;
             isPushable = false;
-            if (text.Contains("任意鍵繼續") || text.Contains("開始播放") || text.Contains("空白鍵"))
+            if (text.Contains("動畫播放中"))
             {
-                _currentMode = BBSMode.PressAnyKey;
+                currentMode = BBSMode.AnimationPlay;
+            }
+            else if (text.Contains("任意鍵繼續") || text.Contains("開始播放") || text.Contains("空白鍵"))
+            {
+                currentMode = BBSMode.PressAnyKey;
             }
             else if (text.Contains("瀏覽"))
             {
-                _currentMode = BBSMode.ArticleBrowse;
+                currentMode = BBSMode.ArticleBrowse;
                 isPushable = true;
-            }
-            else if (text.Contains("動畫播放中"))
-            {
-                _currentMode = BBSMode.AnimationPlay;
             }
             else if(text.Contains("編輯文章"))
             {
-                _currentMode = BBSMode.Editor;
+                currentMode = BBSMode.Editor;
             }
             else if(text.Contains("文章選讀"))
             {
-                _currentMode = BBSMode.BoardList;
+                currentMode = BBSMode.BoardList;
                 isPushable = true;
             }
-            else if (text.Contains("呼叫器") || text.Contains("功能鍵") || text.Contains("選擇看板")
-                 || text.Contains("鴻雁往返"))
+            else if (text.Contains("呼叫") || text.Contains("功能鍵") || text.Contains("選擇看板") || text.Contains("鴻雁往返"))
             {
-                _currentMode = BBSMode.BoardList;
+                currentMode = BBSMode.BoardList;
             }
             else if (text.Contains("分類看板") || text.Contains("板主") || text.Contains("郵件選單")) //push article
             {
-                _currentMode = BBSMode.BoardList;
+                currentMode = BBSMode.BoardList;
             }
             else
             {
-                _currentMode = BBSMode.Other;
+                currentMode = BBSMode.Other;
             }
 
             //Debug.WriteLine(mode.ToString());
@@ -732,10 +753,18 @@ namespace KzBBS
         }
 
 
-        internal static void showBBS(Canvas PTTCanvas)
+        internal static async void showBBS(Canvas PTTCanvas)
         {
+            //check auto login
+            if (TelnetConnect.connection.autoLogin && LoginScreen)
+            {
+                await TelnetConnect.sendCommand(TelnetConnect.connection.account + "\r" + TelnetConnect.connection.password + "\r");
+                TelnetConnect.connection.autoLogin = false;
+                LoginScreen = false;
+            }
             PTTCanvas.Children.Clear();
             ProcessCanvas(PTTCanvas);
         }
+
     }
 }

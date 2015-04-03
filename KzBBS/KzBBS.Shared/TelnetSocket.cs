@@ -28,29 +28,10 @@ namespace KzBBS
         public bool IsConnected { get { return connected; } }
         public bool Connecting { get { return connecting; } }
 
-        //public TelnetSocket(string host, string port)
-        //{
-        //    clientSocket = new StreamSocket();
-        //    serverHost = new HostName(host);
-        //    serverPort = port;
-        //}
-
-        //public TelnetSocket()
-        //{
-        //    clientSocket = new StreamSocket();
-        //    cts = new CancellationTokenSource();
-        //}
-
         public async Task Connect(string host, string port)
         {
             serverHost = new HostName(host);
             serverPort = port;
-            //if (connected)
-            //{
-            //    ShowMessage("本來就連線了阿!");
-            //    return;
-            //}
-            // Try to connect to the PTT
             clientSocket = new StreamSocket();
             cts = new CancellationTokenSource();
             try
@@ -66,22 +47,6 @@ namespace KzBBS
                 ShowMessage(exception.Message);
                 Disconnect();
                 throw;
-                // If this is an unknown status, 
-                // it means that the error is fatal and retry will likely fail.
-                //if (SocketError.GetStatus(exception.HResult) == SocketErrorStatus.Unknown)
-                //{
-                //    ShowMessage("檢查一下你的網路是不是沒有連線.");
-                //}
-
-                //ShowMessage(exception.Message);
-                // Could retry the connection, but for this simple example
-                // just close the socket.
-
-                //closing = true;
-                //clientSocket.Dispose();
-                //clientSocket = null;
-                //connected = false;
-                //ShowMessage("已經斷線");
             }
         }
 
@@ -89,12 +54,8 @@ namespace KzBBS
         {
             if (connected || connecting)
             {
-                //clientSocket.Dispose();
-                //clientSocket = null;
-                //cts = null;
                 connected = false;
                 connecting = false;
-                //ShowMessage("已經斷線");
             }
             onSocketDisconnect(new EventArgs());
         }
@@ -107,6 +68,31 @@ namespace KzBBS
             //messageDialog.Title = "訊息通知";
             messageDialog.Title = loader.GetString("infoNotify");
             await messageDialog.ShowAsync();
+        }
+
+        public static async Task<bool> confirmDialog(string msg)
+        {
+            bool isYes = false;
+            // Create the message dialog and set its content
+            var messageDialog = new MessageDialog(msg);
+            //messageDialog.Title = "作決定吧";
+            messageDialog.Title = loader.GetString("todecide");
+            // Add commands and set their callbacks;
+            //messageDialog.Commands.Add(new UICommand("好",
+            //    new UICommandInvokedHandler((cmd) => isYes = true)));
+            //messageDialog.Commands.Add(new UICommand("不好",
+            //    new UICommandInvokedHandler((cmd) => isYes = false)));
+            messageDialog.Commands.Add(new UICommand(loader.GetString("sayok"),
+                new UICommandInvokedHandler((cmd) => isYes = true)));
+            messageDialog.Commands.Add(new UICommand(loader.GetString("sayno"),
+                new UICommandInvokedHandler((cmd) => isYes = false)));
+            // Set the command that will be invoked by default
+            messageDialog.DefaultCommandIndex = 0;
+            // Set the command to be invoked when escape is pressed
+            messageDialog.CancelCommandIndex = 1;
+            // Show the message dialog
+            await messageDialog.ShowAsync();
+            return isYes;
         }
 
         public event EventHandler SocketDisconnect;

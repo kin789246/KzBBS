@@ -66,7 +66,6 @@ namespace KzBBS
         }
 
         double factor = 1;
-        double canvasOffset = 10;
         private void DetermineSize()
         {
             Rect winSize = Window.Current.Bounds;
