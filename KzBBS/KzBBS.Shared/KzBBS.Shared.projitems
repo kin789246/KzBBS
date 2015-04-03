@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Big5Util.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PTTDisplay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetANSIParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelnetConnect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetSocket.cs" />
@@ -35,5 +36,11 @@
   <ItemGroup>
     <PRIResource Include="$(MSBuildThisFileDirectory)Strings\en-US\Resources.resw" />
     <PRIResource Include="$(MSBuildThisFileDirectory)Strings\zh-TW\Resources.resw" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)Styles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 </Project>

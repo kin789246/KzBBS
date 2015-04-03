@@ -72,11 +72,11 @@ namespace KzBBS
             this.navigationHelper.LoadState += navigationHelper_LoadState;
             this.navigationHelper.SaveState += navigationHelper_SaveState;
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
-            Current = this;
+            //Current = this;
 
             if (!Big5Util.TableSeted)
             {
-                Big5Util.generateTable();
+                //Big5Util.generateTable();
             }
             PTTDisplay._fontSize = telnetFontSize;
 
@@ -87,10 +87,10 @@ namespace KzBBS
             pushKey.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             boundControlBtns.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
 
-            //appCanvas.ManipulationDelta += swipeUI_ManipulationDelta;
-            //appCanvas.ManipulationCompleted += swipeUI_ManipulationCompleted;
-            //appCanvas.ManipulationMode = ManipulationModes.TranslateRailsX | ManipulationModes.TranslateRailsY
-            //| ManipulationModes.TranslateX | ManipulationModes.TranslateY;
+            appCanvas.ManipulationDelta += swipeUI_ManipulationDelta;
+            appCanvas.ManipulationCompleted += swipeUI_ManipulationCompleted;
+            appCanvas.ManipulationMode = ManipulationModes.TranslateRailsX | ManipulationModes.TranslateRailsY
+            | ManipulationModes.TranslateX | ManipulationModes.TranslateY;
             PTTCanvas.DoubleTapped += PTTCanvas_DoubleTapped;
             PTTCanvas.Tapped += PTTCanvas_Tapped;
 
@@ -1040,7 +1040,7 @@ namespace KzBBS
         }
         private void disconnect_Click(object sender, RoutedEventArgs e)
         {
-            if (TelnetSocket.PTTSocket.IsConnected)
+            if (TelnetSocket.PTTSocket.Connecting)
             {
                 //    //ShowMessage("沒有連線就沒有斷線");
                 //    ShowMessage(loader.GetString("noconnnodisconn"));

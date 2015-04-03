@@ -51,14 +51,8 @@ namespace KzBBS
             //    return;
             //}
             // Try to connect to the PTT
-            if (clientSocket == null)
-            {
-                clientSocket = new StreamSocket();
-            }
-            if (cts == null)
-            {
-                cts = new CancellationTokenSource();
-            }
+            clientSocket = new StreamSocket();
+            cts = new CancellationTokenSource();
             try
             {
                 connecting = true;
@@ -95,9 +89,9 @@ namespace KzBBS
         {
             if (connected || connecting)
             {
-                clientSocket.Dispose();
-                clientSocket = null;
-                cts = null;
+                //clientSocket.Dispose();
+                //clientSocket = null;
+                //cts = null;
                 connected = false;
                 connecting = false;
                 //ShowMessage("已經斷線");

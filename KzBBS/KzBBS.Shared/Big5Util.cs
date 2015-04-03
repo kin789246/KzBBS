@@ -12,9 +12,8 @@ using System.Linq;
 
 namespace KzBBS
 {
-    public class Big5Util
+    class Big5Util
     {
-
         private static Dictionary<int, int> mBIG5_Unicode_MAP = new Dictionary<int, int>();
         private static Dictionary<int, int> mUnicode_BIG5_MAP = new Dictionary<int, int>();
         public static bool TableSeted = false;
@@ -24,8 +23,12 @@ namespace KzBBS
         //    set { mBIG5_Unicode_MAP = value; }
         //}
 
-        public static async void generateTable()
+        public static async Task generateTable()
         {
+            if (TableSeted)
+            {
+                return;
+            }
             Windows.ApplicationModel.Package package = Windows.ApplicationModel.Package.Current;
             Windows.Storage.StorageFolder installedLocation = package.InstalledLocation;
             StorageFile readBig5toUni = await installedLocation.GetFileAsync("moz18-b2u.txt");
@@ -49,7 +52,7 @@ namespace KzBBS
                 }
                 catch (Exception)
                 {
-                    continue; // No mapping
+                    throw; // No mapping
                 }
             }
 
@@ -69,7 +72,7 @@ namespace KzBBS
                 catch (Exception e)
                 {
                     Debug.WriteLine(e.Message);
-                    continue; // No mapping
+                    throw; // No mapping
                 }
             }
 

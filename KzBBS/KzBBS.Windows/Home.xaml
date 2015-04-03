@@ -53,25 +53,25 @@
      
         <Viewbox Name="boundControlBtns" Width="1200" Height="720" Canvas.ZIndex="9" Stretch="Uniform" >
             <Canvas Name="boundCtrlCanvas" Width="600" Height="360">
-                <RepeatButton Content="▲" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
-                <RepeatButton Content="▼" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Canvas.Top="300" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
-                <RepeatButton Content="◄" Foreground="Transparent" FontFamily="Arial" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Top="100"  MinWidth="60" Width="60" Height="160" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
-                <RepeatButton Content="►" Foreground="Transparent" FontFamily="Arial" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="540" Canvas.Top="100" MinWidth="60" Width="60" Height="160" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
-                <Button Content="Home" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Width="120" Height="60" Click="hotKey_Click"  BorderThickness="0"  IsTabStop="False"/>
-                <Button Content="End" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Top="300" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" IsTabStop="False" />
-                <Button Content="PgUp" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="480" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" IsTabStop="False" />
-                <Button Content="PgDn" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="480" Canvas.Top="300" Width="120" Height="60" Click="hotKey_Click"  BorderThickness="0" IsTabStop="False"/>
+                <RepeatButton Content="▲" Foreground="Transparent" Canvas.Left="220" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
+                <RepeatButton Content="▼" Foreground="Transparent" Canvas.Left="220" Canvas.Top="300" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
+                <RepeatButton Content="◄" Foreground="Transparent" FontFamily="Arial" Canvas.Top="100"  MinWidth="60" Width="60" Height="160" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
+                <RepeatButton Content="►" Foreground="Transparent" FontFamily="Arial" Canvas.Left="540" Canvas.Top="100" MinWidth="60" Width="60" Height="160" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
+                <Button Content="Home" Foreground="Transparent" Width="120" Height="60" Click="hotKey_Click"  BorderThickness="0"  IsTabStop="False"/>
+                <Button Content="End" Foreground="Transparent" Canvas.Top="300" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" IsTabStop="False" />
+                <Button Content="PgUp" Foreground="Transparent" Canvas.Left="480" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" IsTabStop="False" />
+                <Button Content="PgDn" Foreground="Transparent" Canvas.Left="480" Canvas.Top="300" Width="120" Height="60" Click="hotKey_Click"  BorderThickness="0" IsTabStop="False"/>
                 <!--<Button Content="Enter" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="240" Canvas.Top="120" Width="120" Height="120" Click="Enter_Click" BorderThickness="0" IsTabStop="False"/>-->
             </Canvas>
         </Viewbox>
         <StackPanel Name="buttonsPanel" Orientation="Horizontal" Canvas.Left="5" Canvas.Top="725" Canvas.ZIndex="11">
             <TextBlock x:Uid="unConn2" Name="connStatus" Text="未連線" Foreground="DarkRed" FontSize="26" TextAlignment="Center" Padding="1" Height="35" Margin="0,3,0,0"/>
             <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="22" FontFamily="Arial" Height="30" />
-            <Button x:Uid="hideconn" Name="connButton" Content="HideConn" FontSize="30" Click="connMini_Click" Style="{StaticResource ButtonNoPadding}" MinHeight="20" MinWidth="60" BorderThickness="0" />
-            <Button x:Uid="showhotkey" Name="navButton" Content="HotKey" FontSize="30" Click="naviMini_Click" Style="{StaticResource ButtonNoPadding}" MinHeight="20" MinWidth="60" BorderThickness="0" />
-            <Button x:Uid="selWords" Name="selButton" Content="Copy" FontSize="30" Click="Select_Click" Style="{StaticResource ButtonNoPadding}" MinHeight="20" MinWidth="60" BorderThickness="0" />
-            <Button x:Uid="getInput" Name="getInputBtn" Content="Keyboard" FontSize="30" Click="getInput_Click" Style="{StaticResource ButtonNoPadding}" MinHeight="20" MinWidth="60" BorderThickness="0" />
-            <Button x:Uid="aboutBtn" Name="aboutButton" Content="About" FontSize="30" Click="About_Click" Style="{StaticResource ButtonNoPadding}" MinHeight="20" MinWidth="30" BorderThickness="0" />
+            <Button x:Uid="hideconn" Name="connButton" Content="HideConn" FontSize="30" Click="connMini_Click" MinHeight="20" MinWidth="60" BorderThickness="0" />
+            <Button x:Uid="showhotkey" Name="navButton" Content="HotKey" FontSize="30" Click="naviMini_Click" MinHeight="20" MinWidth="60" BorderThickness="0" />
+            <Button x:Uid="selWords" Name="selButton" Content="Copy" FontSize="30" Click="Select_Click" MinHeight="20" MinWidth="60" BorderThickness="0" />
+            <Button x:Uid="getInput" Name="getInputBtn" Content="Keyboard" FontSize="30" Click="getInput_Click" MinHeight="20" MinWidth="60" BorderThickness="0" />
+            <Button x:Uid="aboutBtn" Name="aboutButton" Content="About" FontSize="30" Click="About_Click" MinHeight="20" MinWidth="30" BorderThickness="0" />
             <TextBlock Name="statusBar" FontSize="25" Height="30" Padding="1" Margin="5,0,0,0" />
         </StackPanel>
         <StackPanel Name="hotkeyPanel" Canvas.Left="1180" Background="Transparent">
@@ -114,8 +114,8 @@
                     <PasswordBox x:Uid="passwordTbox" Name="tPwd" FontSize="26" PasswordChar="*" Width="140" MinHeight="42" Padding="2,0" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="7,10,0,0">
-                    <CheckBox x:Uid="remember" Name="rememberAcPd" Style="{StaticResource WP81CheckboxStyle}" FontSize="22" MinWidth="60" MinHeight="20" Content="記住" Checked="remember_Checked"  />
-                    <Button x:Uid="clearSaved" Name="clearSaved" Style="{StaticResource ButtonNoPadding}" FontSize="24" MinWidth="120" Padding="0,1,0,0" 
+                    <CheckBox x:Uid="remember" Name="rememberAcPd" FontSize="22" MinWidth="60" MinHeight="20" Content="記住" Checked="remember_Checked"  />
+                    <Button x:Uid="clearSaved" Name="clearSaved" FontSize="24" MinWidth="120" Padding="0,1,0,0" 
                            IsEnabled="False" BorderThickness="0" Content="清除已存" Click="clearSaved_Click" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="4,5,0,5">
@@ -134,7 +134,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Border CornerRadius="5" Background="LightBlue" Opacity="0.8" Grid.RowSpan="3" />
-            <Button x:Uid="showadvance" Name="advButton" Content="Show Advance" BorderThickness="0" Grid.Row="1" FontSize="24" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"
+            <Button x:Uid="showadvance" Name="advButton" Content="Show Advance" BorderThickness="0" Grid.Row="1" FontSize="24" IsTabStop="False"
                        MinHeight="25" HorizontalAlignment="Center" Click="miniMax_Click" />
             <Grid Name="NaviButton" Grid.Row="0">
                 <Grid.RowDefinitions>
@@ -149,17 +149,17 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="SPACE" FontSize="30" Click="hotKey_Click" MinWidth="160" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False" />
-                <Button Grid.Row="1" Grid.Column="0" Content="y" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="2" Grid.Column="0" Content="n" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="0" Grid.Column="2" Content="↵" FontSize="30" Click="Enter_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <RepeatButton Grid.Row="0" Grid.Column="3" Content="←" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource RepeatButtonNoPadding}" IsTabStop="False"/>
-                <RepeatButton Grid.Row="1" Grid.Column="2" Content="▲" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource RepeatButtonNoPadding}" IsTabStop="False"/>
-                <RepeatButton Grid.Row="2" Grid.Column="2" Content="▼" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource RepeatButtonNoPadding}" IsTabStop="False"/>
-                <RepeatButton Grid.Row="2" Grid.Column="1" Content="◄" FontSize="30" Click="hotKey_Click" MinHeight="80" FontFamily="Arial" MinWidth="80" Style="{StaticResource RepeatButtonNoPadding}" IsTabStop="False"/>
-                <RepeatButton Grid.Row="2" Grid.Column="3" Content="►" FontSize="30" Click="hotKey_Click" MinHeight="80" FontFamily="Arial" MinWidth="80" Style="{StaticResource RepeatButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="1" Grid.Column="1" Content="PgUp" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="1" Grid.Column="3" Content="PgDn" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
+                <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="SPACE" FontSize="30" Click="hotKey_Click" MinWidth="160" MinHeight="80" IsTabStop="False" />
+                <Button Grid.Row="1" Grid.Column="0" Content="y" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="2" Grid.Column="0" Content="n" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="0" Grid.Column="2" Content="↵" FontSize="30" Click="Enter_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <RepeatButton Grid.Row="0" Grid.Column="3" Content="←" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <RepeatButton Grid.Row="1" Grid.Column="2" Content="▲" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <RepeatButton Grid.Row="2" Grid.Column="2" Content="▼" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <RepeatButton Grid.Row="2" Grid.Column="1" Content="◄" FontSize="30" Click="hotKey_Click" MinHeight="80" FontFamily="Arial" MinWidth="80" IsTabStop="False"/>
+                <RepeatButton Grid.Row="2" Grid.Column="3" Content="►" FontSize="30" Click="hotKey_Click" MinHeight="80" FontFamily="Arial" MinWidth="80" IsTabStop="False"/>
+                <Button Grid.Row="1" Grid.Column="1" Content="PgUp" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="1" Grid.Column="3" Content="PgDn" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
             </Grid>
             <Grid Name="hotKeyBoard" Grid.Row="2">
                 <Grid.RowDefinitions>
@@ -174,22 +174,22 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="1" Grid.Column="3" Content="^u" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="2" Grid.Column="3" Content="^p" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="1" Grid.Column="0" Content="/" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="1" Grid.Column="1" Content="a" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="0" Grid.Column="0" Content="[" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="0" Grid.Column="1" Content="]" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="0" Grid.Column="2" Content="=" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="0" Grid.Column="3" Content="#" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="1" Grid.Column="2" Content="s" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="2" Grid.Column="0" Content="X" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="2" Grid.Column="1" Content="z" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="3" Grid.Column="3" Content="^x" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="3" Grid.Column="0" Content="Home" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="3" Grid.Column="1" Content="End" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="3" Grid.Column="2" Content="E" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
-                <Button Grid.Row="2" Grid.Column="2" Content="Z" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" Style="{StaticResource ButtonNoPadding}" IsTabStop="False"/>
+                <Button Grid.Row="1" Grid.Column="3" Content="^u" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="2" Grid.Column="3" Content="^p" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="1" Grid.Column="0" Content="/" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="1" Grid.Column="1" Content="a" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="0" Grid.Column="0" Content="[" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="0" Grid.Column="1" Content="]" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="0" Grid.Column="2" Content="=" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="0" Grid.Column="3" Content="#" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="1" Grid.Column="2" Content="s" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="2" Grid.Column="0" Content="X" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="2" Grid.Column="1" Content="z" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="3" Grid.Column="3" Content="^x" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="3" Grid.Column="0" Content="Home" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="3" Grid.Column="1" Content="End" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="3" Grid.Column="2" Content="E" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                <Button Grid.Row="2" Grid.Column="2" Content="Z" FontSize="30" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
 
             </Grid>
         </Grid>

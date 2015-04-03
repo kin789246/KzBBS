@@ -208,7 +208,7 @@ namespace KzBBS
                    { PTTCanvas.Children.Remove(pointToCursor); }
                    //Set the cursor
                    PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
-                       , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
+                       , TelnetANSIParser.curPos.X * telnetFontSize, TelnetANSIParser.curPos.Y * telnetFontSize / 2, 1));
                    pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
                    //move textbox
                    Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 2);
@@ -388,7 +388,7 @@ namespace KzBBS
                 { PTTCanvas.Children.Remove(pointToCursor); }
                 //Set the cursor
                 PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
-                    , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
+                    , TelnetANSIParser.curPos.X *telnetFontSize, TelnetANSIParser.curPos.Y * telnetFontSize / 2, 1));
                 pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
                 //move textbox
                 Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 2);
@@ -607,7 +607,7 @@ namespace KzBBS
                 PTTDisplay.generateHyperlink(PTTDisplay.forClipBoard, clipB, Colors.Transparent);
                 //Set the cursor
                 PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, telnetFontSize / 2
-                    , (int)TelnetANSIParser.curPos.X, (int)TelnetANSIParser.curPos.Y, 1));
+                    , TelnetANSIParser.curPos.X * telnetFontSize, TelnetANSIParser.curPos.Y * telnetFontSize / 2, 1));
                 pointToCursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
                 //move textbox
                 Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * telnetFontSize / 2);
