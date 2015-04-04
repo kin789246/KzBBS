@@ -33,8 +33,8 @@ namespace KzBBS
     class PTTBlock
     {
         public string Text { get; set; }
-        public int LeftPoint { get; set; }
-        public int TopPoint { get; set; }
+        public double LeftPoint { get; set; }
+        public double TopPoint { get; set; }
         public SolidColorBrush ForeColor { get; set; }
         public SolidColorBrush BackColor { get; set; }
         public double Width { get; set; }
@@ -49,7 +49,31 @@ namespace KzBBS
         public int No { get; set; }
         public string Text { get; set; }
         public string UniqueId { get; set; }
+        public bool Changed { get; set; }
         public ObservableCollection<PTTBlock> Blocks { get; set; }
+
+        public PTTLine()
+        {
+            No = 0;
+            Text = "";
+            UniqueId = "";
+            Changed = false;
+            Blocks = new ObservableCollection<PTTBlock>();
+        }
+
+        public PTTLine(PTTLine line)
+        {
+            No = line.No;
+            Text = line.Text;
+            UniqueId = line.UniqueId;
+            Changed = line.Changed;
+
+            Blocks = new ObservableCollection<PTTBlock>();
+            foreach (var block in line.Blocks)
+            {
+                Blocks.Add(block);
+            }
+        }
     }
 
     class PTTDisplay
@@ -69,9 +93,16 @@ namespace KzBBS
         public static BBSMode LastMode = BBSMode.Other;
         public static BBSMode currentMode;
         public static bool LoginScreen = false;
+        public static List<UIElement>[] toRemove = new List<UIElement>[24];
         /*---------------------------------------*/
 
         public static PTTDisplay pttDisplay = new PTTDisplay();
+
+        private static List<PTTLine> lastPage = new List<PTTLine>();
+        public static List<PTTLine> LastPage 
+        {
+            get { return lastPage; }
+        }
         private static ObservableCollection<PTTLine> lines = new ObservableCollection<PTTLine>();
         public static ObservableCollection<PTTLine> Lines
         {
@@ -84,6 +115,7 @@ namespace KzBBS
             currentMode = BBSMode.Other;
             LoginScreen = false;
             lines.Clear();
+            toRemove = new List<UIElement>[24];
         }
 
         public void LoadFromSource(TelnetData[,] BBSPage)
@@ -125,8 +157,18 @@ namespace KzBBS
                 getLineProp(pttline);
                 lines.Add(pttline);
             }
+            saveToLastPage();
             onLinesChanged(new EventArgs());
             Debug.WriteLine("mode: {0}", currentMode.ToString());
+        }
+
+        private void saveToLastPage()
+        {
+            lastPage.Clear();
+            foreach (var line in lines)
+            {
+                lastPage.Add(new PTTLine(line));
+            }
         }
 
         PTTLine lastID = new PTTLine();
@@ -156,6 +198,8 @@ namespace KzBBS
                     checkMode(line.Text);
                 }
             }
+
+            //get line's unicode id
             string getId = pttline.Text;
             if (pttline.Text.Contains("★"))
             {
@@ -171,6 +215,25 @@ namespace KzBBS
             {
                 lastID = pttline;
             }
+
+            //check if changed
+            if (lastPage.Count != 0)
+            {
+                foreach (var line in lastPage)
+                {
+                    if (line.No == pttline.No)
+                    {
+                        if (line.Text == pttline.Text)
+                        {
+                            pttline.Changed = false;
+                        }
+                        else
+                        {
+                            pttline.Changed = true;
+                        }
+                    }
+                }
+            }
         }
 
         private static PTTBlock getBlock(TelnetData point)
@@ -178,8 +241,8 @@ namespace KzBBS
             PTTBlock pb = new PTTBlock();
 
             pb.Text = point.Text;
-            pb.TopPoint = (int)(point.Position.X * _fontSize);
-            pb.LeftPoint = (int)(point.Position.Y * _fontSize / 2);
+            pb.TopPoint = point.Position.X * _fontSize;
+            pb.LeftPoint = point.Position.Y * _fontSize / 2;
             pb.Width = point.Count * _fontSize / 2;
             pb.ForeColor = new SolidColorBrush(point.ForeColor);
             pb.BackColor = new SolidColorBrush(point.BackColor);
@@ -194,7 +257,7 @@ namespace KzBBS
             }
             pb.Blinking = point.Blinking;
             pb.DualColor = point.DualColor;
-
+            if (pb.Text.Contains("\x25CF")) { Debug.WriteLine(pb.Text); }
             return pb;
             
         }
@@ -333,29 +396,48 @@ namespace KzBBS
         {
             foreach (var line in Lines)
             {
-                foreach (var block in line.Blocks)
+                if (line.Changed)
                 {
-                    //display background
-                    PTTCanvas.Children.Add(showBackground(block.BackColor.Color, block.Width, block.TopPoint, block.LeftPoint, 0));
-                    //display text
-                    if (block.Blinking && block.DualColor) // half blinking
+                    if (toRemove[line.No] != null)
                     {
-                        PTTCanvas.Children.Add(showBlinking(block.Text, block.ForeColor.Color, block.BackColor.Color, 
-                            block.Width*2, block.TopPoint, block.LeftPoint - (int)_fontSize / 2, 1));
+                        foreach (var element in toRemove[line.No])
+                        {
+                            PTTCanvas.Children.Remove(element);
+                        }
+                        Debug.WriteLine("after removed, children count = {0}", PTTCanvas.Children.Count);
+                        toRemove[line.No].Clear();
                     }
-                    else if (block.DualColor) // half color
+
+                    foreach (var block in line.Blocks)
                     {
-                        PTTCanvas.Children.Add(showWord(block.Text, block.ForeColor.Color, 
-                            block.Width*2, block.TopPoint, block.LeftPoint - (int)_fontSize / 2, 1));
-                    }
-                    else if (block.Blinking) // full blinking
-                    {
-                        PTTCanvas.Children.Add(showBlinking(block.Text, block.ForeColor.Color, block.BackColor.Color,
-                            block.Width, block.TopPoint, block.LeftPoint, 2));
-                    }
-                    else //normal
-                    {
-                        PTTCanvas.Children.Add(showWord(block.Text, block.ForeColor.Color, block.Width, block.TopPoint, block.LeftPoint, 2));
+                        if (toRemove[line.No] == null)
+                        { toRemove[line.No] = new List<UIElement>(); }
+
+                        //display background
+                        PTTCanvas.Children.Add(showBackground(block.BackColor.Color, block.Width, block.TopPoint, block.LeftPoint, 0));
+                        toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
+                        //display text
+                        if (block.Blinking && block.DualColor) // half blinking
+                        {
+                            PTTCanvas.Children.Add(showBlinking(block.Text, block.ForeColor.Color, block.BackColor.Color,
+                                block.Width * 2, block.TopPoint, block.LeftPoint - _fontSize / 2, 1));
+                        }
+                        else if (block.DualColor) // half color
+                        {
+                            PTTCanvas.Children.Add(showWord(block.Text, block.ForeColor.Color,
+                                block.Width * 2, block.TopPoint, block.LeftPoint - _fontSize / 2, 1));
+                        }
+                        else if (block.Blinking) // full blinking
+                        {
+                            PTTCanvas.Children.Add(showBlinking(block.Text, block.ForeColor.Color, block.BackColor.Color,
+                                block.Width, block.TopPoint, block.LeftPoint, 2));
+                        }
+                        else //normal
+                        {
+                            PTTCanvas.Children.Add(showWord(block.Text, block.ForeColor.Color, block.Width, block.TopPoint, block.LeftPoint, 2));
+                        }
+                        
+                        toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
                     }
                 }
             }
@@ -752,7 +834,6 @@ namespace KzBBS
             //}
         }
 
-
         internal static async void showBBS(Canvas PTTCanvas)
         {
             //check auto login
@@ -762,9 +843,7 @@ namespace KzBBS
                 TelnetConnect.connection.autoLogin = false;
                 LoginScreen = false;
             }
-            PTTCanvas.Children.Clear();
             ProcessCanvas(PTTCanvas);
         }
-
     }
 }

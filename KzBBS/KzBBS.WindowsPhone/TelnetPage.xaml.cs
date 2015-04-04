@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using Windows.Storage.Streams;
+using Windows.Graphics.Display;
 using Windows.UI;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -18,20 +17,97 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-// The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
+// The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkID=390556
 
 namespace KzBBS
 {
     /// <summary>
-    /// A basic page that provides characteristics common to most applications.
+    /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class TelnetPage : Page
     {
-
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
 
+        UIElement cursor;
+        public TelnetPage()
+        {
+            this.InitializeComponent();
+
+            this.navigationHelper = new NavigationHelper(this);
+            this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
+            this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
+         
+            PTTDisplay.pttDisplay.LinesPropChanged += pttDisplay_LinesPropChanged;
+            Window.Current.SizeChanged += Current_SizeChanged;
+            DetermineSize();
+            //set the cursor
+            PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
+                    , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
+           cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
+        }
+
+        private void Current_SizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
+        {
+            DetermineSize();
+        }
+
+        StatusBar topStatusBar = Windows.UI.ViewManagement.StatusBar.GetForCurrentView();
+        double factor = 1;
+        private async void DetermineSize()
+        {
+            Rect winSize = Window.Current.Bounds;
+
+            if (winSize.Width > winSize.Height)
+            {
+                await topStatusBar.HideAsync();
+
+                PTTDisplay.isPortrait = false;
+                factor = (winSize.Width / 640 > winSize.Height / 384) ? winSize.Height / 384 : winSize.Width / 640;
+                PTTDisplay._fontSize = 15 * factor;
+                PTTDisplay.chtOffset = 1 * factor;
+                PTTCanvas.Width = 600 * factor;
+                PTTCanvas.Height = 360 * factor;
+                //canvasOffset = (winSize.Width - PTTCanvas.Width) / 2;
+
+                sendCmd.Height = 22 * factor;
+                sendCmd.MinWidth = 12 * factor;
+                sendCmd.MinHeight = 15 * factor;
+                sendCmd.FontSize = 12 * factor;
+
+                boundControlBtns.Width = 600 * factor;
+                boundControlBtns.Height = 360 * factor;
+            }
+            else
+            {
+                PTTDisplay.isPortrait = true;
+                factor = winSize.Height / 600;
+                //TelnetViewbox.Width = winSize.Width;
+                //TelnetViewbox.Height = winSize.Height;
+                //Canvas.SetLeft(TelnetViewbox, 0);
+                PTTDisplay._fontSize = 12.5 * factor;
+            }
+        }
+
+        void pttDisplay_LinesPropChanged(object sender, EventArgs e)
+        {
+            PTTDisplay.showBBS(PTTCanvas);
+            Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+            Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+            Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+            Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+        }
+
         /// <summary>
+        /// Gets the <see cref="NavigationHelper"/> associated with this <see cref="Page"/>.
+        /// </summary>
+        public NavigationHelper NavigationHelper
+        {
+            get { return this.navigationHelper; }
+        }
+
+        /// <summary>
+        /// Gets the view model for this <see cref="Page"/>.
         /// This can be changed to a strongly typed view model.
         /// </summary>
         public ObservableDictionary DefaultViewModel
@@ -40,80 +116,7 @@ namespace KzBBS
         }
 
         /// <summary>
-        /// NavigationHelper is used on each page to aid in navigation and 
-        /// process lifetime management
-        /// </summary>
-        public NavigationHelper NavigationHelper
-        {
-            get { return this.navigationHelper; }
-        }
-
-        UIElement cursor;
-        public TelnetPage()
-        {
-            this.InitializeComponent();
-            this.navigationHelper = new NavigationHelper(this);
-            this.navigationHelper.LoadState += navigationHelper_LoadState;
-            this.navigationHelper.SaveState += navigationHelper_SaveState;
-
-            PTTDisplay.pttDisplay.LinesPropChanged += pttDisplay_LinesPropChanged;
-            Window.Current.SizeChanged += Current_SizeChanged;
-            DetermineSize();
-            //set the cursor
-            PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
-                    , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
-            cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
-        }
-
-        private void Current_SizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
-        {
-            DetermineSize();
-        }
-
-        double factor = 1;
-        private void DetermineSize()
-        {
-            Rect winSize = Window.Current.Bounds;
-
-            if (winSize.Width > winSize.Height)
-            {
-                PTTDisplay.isPortrait = false;
-                factor = (winSize.Width / 1280 > winSize.Height / 800) ? winSize.Height / 800 : winSize.Width / 1280;
-                PTTDisplay._fontSize = 30 * factor;
-                PTTDisplay.chtOffset = 5 * factor;
-                PTTCanvas.Width = 1200 * factor;
-                PTTCanvas.Height = 720 * factor;
-                operationBoard.Width = 1200 * factor;
-                operationBoard.Height = 720 * factor;
-
-                sendCmd.Height = 33 * factor;
-                sendCmd.MinWidth = 15 * factor;
-                sendCmd.MinHeight = 33 * factor;
-                sendCmd.FontSize = 22 * factor;
-            }
-            else
-            {
-                PTTDisplay.isPortrait = true;
-                factor = winSize.Height / 1200;
-                //TelnetViewbox.Width = winSize.Width;
-                //TelnetViewbox.Height = winSize.Height;
-                //Canvas.SetLeft(TelnetViewbox, 0);
-                PTTDisplay._fontSize = 25 * factor;
-            }
-            //PTTDisplay.pt_sendCmd = sendCmd;
-        }
-
-        void pttDisplay_LinesPropChanged(object sender, EventArgs e)
-        {
-            PTTDisplay.showBBS(PTTCanvas); 
-            Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-            Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
-            Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-            Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
-        }
-
-        /// <summary>
-        /// Populates the page with content passed during navigation. Any saved state is also
+        /// Populates the page with content passed during navigation.  Any saved state is also
         /// provided when recreating a page from a prior session.
         /// </summary>
         /// <param name="sender">
@@ -122,8 +125,8 @@ namespace KzBBS
         /// <param name="e">Event data that provides both the navigation parameter passed to
         /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested and
         /// a dictionary of state preserved by this page during an earlier
-        /// session. The state will be null the first time a page is visited.</param>
-        private void navigationHelper_LoadState(object sender, LoadStateEventArgs e)
+        /// session.  The state will be null the first time a page is visited.</param>
+        private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             if (PTTDisplay.Lines.Count != 0)
             {
@@ -143,29 +146,33 @@ namespace KzBBS
         /// <param name="sender">The source of the event; typically <see cref="NavigationHelper"/></param>
         /// <param name="e">Event data that provides an empty dictionary to be populated with
         /// serializable state.</param>
-        private void navigationHelper_SaveState(object sender, SaveStateEventArgs e)
+        private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
         }
 
         #region NavigationHelper registration
 
+        /// <summary>
         /// The methods provided in this section are simply used to allow
         /// NavigationHelper to respond to the page's navigation methods.
-        /// 
+        /// <para>
         /// Page specific logic should be placed in event handlers for the  
-        /// <see cref="GridCS.Common.NavigationHelper.LoadState"/>
-        /// and <see cref="GridCS.Common.NavigationHelper.SaveState"/>.
+        /// <see cref="NavigationHelper.LoadState"/>
+        /// and <see cref="NavigationHelper.SaveState"/>.
         /// The navigation parameter is available in the LoadState method 
         /// in addition to page state preserved during an earlier session.
-
+        /// </para>
+        /// </summary>
+        /// <param name="e">Provides data for navigation methods and event
+        /// handlers that cannot cancel the navigation request.</param>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            navigationHelper.OnNavigatedTo(e);
+            this.navigationHelper.OnNavigatedTo(e);
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            navigationHelper.OnNavigatedFrom(e);
+            this.navigationHelper.OnNavigatedFrom(e);
         }
 
         #endregion
@@ -173,16 +180,9 @@ namespace KzBBS
         private async void cmdOrText_KeyUp(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Shift) return;
-            if(e.Key == Windows.System.VirtualKey.Control)
-            { 
-                ctrlChecked.IsChecked = false;
-                return;
-            }
-            //check space command
             if (e.Key == Windows.System.VirtualKey.Space && sendCmd.Text == " ")
             {
                 sendCmd.Text = "";
-                bskey = true;
                 return;
             }
             if (e.Key == Windows.System.VirtualKey.Enter)
@@ -193,16 +193,14 @@ namespace KzBBS
                     statusBar.Text = e.Key.ToString() + " sent";
                 }
                 else
-                {//TODO: send big5 words one by one
+                {
                     byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
                     await TelnetConnect.sendCommand(cmd);
                     statusBar.Text = sendCmd.Text + " sent";
                     sendCmd.Text = "";
                 }
-                bskey = true;
                 return;
             }
-            //check ctrl + ? combination key
             if (ctrlChecked.IsChecked == true)
             {
                 if (64 < (int)e.Key && (int)e.Key < 91)
@@ -212,11 +210,10 @@ namespace KzBBS
                     await TelnetConnect.sendCommand(cmd);
                     statusBar.Text = "Ctrl + " + e.Key.ToString() + " sent";
                     sendCmd.Text = "";
-                    bskey = true;
-                    return;
                 }
+                ctrlChecked.IsChecked = false;
+                return;
             }
-            //check single letter command
             if (sendCmd.Text.Length == 1)
             {
                 if (sendCmd.Text[0] < 256)
@@ -224,27 +221,13 @@ namespace KzBBS
                     await TelnetConnect.sendCommand(sendCmd.Text);
                     statusBar.Text = sendCmd.Text + " sent";
                     sendCmd.Text = "";
-                    bskey = true;
                 }
-                return;
             }
-            
-            if(string.IsNullOrEmpty(sendCmd.Text))
-            { bskey = true; }
-            else
-            { bskey = false; }
-
         }
 
-        bool bskey = false;
         async void cmdOrText_KeyDown(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Shift) return;
-            if (e.Key == Windows.System.VirtualKey.Control)
-            {
-                ctrlChecked.IsChecked = true;
-                return;
-            }
             if (e.Key == Windows.System.VirtualKey.Up)
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
@@ -299,19 +282,125 @@ namespace KzBBS
                 {
                     await TelnetConnect.sendCommand(" ");
                     statusBar.Text = "space key sent";
-                    sendCmd.Text = "";
-                    bskey = true;
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Back)
             {
-                if (bskey)
+                if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand("\b");
                     statusBar.Text = "backspace key sent";
-                    bskey = false;
                 }
             }
+        }
+
+        private async void Enter_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(sendCmd.Text))
+            {
+                await TelnetConnect.sendCommand("\r");
+                statusBar.Text = "";
+            }
+            else
+            {
+                if (sendCmd.Text.Length == 1 && ctrlChecked.IsChecked == true)
+                {
+                    string upper = sendCmd.Text.ToUpper();
+                    char ctrlWord = upper[0];
+                    if (64 < ctrlWord && ctrlWord < 128)
+                    {
+                        int uletter = ctrlWord - 64;
+                        byte[] cmd = { (byte)uletter };
+                        await TelnetConnect.sendCommand(cmd);
+                        statusBar.Text = "Ctrl + " + sendCmd.Text + " sent!";
+                        sendCmd.Text = "";
+                        ctrlChecked.IsChecked = false;
+                    }
+                }
+                else
+                {
+                    byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
+
+                    await TelnetConnect.sendCommand(cmd);
+                    sendCmd.Text = "";
+                    statusBar.Text = "";
+                }
+            }
+        }
+
+        private async void hotKey_Click(object sender, RoutedEventArgs e)
+        {
+            ButtonBase bn = sender as ButtonBase;
+            if (bn == null) return;
+            string cmd = bn.Content as string;
+
+            if (cmd.Length == 1 && char.IsLetterOrDigit(cmd[0]))
+            {
+                await TelnetConnect.sendCommand(cmd);
+            }
+            else if (cmd[0] == '^')
+            {
+                int send = cmd[1] - 96;
+                await TelnetConnect.sendCommand(new byte[] { (byte)send });
+            }
+            else
+            {
+                switch (cmd)
+                {
+                    case "SPACE":
+                        await TelnetConnect.sendCommand(" ");
+                        break;
+                    case "←":
+                        await TelnetConnect.sendCommand("\b");
+                        break;
+                    case "▲":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 65 });
+                        break;
+                    case "▼":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 66 });
+                        break;
+                    case "◄":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 });
+                        break;
+                    case "►":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 67 });
+                        break;
+                    case "PgUp":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 }); //Esc [ 5 ~
+                        break;
+                    case "PgDn":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~
+                        break;
+                    case "/":
+                        await TelnetConnect.sendCommand("/");
+                        break;
+                    case "[":
+                        await TelnetConnect.sendCommand("[");
+                        break;
+                    case "]":
+                        await TelnetConnect.sendCommand("]");
+                        break;
+                    case "=":
+                        await TelnetConnect.sendCommand("=");
+                        break;
+                    case "#":
+                        await TelnetConnect.sendCommand("#");
+                        break;
+                    case "Home":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 49, 126 }); //ESC [ 1 ~
+                        break;
+                    case "End":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 52, 126 }); //ESC [ 4 ~
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void getInput_Click(object sender, RoutedEventArgs e)
+        {
+            sendCmd.Focus(FocusState.Programmatic);
         }
     }
 }

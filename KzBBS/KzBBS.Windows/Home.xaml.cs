@@ -74,10 +74,10 @@ namespace KzBBS
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
             //Current = this;
 
-            if (!Big5Util.TableSeted)
-            {
-                //Big5Util.generateTable();
-            }
+            //if (!Big5Util.TableSeted)
+            //{
+            //    Big5Util.generateTable();
+            //}
             PTTDisplay._fontSize = telnetFontSize;
 
             Window.Current.SizeChanged += Current_SizeChanged;

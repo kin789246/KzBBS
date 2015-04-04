@@ -73,10 +73,10 @@ namespace KzBBS
             this.navigationHelper.SaveState += navigationHelper_SaveState;
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
 
-            if (!Big5Util.TableSeted)
-            {
-                Big5Util.generateTable();
-            }
+            //if (!Big5Util.TableSeted)
+            //{
+            //    Big5Util.generateTable();
+            //}
             PTTDisplay._fontSize = telnetFontSize;
 
             Window.Current.SizeChanged += Current_SizeChanged;
@@ -106,7 +106,7 @@ namespace KzBBS
 
         async void PTTCanvas_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (PTTDisplay._currentMode == BBSMode.BoardList)
+            if (PTTDisplay.currentMode == BBSMode.BoardList)
             {
                 string getID = "";
                 //Point current = e.GetPosition(TelnetViewbox);
@@ -227,7 +227,7 @@ namespace KzBBS
                     if (iDown %10 == 0)
                     {
                         statusBar.Text = "slide down ";
-                        if (PTTDisplay._currentMode == BBSMode.ArticleBrowse)
+                        if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
                         { await sendCommand("j"); }
                         else
                         { await sendCommand(new byte[] { 27, 91, 66 }); }
@@ -240,7 +240,7 @@ namespace KzBBS
                     if (iUp % 10 == 0)
                     {
                         statusBar.Text = "slide up ";
-                        if (PTTDisplay._currentMode == BBSMode.ArticleBrowse)
+                        if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
                         { await sendCommand("k"); }
                         else
                         { await sendCommand(new byte[] { 27, 91, 65 }); }
@@ -598,7 +598,7 @@ namespace KzBBS
                 if(pointToCursor != null && PTTCanvas.Children.Count != 0)
                 { PTTCanvas.Children.Remove(pointToCursor); }
 
-                //PTTDisplay._currentMode = PTTDisplay.checkMode();
+                //PTTDisplay.currentMode = PTTDisplay.checkMode();
                 //PTTDisplay.DisplayLanscape(PTTCanvas, TelnetANSIParser.BBSPage); 
                 PTTDisplay.showAll(PTTCanvas, TelnetANSIParser.BBSPage);
 

@@ -50,8 +50,6 @@
             <StackPanel Grid.Column="2" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="22" FontFamily="Arial" Height="30" />
-                    <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" Width="30" HorizontalAlignment="Left"
-                   Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" TabIndex="-1" Opacity="0.7"/>
                     <TextBlock Name="statusBar" FontSize="25" Height="30" Padding="1" Margin="5,0,0,0" />
                     <TextBlock x:Name="testtb" FontSize="30" />
                 </StackPanel>
@@ -60,6 +58,10 @@
         <Canvas Name="PTTCanvas" Width="1200" Height="720" Grid.Row="1" VerticalAlignment="Top" >
             <TextBlock Name="clipB" FontFamily="kaiu.ttf#DFKai-SB" FontSize="30" LineStackingStrategy="BaselineToBaseline"
                            LineHeight="30" IsTextSelectionEnabled="False" Foreground="Transparent" Canvas.ZIndex="5" />
+        </Canvas>
+        <Canvas Name="operationBoard" Width="1200" Height="720" Grid.Row="1" VerticalAlignment="Top">
+            <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" Width="30" HorizontalAlignment="Left"
+                   Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" TabIndex="-1" Opacity="0.7"/>
         </Canvas>
     </Grid>
 </Page>

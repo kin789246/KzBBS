@@ -577,16 +577,16 @@ namespace KzBBS
             }
             //Debug.WriteLine("handle ansi escape time: {0}", Environment.TickCount - debugstart);
             //#region debug2
-            StringBuilder sb = new StringBuilder();
-            for (int row = 0; row < ROW; row++)
-            {
-                for (int col = 0; col < COL; col++)
-                {
-                    sb.Append(BBSPage[row, col].Text);
-                }
-                sb.Append("\n");
-            }
-            Debug.WriteLine(sb.ToString());
+            //StringBuilder sb = new StringBuilder();
+            //for (int row = 0; row < ROW; row++)
+            //{
+            //    for (int col = 0; col < COL; col++)
+            //    {
+            //        sb.Append(BBSPage[row, col].Text);
+            //    }
+            //    sb.Append("\n");
+            //}
+            //Debug.WriteLine(sb.ToString());
             //#endregion
         }
 

@@ -14,9 +14,9 @@ namespace KzBBS
 {
     class Big5Util
     {
-        private static Dictionary<int, int> mBIG5_Unicode_MAP = new Dictionary<int, int>();
-        private static Dictionary<int, int> mUnicode_BIG5_MAP = new Dictionary<int, int>();
-        public static bool TableSeted = false;
+        private static Dictionary<int, int> mBIG5_Unicode_MAP;
+        private static Dictionary<int, int> mUnicode_BIG5_MAP;
+        //public static bool TableSeted = false;
         //public static Dictionary<int, int> Big5UnicodeTable
         //{
         //    get { return mBIG5_Unicode_MAP; }
@@ -25,12 +25,11 @@ namespace KzBBS
 
         public static async Task generateTable()
         {
-            if (TableSeted)
-            {
-                return;
-            }
+            mBIG5_Unicode_MAP = new Dictionary<int, int>();
+            mUnicode_BIG5_MAP = new Dictionary<int, int>();
             Windows.ApplicationModel.Package package = Windows.ApplicationModel.Package.Current;
             Windows.Storage.StorageFolder installedLocation = package.InstalledLocation;
+            //TODO: support GBK code
             StorageFile readBig5toUni = await installedLocation.GetFileAsync("moz18-b2u.txt");
             StorageFile readUnitoBig5 = await installedLocation.GetFileAsync("moz18-u2b.txt");
             IList<string> temp = await FileIO.ReadLinesAsync(readBig5toUni);
@@ -76,7 +75,7 @@ namespace KzBBS
                 }
             }
 
-            TableSeted = true;
+            //TableSeted = true;
         }
 
         public static string ToUni(byte[] pureText)
