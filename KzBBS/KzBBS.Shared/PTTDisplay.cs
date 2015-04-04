@@ -115,6 +115,7 @@ namespace KzBBS
             currentMode = BBSMode.Other;
             LoginScreen = false;
             lines.Clear();
+            lastPage.Clear();
             toRemove = new List<UIElement>[24];
         }
 
@@ -404,7 +405,7 @@ namespace KzBBS
                         {
                             PTTCanvas.Children.Remove(element);
                         }
-                        Debug.WriteLine("after removed, children count = {0}", PTTCanvas.Children.Count);
+                        //Debug.WriteLine("after removed, children count = {0}", PTTCanvas.Children.Count);
                         toRemove[line.No].Clear();
                     }
 

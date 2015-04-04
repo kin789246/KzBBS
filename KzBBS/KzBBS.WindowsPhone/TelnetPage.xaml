@@ -28,8 +28,8 @@
                 <TextBlock Name="clipB" FontFamily="kaiu.ttf#DFKai-SB" FontSize="15" LineStackingStrategy="BaselineToBaseline"
                            LineHeight="15" IsTextSelectionEnabled="False" Foreground="Transparent" />
             </Canvas>
-            <Viewbox Name="boundControlBtns" Width="600" Height="360" Margin="0,-8,0,0" >
-                <Canvas Width="600" Height="360">
+            <Viewbox Name="operationBoard" Width="600" Height="360" Margin="0,-8,0,0" >
+                <Canvas Width="600" Height="360" >
                     <TextBox Name="sendCmd" Padding="0" FontSize="12" KeyUp="cmdOrText_KeyUp" KeyDown="cmdOrText_KeyDown" Margin="2,0,0,0" VerticalAlignment="Center"
                     Text="" MinWidth="12" MinHeight="15" Height="22" IsSpellCheckEnabled="False" Opacity="0.7" Canvas.ZIndex="11" />
                     <RepeatButton Content="▲" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" />

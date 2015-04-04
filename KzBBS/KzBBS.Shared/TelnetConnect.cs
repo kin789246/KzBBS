@@ -75,10 +75,10 @@ namespace KzBBS
                     {
                         goTouchVersion(rawdata);
                     }
-                    else
-                    {
-                        TelnetSocket.PTTSocket.cts.Cancel();
-                    }
+                    //else
+                    //{
+                    //    TelnetSocket.PTTSocket.cts.Cancel();
+                    //}
                 }
             }
             catch (Exception exception)

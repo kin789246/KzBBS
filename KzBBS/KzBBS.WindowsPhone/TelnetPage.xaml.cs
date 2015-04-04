@@ -68,15 +68,14 @@ namespace KzBBS
                 PTTDisplay.chtOffset = 1 * factor;
                 PTTCanvas.Width = 600 * factor;
                 PTTCanvas.Height = 360 * factor;
-                //canvasOffset = (winSize.Width - PTTCanvas.Width) / 2;
 
                 sendCmd.Height = 22 * factor;
                 sendCmd.MinWidth = 12 * factor;
                 sendCmd.MinHeight = 15 * factor;
                 sendCmd.FontSize = 12 * factor;
 
-                boundControlBtns.Width = 600 * factor;
-                boundControlBtns.Height = 360 * factor;
+                operationBoard.Width = 600 * factor;
+                operationBoard.Height = 360 * factor;
             }
             else
             {
@@ -92,8 +91,8 @@ namespace KzBBS
         void pttDisplay_LinesPropChanged(object sender, EventArgs e)
         {
             PTTDisplay.showBBS(PTTCanvas);
-            Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-            Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+            Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * 15 / 2);
+            Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * 15);
             Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
             Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
         }
@@ -131,8 +130,8 @@ namespace KzBBS
             if (PTTDisplay.Lines.Count != 0)
             {
                 PTTDisplay.showBBS(PTTCanvas);
-                Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-                Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+                Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * 15 / 2);
+                Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * 15);
                 Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
                 Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
             }
