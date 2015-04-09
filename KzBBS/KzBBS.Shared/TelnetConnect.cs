@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Storage.Streams;
 
 namespace KzBBS
@@ -57,6 +59,7 @@ namespace KzBBS
             }
         }
 
+        static int co = 0;
         static byte[] rawdata = new byte[0];
         private async void ClientWaitForMessage()
         {
@@ -67,18 +70,23 @@ namespace KzBBS
             {
                 while (true)
                 {
-                    uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(TelnetSocket.PTTSocket.cts.Token);
-
+                    //uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(TelnetSocket.PTTSocket.cts.Token);
+                    IAsyncOperation<uint> taskLoad = reader.LoadAsync((uint)MAXBuffer);
+                    if (taskLoad.Status== AsyncStatus.Started)
+                    {
+                        co = 0;
+                        onLinesChanged(new EventArgs());
+                    }
+                    await taskLoad.AsTask();
+                    uint Message = taskLoad.GetResults();
                     rawdata = new byte[Message];
                     reader.ReadBytes(rawdata);
                     if (rawdata.Length != 0)
                     {
-                        goTouchVersion(rawdata);
+                        TelnetANSIParser.HandleAnsiESC(rawdata);
+                        PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
+                        Debug.WriteLine("times: {0}", ++co);
                     }
-                    //else
-                    //{
-                    //    TelnetSocket.PTTSocket.cts.Cancel();
-                    //}
                 }
             }
             catch (Exception exception)
@@ -94,12 +102,14 @@ namespace KzBBS
             }
         }
 
-        private void goTouchVersion(byte[] rdata)
+        public event EventHandler LinesPropChanged;
+        public virtual void onLinesChanged(EventArgs e)
         {
-            TelnetANSIParser.HandleAnsiESC(rdata);
-            PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
+            if (LinesPropChanged != null)
+            {
+                LinesPropChanged(this, e);
+            }
         }
-
 
         public static async Task sendCommand(byte[] interpretByte)
         {

@@ -42,9 +42,9 @@ namespace KzBBS
                 connected = true;
             }
 
-            catch (Exception exception)
+            catch
             {
-                ShowMessage(exception.Message);
+                //ShowMessage(exception.Message);
                 Disconnect();
                 throw;
             }

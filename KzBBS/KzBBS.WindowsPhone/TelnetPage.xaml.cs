@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.RegularExpressions;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
@@ -37,14 +38,17 @@ namespace KzBBS
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
-         
+
             PTTDisplay.pttDisplay.LinesPropChanged += pttDisplay_LinesPropChanged;
             Window.Current.SizeChanged += Current_SizeChanged;
             DetermineSize();
-            //set the cursor
-            PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
-                    , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
-           cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
+
+            if (!PTTDisplay.PTTMode)
+            { //set the cursor
+                PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
+                        , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
+                cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
+            }
         }
 
         private void Current_SizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
@@ -76,6 +80,9 @@ namespace KzBBS
 
                 operationBoard.Width = 600 * factor;
                 operationBoard.Height = 360 * factor;
+
+                BBSListView.Width = 600 * factor;
+                BBSListView.Height = 360 * factor;
             }
             else
             {
@@ -90,11 +97,7 @@ namespace KzBBS
 
         void pttDisplay_LinesPropChanged(object sender, EventArgs e)
         {
-            PTTDisplay.showBBS(PTTCanvas);
-            Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * 15 / 2);
-            Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * 15);
-            Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-            Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+            onDataChange();
         }
 
         /// <summary>
@@ -129,11 +132,7 @@ namespace KzBBS
         {
             if (PTTDisplay.Lines.Count != 0)
             {
-                PTTDisplay.showBBS(PTTCanvas);
-                Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * 15 / 2);
-                Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * 15);
-                Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-                Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+                onDataChange();
             }
         }
 
@@ -400,6 +399,83 @@ namespace KzBBS
         private void getInput_Click(object sender, RoutedEventArgs e)
         {
             sendCmd.Focus(FocusState.Programmatic);
+        }
+
+        private async void onDataChange()
+        {
+            if (PTTDisplay.PTTMode)
+            {
+                if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
+                {
+                    BBSListView.Items.Clear();
+                    BBSListView.Items.Add(PTTDisplay.showWord("Loading...", TelnetANSIParser.nGray, PTTDisplay._fontSize / 2 * 10, 0, 0, 0));
+                    if (PTTDisplay.LastMode != BBSMode.ArticleBrowse)
+                    { PTTDisplay.CurrPage.Clear(); }
+                    PTTDisplay.articleAddToCurrPage();
+                    if (!PTTDisplay.Lines[PTTDisplay.Lines.Count - 1].Text.Contains("100%"))
+                    {
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 });
+                        return;
+                    }
+                }
+                else
+                {
+                    PTTDisplay.CurrPage.Clear();
+                    PTTDisplay.CurrPage = PTTDisplay.Lines.ToList();
+                }
+                PTTDisplay.ShowBBSListView(BBSListView, PTTDisplay.CurrPage);
+            }
+            else
+            {
+                PTTDisplay.showBBS(PTTCanvas, PTTDisplay.Lines);
+                Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+                Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+                Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+                Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+            }
+        }
+
+        private async void BBSListVitemItem_Click(object sender, ItemClickEventArgs e)
+        {
+            Canvas lineCanvas = e.ClickedItem as Canvas;
+            if (!string.IsNullOrEmpty(lineCanvas.Name))
+            {
+                if (Regex.IsMatch(lineCanvas.Name, @"[a-zA-Z]+")) //letter
+                {
+                    await TelnetConnect.sendCommand(lineCanvas.Name + "\r");
+                }
+                else if (Regex.IsMatch(lineCanvas.Name, @"\d+")) //numbers
+                {
+                    //updatePage = false;
+                    await TelnetConnect.sendCommand(lineCanvas.Name + "\r\r");
+                    //if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
+                    //{
+                    //    await TelnetConnect.sendCommand("Q");
+                    //    PTTLine line = PTTDisplay.Lines.First(x => x.No == 19);
+                    //    if (line != null)
+                    //    {
+                    //       foreach( var text in line.Text.Split(' '))
+                    //       {
+                    //           if(Regex.IsMatch(text, @"#\w+\s"))
+                    //           {
+                    //               Debug.WriteLine("文章代碼: " + text);
+                    //           }
+                    //       }
+                    //    }
+                    //    await TelnetConnect.sendCommand(" ");
+                    //}
+                    //onDataChange();
+                    //updatePage = true;
+                }
+            }
+            else
+            {
+                if (PTTDisplay.currentMode == BBSMode.PressAnyKey || PTTDisplay.currentMode == BBSMode.AnimationPlay)
+                {
+                    await TelnetConnect.sendCommand(" ");
+                }
+            }
+
         }
     }
 }

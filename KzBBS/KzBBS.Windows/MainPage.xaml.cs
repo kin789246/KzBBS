@@ -57,13 +57,14 @@ namespace KzBBS
 
             TelnetSocket.PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
             disconnBtn.IsEnabled = false;
+            PTTMode.IsChecked = true;
             loadProfile();
             //Current = this;
         }
 
+        Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
         private void loadProfile()
         {
-            Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
             if (roamingSettings.Values.ContainsKey("telnetAccount"))
             {
                 tAccount.Text = roamingSettings.Values["telnetAccount"].ToString();
@@ -114,6 +115,7 @@ namespace KzBBS
         /// serializable state.</param>
         private void navigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
+            
         }
 
         #region NavigationHelper registration
@@ -144,13 +146,29 @@ namespace KzBBS
             disconnBtn.IsEnabled = true;
             connBtn.IsEnabled = false;
             if (string.IsNullOrEmpty(tIP.Text) || string.IsNullOrEmpty(tPort.Text)) return;
-            if(!string.IsNullOrEmpty(tAccount.Text) && !string.IsNullOrEmpty(tPwd.Password))
-            { 
+            if (!string.IsNullOrEmpty(tAccount.Text) && !string.IsNullOrEmpty(tPwd.Password))
+            {
                 TelnetConnect.connection.autoLogin = true;
                 TelnetConnect.connection.account = tAccount.Text;
                 TelnetConnect.connection.password = tPwd.Password;
             }
-            await TelnetConnect.connection.OnConnect(tIP.Text, tPort.Text);
+            try
+            {
+                await TelnetConnect.connection.OnConnect(tIP.Text, tPort.Text);
+            }
+            catch(Exception exp)
+            {
+                TelnetSocket.ShowMessage(exp.Message);
+                return;
+            }
+            if (PTTMode.IsChecked == true)
+            {
+                PTTDisplay.PTTMode = true;
+            }
+            else
+            {
+                PTTDisplay.PTTMode = false;
+            }
             this.Frame.Navigate(typeof(TelnetPage));
         }
 
@@ -169,7 +187,7 @@ namespace KzBBS
                 return;
             }
             bool isYes = true;
-            Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+            //Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
             if (roamingSettings.Values.ContainsKey("telnetAccount") || roamingSettings.Values.ContainsKey("telnetPassword"))
             {
                 //confirm overwrite

@@ -41,6 +41,7 @@ namespace KzBBS
             
             TelnetSocket.PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
             disconnBtn.IsEnabled = false;
+            PTTMode.IsChecked = true;
             loadProfile();
         }
 
@@ -155,6 +156,14 @@ namespace KzBBS
                 TelnetConnect.connection.password = tPwd.Password;
             }
             await TelnetConnect.connection.OnConnect(tIP.Text, tPort.Text);
+            if (PTTMode.IsChecked == true)
+            {
+                PTTDisplay.PTTMode = true;
+            }
+            else
+            {
+                PTTDisplay.PTTMode = false;
+            }
             this.Frame.Navigate(typeof(TelnetPage));
         }
 

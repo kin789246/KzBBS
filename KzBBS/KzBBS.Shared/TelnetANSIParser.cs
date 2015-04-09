@@ -245,33 +245,33 @@ namespace KzBBS
             //}
             //Debug.WriteLine(rdataString.ToString());
             //raw text
-            //List<byte> noCmd = new List<byte>();
-            //noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
-            //string removeIAC = Big5Util.ToUni(noCmd.ToArray());
-            //if (!string.IsNullOrEmpty(removeIAC))
-            //{
-            //    string printIt = "";
-            //    foreach (char byteword in removeIAC)
-            //    {
-            //        if (byteword == '\n')
-            //        {
-            //            printIt += "\\n\n";
-            //        }
-            //        else if (byteword == '\r')
-            //        { printIt += "\\r"; }
-            //        else if (byteword == '\b')
-            //        {
-            //            printIt += "\\b";
-            //        }
-            //        else
-            //        {
-            //            printIt += byteword;
-            //        }
-            //    }
-            //    printIt += "-received.";
-            //    Debug.WriteLine(printIt);
-            //}
-            ////////////////////////////////////
+            List<byte> noCmd = new List<byte>();
+            noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
+            string removeIAC = Big5Util.ToUni(noCmd.ToArray());
+            if (!string.IsNullOrEmpty(removeIAC))
+            {
+                string printIt = "";
+                foreach (char byteword in removeIAC)
+                {
+                    if (byteword == '\n')
+                    {
+                        printIt += "\\n\n";
+                    }
+                    else if (byteword == '\r')
+                    { printIt += "\\r"; }
+                    else if (byteword == '\b')
+                    {
+                        printIt += "\\b";
+                    }
+                    else
+                    {
+                        printIt += byteword;
+                    }
+                }
+                printIt += "-received.";
+                Debug.WriteLine(printIt);
+            }
+            //////////////////////////////////
 
             #endregion
             //debugstart = Environment.TickCount;
@@ -576,7 +576,7 @@ namespace KzBBS
                 }
             }
             //Debug.WriteLine("handle ansi escape time: {0}", Environment.TickCount - debugstart);
-            //#region debug2
+            ////#region debug2
             //StringBuilder sb = new StringBuilder();
             //for (int row = 0; row < ROW; row++)
             //{
@@ -587,7 +587,7 @@ namespace KzBBS
             //    sb.Append("\n");
             //}
             //Debug.WriteLine(sb.ToString());
-            //#endregion
+            ////#endregion
         }
 
         private static void checkHiByte()

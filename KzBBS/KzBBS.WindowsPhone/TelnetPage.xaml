@@ -28,10 +28,11 @@
                 <TextBlock Name="clipB" FontFamily="kaiu.ttf#DFKai-SB" FontSize="15" LineStackingStrategy="BaselineToBaseline"
                            LineHeight="15" IsTextSelectionEnabled="False" Foreground="Transparent" />
             </Canvas>
-            <Viewbox Name="operationBoard" Width="600" Height="360" Margin="0,-8,0,0" >
+            <ListView Name="BBSListView" Width="600" Height="300" VerticalAlignment="Top" SelectionMode="None" 
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ItemClick="BBSListVitemItem_Click" IsItemClickEnabled="True" />
+            <Viewbox Name="operationBoard" Width="600" Height="360" Margin="0,-8,0,0" Visibility="Visible" >
                 <Canvas Width="600" Height="360" >
-                    <TextBox Name="sendCmd" Padding="0" FontSize="12" KeyUp="cmdOrText_KeyUp" KeyDown="cmdOrText_KeyDown" Margin="2,0,0,0" VerticalAlignment="Center"
-                    Text="" MinWidth="12" MinHeight="15" Height="22" IsSpellCheckEnabled="False" Opacity="0.7" Canvas.ZIndex="11" />
                     <RepeatButton Content="▲" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" />
                     <RepeatButton Content="▼" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Canvas.Top="300" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" />
                     <RepeatButton Content="◄" Foreground="Transparent" FontFamily="Arial" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Top="100"  MinWidth="60" Width="60" Height="160" BorderThickness="0" Click="hotKey_Click" />
@@ -41,6 +42,8 @@
                     <Button Content="PgUp" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="480" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" />
                     <Button Content="PgDn" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="480" Canvas.Top="300" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" />
                     <Button Content="Enter" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="240" Canvas.Top="120" Width="120" Height="120" Click="Enter_Click" BorderThickness="0" />
+                    <TextBox Name="sendCmd" Padding="0" FontSize="12" KeyUp="cmdOrText_KeyUp" KeyDown="cmdOrText_KeyDown" Margin="2,0,0,0" VerticalAlignment="Center"
+                    Text="" MinWidth="12" MinHeight="15" Height="22" IsSpellCheckEnabled="False" Opacity="0.7" />
                 </Canvas>
             </Viewbox>
         </Grid>
