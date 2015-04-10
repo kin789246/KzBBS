@@ -6,8 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    IsTextScaleFactorEnabled="False">
+    IsTextScaleFactorEnabled="False" Background="Black" >
 
     <Grid x:Name="LayoutRoot">
 
@@ -24,13 +23,16 @@
 
         <!--TODO: Content should be placed within the following grid-->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="0">
-            <Canvas Name="PTTCanvas" Width="600" Height="360" Margin="0,-8,0,0">
-                <TextBlock Name="clipB" FontFamily="kaiu.ttf#DFKai-SB" FontSize="15" LineStackingStrategy="BaselineToBaseline"
-                           LineHeight="15" IsTextSelectionEnabled="False" Foreground="Transparent" />
-            </Canvas>
-            <ListView Name="BBSListView" Width="600" Height="300" VerticalAlignment="Top" SelectionMode="None" 
+            <Canvas Name="PTTCanvas" Width="600" Height="360" Margin="0,-8,0,0" />
+            <StackPanel Name="BBSStackPanel" Width="600" Height="360" VerticalAlignment="Top" Margin="0,-8,0,0" >
+                <StackPanel Name="topStackPanel" Height="45" />
+                
+                <ListView Name="BBSListView" Width="600" Height="300" VerticalAlignment="Top" SelectionMode="None" 
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                       ItemClick="BBSListVitemItem_Click" IsItemClickEnabled="True" />
+
+                <StackPanel Name="bottomStackPanel" Height="15" />
+            </StackPanel>
             <Viewbox Name="operationBoard" Width="600" Height="360" Margin="0,-8,0,0" Visibility="Visible" >
                 <Canvas Width="600" Height="360" >
                     <RepeatButton Content="▲" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" />

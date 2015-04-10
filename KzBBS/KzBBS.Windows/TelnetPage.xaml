@@ -8,7 +8,8 @@
     xmlns:common="using:KzBBS.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Background="Black">
 
     <Page.Resources>
         <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
@@ -55,17 +56,18 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-        <Canvas Name="BBSCanvas" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" >
-            <Canvas Name="PTTCanvas" Width="1200" Height="720" >
-                <TextBlock Name="clipB" FontFamily="kaiu.ttf#DFKai-SB" FontSize="30" LineStackingStrategy="BaselineToBaseline"
-                           LineHeight="30" IsTextSelectionEnabled="False" Foreground="Transparent" Canvas.ZIndex="5" />
-            </Canvas>
-            <ListView Name="BBSListView" Width="1200" Height="720" SelectionMode="None" ScrollViewer.VerticalScrollBarVisibility="Auto"
+        <Canvas Name="PTTCanvas" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" />
+        <StackPanel Name="BBSStackPanel" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" >
+            <StackPanel Name="topStackPanel" Height="90" />
+
+            <ListView Name="BBSListView" Width="1200" Height="600" SelectionMode="None" ScrollViewer.VerticalScrollBarVisibility="Auto"
                       ItemClick="BBSListVitemItem_Click" IsItemClickEnabled="True" />
-            <Canvas Name="operationBoard" Width="1200" Height="720" >
-                <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" Width="30" HorizontalAlignment="Left"
+            
+            <StackPanel Name="bottomStackPanel" Height="30" />
+        </StackPanel>
+        <Canvas Name="operationBoard" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" >
+            <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" Width="30" HorizontalAlignment="Left"
                    Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" TabIndex="-1" Opacity="0.7"/>
-            </Canvas>
         </Canvas>
     </Grid>
 </Page>

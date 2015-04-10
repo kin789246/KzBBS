@@ -190,13 +190,13 @@ namespace KzBBS
                 lines.Add(pttline);
             }
             saveToLastLines();
-            //onLinesChanged(new EventArgs());
-            //#region debug
-            //foreach (var line in Lines)
-            //{
-            //    Debug.WriteLine(line.Text);
-            //}
-            //#endregion
+            onLinesChanged(new EventArgs());
+            #region debug
+            foreach (var line in Lines)
+            {
+                Debug.WriteLine(line.Text);
+            }
+            #endregion
             Debug.WriteLine("mode: {0}", currentMode.ToString());
         }
 
@@ -244,6 +244,7 @@ namespace KzBBS
                 getId = pttline.Text.Substring(0, 9);
             }
             pttline.UniqueId = getSelectedID(getId);
+            
             if (pttline.UniqueId == "★" && !string.IsNullOrEmpty(lastID.UniqueId))
             {
                 int id = pttline.No - lastID.No + int.Parse(lastID.UniqueId);
@@ -437,7 +438,7 @@ namespace KzBBS
             }
         }
 
-        public async static void ShowBBSListView(Canvas PTTCanvas, ListView BBSListView, List<PTTLine> currPage)
+        public async static void ShowBBSListView(StackPanel top, ListView list, StackPanel bottom, List<PTTLine> currPage)
         {
             //check auto login
             if (TelnetConnect.connection.autoLogin && LoginScreen)
@@ -446,137 +447,110 @@ namespace KzBBS
                 TelnetConnect.connection.autoLogin = false;
                 LoginScreen = false;
             }
-            BBSListView.Items.Clear();
-            PTTCanvas.Children.Clear();
-            
-            if (currentMode == BBSMode.MainList || currentMode == BBSMode.ClassBoard)
+            top.Children.Clear();
+            list.Items.Clear();
+            bottom.Children.Clear();
+            if (currentMode == BBSMode.MainList || currentMode == BBSMode.ClassBoard || currentMode == BBSMode.BoardList || currentMode == BBSMode.Essence)
             {
-                BBSListView.Height = _fontSize * 24;
-                Canvas.SetTop(BBSListView, 0);
-                int start = 0;
-                int count = 0;
+                int topCount = 0;
+                int bottomCount = 0;
                 bool articleTitle = false;
-                
-                Canvas lineCanvas = getCanvas(BBSListView.Width, _fontSize);
                 foreach (var line in currPage)
-                { 
+                {
+                    Canvas lineCanvas = getCanvas(list.Width, _fontSize);
+                    if (currentMode == BBSMode.MainList)
+                    {
+                        if(Regex.IsMatch(line.UniqueId, @"\(\w\)"))
+                        {
+                            line.UniqueId = line.UniqueId.Trim('(', ')');
+                        }
+                        else
+                        {
+                            line.UniqueId = "";
+                        }
+                    }
+                    
                     if (string.IsNullOrEmpty(line.UniqueId) && !articleTitle) //continue non-list
-                    {   
+                    {
                         foreach (var block in line.Blocks)
                         {
-                            saveToCanvas(lineCanvas, block, (line.No - start) * _fontSize);
+                            saveToCanvas(lineCanvas, block, 0);
                         }
-                        count++;
+                        if (list.Items.Count == 0)
+                        {
+                            top.Children.Add(lineCanvas);
+                            topCount++;
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrWhiteSpace(line.Text))
+                            {
+                                bottom.Children.Add(lineCanvas);
+                                bottomCount++;
+                            }
+                        }
                         articleTitle = false;
                     }
                     else if (string.IsNullOrEmpty(line.UniqueId) && articleTitle) //stop list, start another non-list
                     {
-                        start = line.No;
-                        count = 1;
-                        lineCanvas = getCanvas(BBSListView.Width, _fontSize);
+                        bottomCount++;
+                        lineCanvas = getCanvas(list.Width, _fontSize);
                         foreach (var block in line.Blocks)
                         {
-                            saveToCanvas(lineCanvas, block, (line.No - start) * _fontSize);
+                            saveToCanvas(lineCanvas, block, 0);
                         }
+                        bottom.Children.Add(lineCanvas);
                         articleTitle = false;
                     }
                     else if (!string.IsNullOrEmpty(line.UniqueId) && !articleTitle) //start list, stop non-list
                     {
-                        lineCanvas.Height = count * _fontSize;
-                        BBSListView.Items.Add(lineCanvas);
-                        lineCanvas = getCanvas(BBSListView.Width, _fontSize);
+                        top.Children.Add(lineCanvas);
+                        lineCanvas = getCanvas(list.Width, _fontSize);
                         lineCanvas.Tag = line.UniqueId;
                         foreach (var block in line.Blocks)
                         {
                             saveToCanvas(lineCanvas, block, 0);
                         }
-                        BBSListView.Items.Add(lineCanvas);
+                        list.Items.Add(lineCanvas);
                         articleTitle = true;
                     }
                     else //continue list
                     {
-                        lineCanvas = getCanvas(BBSListView.Width, _fontSize);
+                        lineCanvas = getCanvas(list.Width, _fontSize);
                         lineCanvas.Tag = line.UniqueId;
                         foreach (var block in line.Blocks)
                         {
                             saveToCanvas(lineCanvas, block, 0);
                         }
-                        BBSListView.Items.Add(lineCanvas);
+                        list.Items.Add(lineCanvas);
                         articleTitle = true;
                     }
                 }
-                if (!articleTitle) //save the rest non-list
-                {
-                    lineCanvas.Height = count * _fontSize;
-                    BBSListView.Items.Add(lineCanvas);
-                }
-            }
-            else if (currentMode == BBSMode.BoardList || currentMode== BBSMode.Essence)
-            {
-                int height = 0;
-                if (currentMode == BBSMode.BoardList) { height = 3; }
-                else { height = 2; }
-                Canvas listCanvas = getCanvas(BBSListView.Width, _fontSize);
-                Canvas upperCanvas = getCanvas(BBSListView.Width, _fontSize * height);
-                Canvas lowerCanvas = getCanvas(BBSListView.Width, _fontSize);
-                Canvas.SetTop(lowerCanvas, _fontSize * 23);
-                PTTCanvas.Children.Add(upperCanvas);
-                PTTCanvas.Children.Add(lowerCanvas);
-                foreach (var line in currPage)
-                {   
-                    //the first 2 lines 
-                    if (currPage.IndexOf(line) == 0 || currPage.IndexOf(line) == 1)
-                    {
-                        foreach (var block in line.Blocks)
-                        {
-                            saveToCanvas(upperCanvas, block, currPage.IndexOf(line) * _fontSize);
-                        }
-                    }
-                    //check if 3rd line uppercanvas
-                    else if (currPage.IndexOf(line) == 2 && height == 3)
-                    {
-                        foreach (var block in line.Blocks)
-                        {
-                            saveToCanvas(upperCanvas, block, currPage.IndexOf(line) * _fontSize);
-                        }
-                    }
-                    // the last line
-                    else if (currPage.IndexOf(line) == currPage.Count - 1)
-                    {
-                        foreach (var block in line.Blocks)
-                        {
-                            saveToCanvas(lowerCanvas, block, 0);
-                        }
-                    }
-                    // lists
-                    else
-                    {
-                        listCanvas = getCanvas(BBSListView.Width, _fontSize);
-                        foreach (var block in line.Blocks)
-                        {
-                            saveToCanvas(listCanvas, block, 0);
-                        }
-                        listCanvas.Tag = line.UniqueId;
-                        //Debug.WriteLine(line.UniqueId);
-                        BBSListView.Items.Add(listCanvas);
-                    }
-                }
-                BBSListView.Height = _fontSize * (24 - height - 1);
-                Canvas.SetTop(BBSListView, height * _fontSize);
+                top.Height = _fontSize * topCount;
+                bottom.Height = _fontSize * bottomCount;
+                //if(currentMode == BBSMode.MainList)
+                //{
+                //    bottomCount = 1;
+
+                //}
+                list.Height = _fontSize * (24 - topCount - bottomCount);
             }
             else
             {
-                BBSListView.Height = _fontSize * 24;
-                Canvas.SetTop(BBSListView, 0);
-                Canvas lineCanvas = getCanvas(BBSListView.Width, CurrPage.Count * _fontSize);
+                top.Height = 0;
+                bottom.Height = 0;
+                list.Height = _fontSize * 24;
+                StackPanel sp = new StackPanel();
                 foreach (var line in currPage)
                 {
+                    Canvas lineCanvas = getCanvas(list.Width, _fontSize);
                     foreach (var block in line.Blocks)
                     {
-                        saveToCanvas(lineCanvas, block, CurrPage.IndexOf(line) * _fontSize);
+                        saveToCanvas(lineCanvas, block, 0);
                     }
+                    sp.Children.Add(lineCanvas);
                 }
-                BBSListView.Items.Add(lineCanvas);
+                list.Items.Add(sp);
             }
         }
 
@@ -972,7 +946,7 @@ namespace KzBBS
             string matchPattern = @"(\d+\s)|(\d+[\.X\)])|(\([A-Z]\))";
             //source = TelnetANSIParser.CropText(source, 0, 40);
             afterSplit = Regex.Split(source, matchPattern);
-            char[] forTrim = { '.', 'X', ')', '●', '(', '\xa0' };
+            char[] forTrim = { '.', 'X', '●', '\xa0' };
 
             foreach (string x in afterSplit)
             {
@@ -981,11 +955,11 @@ namespace KzBBS
                 {
                     string id;
                     if (x == "(X)")
-                    { return "X"; }
+                    { return x; }
                     else
                     {
-                        id = x.TrimStart(forTrim);
-                        id = id.TrimEnd(forTrim);
+                        id = x.TrimStart(forTrim).TrimEnd(forTrim);
+                        //id = id.TrimEnd(forTrim);
                         return id;
                     }
                 }

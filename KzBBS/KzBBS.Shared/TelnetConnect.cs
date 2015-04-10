@@ -61,6 +61,7 @@ namespace KzBBS
 
         static int co = 0;
         static byte[] rawdata = new byte[0];
+        static List<byte> finalRawData = new List<byte>();
         private async void ClientWaitForMessage()
         {
             int MAXBuffer = 6000;
@@ -72,10 +73,14 @@ namespace KzBBS
                 {
                     //uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(TelnetSocket.PTTSocket.cts.Token);
                     IAsyncOperation<uint> taskLoad = reader.LoadAsync((uint)MAXBuffer);
-                    if (taskLoad.Status== AsyncStatus.Started)
+                    if (taskLoad.Status == AsyncStatus.Started)
                     {
-                        co = 0;
-                        onLinesChanged(new EventArgs());
+                        //co = 0;
+                        TelnetANSIParser.HandleAnsiESC(finalRawData.ToArray());
+                        //PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
+                        //onLinesChanged(new EventArgs());
+                        Debug.WriteLine("finalrawdata count: {0}", finalRawData.Count);
+                        finalRawData.Clear();
                     }
                     await taskLoad.AsTask();
                     uint Message = taskLoad.GetResults();
@@ -83,9 +88,14 @@ namespace KzBBS
                     reader.ReadBytes(rawdata);
                     if (rawdata.Length != 0)
                     {
-                        TelnetANSIParser.HandleAnsiESC(rawdata);
-                        PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
-                        Debug.WriteLine("times: {0}", ++co);
+                        finalRawData.AddRange(rawdata);
+                        //TelnetANSIParser.HandleAnsiESC(rawdata);
+                        //PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
+                        //Debug.WriteLine("times: {0}", ++co);
+                    }
+                    else
+                    {
+                        return;
                     }
                 }
             }

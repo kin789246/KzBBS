@@ -58,13 +58,15 @@ namespace KzBBS
             this.navigationHelper.LoadState += navigationHelper_LoadState;
             this.navigationHelper.SaveState += navigationHelper_SaveState;
             
-            TelnetConnect.connection.LinesPropChanged += telnetConnect_LinesPropChanged;
+            PTTDisplay.pttDisplay.LinesPropChanged += telnetConnect_LinesPropChanged;
             Window.Current.SizeChanged += Current_SizeChanged;
             DetermineSize();
-            //set the cursor
-            PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
-                    , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
-            cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
+            if (!PTTDisplay.PTTMode)
+            { //set the cursor
+                PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
+                        , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
+                cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
+            }
         }
 
         private void Current_SizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
@@ -83,18 +85,18 @@ namespace KzBBS
                 factor = (winSize.Width / 1280 > winSize.Height / 800) ? winSize.Height / 800 : winSize.Width / 1280;
                 PTTDisplay._fontSize = 30 * factor;
                 PTTDisplay.chtOffset = 5 * factor;
-                PTTCanvas.Width = 1200 * factor;
-                PTTCanvas.Height = 720 * factor;
+                BBSStackPanel.Width = 1200 * factor;
+                BBSStackPanel.Height = 720 * factor;
                 operationBoard.Width = 1200 * factor;
                 operationBoard.Height = 720 * factor;
+                PTTCanvas.Width = 1200 * factor;
+                PTTCanvas.Height = 720 * factor;
 
                 sendCmd.Height = 33 * factor;
                 sendCmd.MinWidth = 15 * factor;
                 sendCmd.MinHeight = 33 * factor;
                 sendCmd.FontSize = 22 * factor;
 
-                BBSCanvas.Width = 1200 * factor;
-                BBSCanvas.Height = 720 * factor;
                 BBSListView.Width = 1200 * factor;
                 BBSListView.Height = 720 * factor;
             }
@@ -321,12 +323,12 @@ namespace KzBBS
             {
                 if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
                 {
-                    
-
                     if (PTTDisplay.LastMode != BBSMode.ArticleBrowse)
                     {
                         BBSListView.Items.Clear();
                         PTTCanvas.Children.Clear();
+                        topStackPanel.Children.Clear();
+                        bottomStackPanel.Children.Clear();
                         PTTCanvas.Children.Add(PTTDisplay.showWord("Loading...", TelnetANSIParser.nGray, PTTDisplay._fontSize / 2 * 10, 0, 0, 0));
                         PTTDisplay.CurrPage.Clear();
                         PTTDisplay.CurrPage = PTTDisplay.Lines.ToList();
@@ -345,6 +347,7 @@ namespace KzBBS
                         loadCount++;
                         return;
                     }
+                    PTTCanvas.Children.Clear();
                     PTTDisplay.CurrPage.Add(PTTDisplay.Lines[PTTDisplay.Lines.Count - 1]);
                 }
                 //else if (PTTDisplay.currentMode == BBSMode.BoardList)
@@ -356,7 +359,7 @@ namespace KzBBS
                     PTTDisplay.CurrPage.Clear();
                     PTTDisplay.CurrPage = PTTDisplay.Lines.ToList();
                 }
-                PTTDisplay.ShowBBSListView(PTTCanvas, BBSListView, PTTDisplay.CurrPage);
+                PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.CurrPage);
             }
             else
             {
@@ -371,48 +374,51 @@ namespace KzBBS
         private async void BBSListVitemItem_Click(object sender, ItemClickEventArgs e)
         {
             Canvas lineCanvas = e.ClickedItem as Canvas;
-            string id = "";
-            if (lineCanvas.Tag != null)
+            if (lineCanvas != null)
             {
-                id = lineCanvas.Tag.ToString();
-            }
-            if (!string.IsNullOrEmpty(id))
-            {
-                if (Regex.IsMatch(lineCanvas.Tag.ToString(), @"[a-zA-Z]+")) //letter
-                //if (PTTDisplay.currentMode == BBSMode.MainList)
+                string id = "";
+                if (lineCanvas.Tag != null)
                 {
-                    await TelnetConnect.sendCommand(id + "\r");
+                    id = lineCanvas.Tag.ToString();
                 }
-                else if (Regex.IsMatch(lineCanvas.Tag.ToString(), @"\d+")) //numbers
-                //else if (PTTDisplay.currentMode == BBSMode.BoardList || PTTDisplay.currentMode == BBSMode.Essence)
+                if (!string.IsNullOrEmpty(id))
                 {
-                    //updatePage = false;
-                    if (PTTDisplay.currentMode == BBSMode.MainList)
+                    if (Regex.IsMatch(lineCanvas.Tag.ToString(), @"[a-zA-Z]+")) //letter
+                    //if (PTTDisplay.currentMode == BBSMode.MainList)
                     {
                         await TelnetConnect.sendCommand(id + "\r");
                     }
-                    else
+                    else if (Regex.IsMatch(lineCanvas.Tag.ToString(), @"\d+")) //numbers
+                    //else if (PTTDisplay.currentMode == BBSMode.BoardList || PTTDisplay.currentMode == BBSMode.Essence)
                     {
-                        await TelnetConnect.sendCommand(id + "\r\r");
+                        //updatePage = false;
+                        if (PTTDisplay.currentMode == BBSMode.MainList)
+                        {
+                            await TelnetConnect.sendCommand(id + "\r");
+                        }
+                        else
+                        {
+                            await TelnetConnect.sendCommand(id + "\r\r");
+                        }
+                        //if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
+                        //{
+                        //    await TelnetConnect.sendCommand("Q");
+                        //    PTTLine line = PTTDisplay.Lines.First(x => x.No == 19);
+                        //    if (line != null)
+                        //    {
+                        //       foreach( var text in line.Text.Split(' '))
+                        //       {
+                        //           if(Regex.IsMatch(text, @"#\w+\s"))
+                        //           {
+                        //               Debug.WriteLine("文章代碼: " + text);
+                        //           }
+                        //       }
+                        //    }
+                        //    await TelnetConnect.sendCommand(" ");
+                        //}
+                        //onDataChange();
+                        //updatePage = true;
                     }
-                    //if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
-                    //{
-                    //    await TelnetConnect.sendCommand("Q");
-                    //    PTTLine line = PTTDisplay.Lines.First(x => x.No == 19);
-                    //    if (line != null)
-                    //    {
-                    //       foreach( var text in line.Text.Split(' '))
-                    //       {
-                    //           if(Regex.IsMatch(text, @"#\w+\s"))
-                    //           {
-                    //               Debug.WriteLine("文章代碼: " + text);
-                    //           }
-                    //       }
-                    //    }
-                    //    await TelnetConnect.sendCommand(" ");
-                    //}
-                    //onDataChange();
-                    //updatePage = true;
                 }
             }
             else
@@ -422,7 +428,6 @@ namespace KzBBS
                     await TelnetConnect.sendCommand(" ");
                 }
             }
-            
         }
     }
 }

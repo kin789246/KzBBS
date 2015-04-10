@@ -88,6 +88,8 @@ namespace KzBBS
         {
             connBtn.IsEnabled = true;
             disconnBtn.IsEnabled = false;
+            PTTDisplay.resetAllSetting();
+            TelnetANSIParser.resetAllSetting();
         }
 
         /// <summary>

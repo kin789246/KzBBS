@@ -244,34 +244,34 @@ namespace KzBBS
             //    { rdataString.Append("\n"); }
             //}
             //Debug.WriteLine(rdataString.ToString());
-            //raw text
-            List<byte> noCmd = new List<byte>();
-            noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
-            string removeIAC = Big5Util.ToUni(noCmd.ToArray());
-            if (!string.IsNullOrEmpty(removeIAC))
-            {
-                string printIt = "";
-                foreach (char byteword in removeIAC)
-                {
-                    if (byteword == '\n')
-                    {
-                        printIt += "\\n\n";
-                    }
-                    else if (byteword == '\r')
-                    { printIt += "\\r"; }
-                    else if (byteword == '\b')
-                    {
-                        printIt += "\\b";
-                    }
-                    else
-                    {
-                        printIt += byteword;
-                    }
-                }
-                printIt += "-received.";
-                Debug.WriteLine(printIt);
-            }
-            //////////////////////////////////
+            ////raw text
+            //List<byte> noCmd = new List<byte>();
+            //noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
+            //string removeIAC = Big5Util.ToUni(noCmd.ToArray());
+            //if (!string.IsNullOrEmpty(removeIAC))
+            //{
+            //    string printIt = "";
+            //    foreach (char byteword in removeIAC)
+            //    {
+            //        if (byteword == '\n')
+            //        {
+            //            printIt += "\\n\n";
+            //        }
+            //        else if (byteword == '\r')
+            //        { printIt += "\\r"; }
+            //        else if (byteword == '\b')
+            //        {
+            //            printIt += "\\b";
+            //        }
+            //        else
+            //        {
+            //            printIt += byteword;
+            //        }
+            //    }
+            //    printIt += "-received.";
+            //    Debug.WriteLine(printIt);
+            //}
+            ////////////////////////////////////
 
             #endregion
             //debugstart = Environment.TickCount;
@@ -576,18 +576,18 @@ namespace KzBBS
                 }
             }
             //Debug.WriteLine("handle ansi escape time: {0}", Environment.TickCount - debugstart);
-            ////#region debug2
-            //StringBuilder sb = new StringBuilder();
-            //for (int row = 0; row < ROW; row++)
-            //{
-            //    for (int col = 0; col < COL; col++)
-            //    {
-            //        sb.Append(BBSPage[row, col].Text);
-            //    }
-            //    sb.Append("\n");
-            //}
-            //Debug.WriteLine(sb.ToString());
-            ////#endregion
+            #region debug2
+            StringBuilder sb = new StringBuilder();
+            for (int row = 0; row < ROW; row++)
+            {
+                for (int col = 0; col < COL; col++)
+                {
+                    sb.Append(BBSPage[row, col].Text);
+                }
+                sb.Append("\n");
+            }
+            Debug.WriteLine(sb.ToString());
+            #endregion
         }
 
         private static void checkHiByte()
@@ -675,130 +675,6 @@ namespace KzBBS
                 BBSPage[row, col].resetData();
             }
         }
-
-        //private static void findReplace(Canvas BBSCanvas, TelnetData toInsert)
-        //{
-        //    int line = (int)curPos.X;
-        //    if (BBSPage[line].Count == 0 || toInsert.Text == "")
-        //        return;
-        //    TelnetData toSave;
-        //    int count;
-        //    int curY, blockY;
-        //    string text;
-        //    curY = (int)toInsert.Position.Y;
-        //    List<TelnetData> toRemove = new List<TelnetData>();
-        //    List<TelnetData> toAdd = new List<TelnetData>();
-        //    foreach (TelnetData block in BBSPage[line])
-        //    { 
-        //        blockY = (int)block.Position.Y;
-        //        //if (blockY + block.Count - 1 < curY) //reserve
-        //        //{
-        //        //    toAdd.Add(block);
-        //        //    block.BBSBackground = null;
-        //        //}
-        //        //if (curY + toInsert.Count - 1 < blockY) //reserve
-        //        //{
-        //        //    toAdd.Add(block);
-        //        //    block.BBSBackground = null;
-        //        //}
-        //        if (blockY < curY && curY <= blockY + block.Count - 1 && blockY + block.Count - 1 <= curY + toInsert.Count - 1)
-        //        {
-        //            block.Text = CropText(block.Text, 0, curY - blockY - 1);
-        //            block.Count = curY - blockY;
-        //            //toAdd.Add(block);
-        //            foreach (UIElement ui in block.BBSUI)
-        //            { BBSCanvas.Children.Remove(ui); }
-        //            block.BBSUI.Clear();
-        //            continue;
-        //        }
-        //        if (curY <= blockY && blockY <= curY + toInsert.Count - 1 && curY + toInsert.Count - 1 < blockY + block.Count - 1)
-        //        {
-        //            block.Text = CropText(block.Text, curY + toInsert.Count - blockY, block.Count - 1);
-        //            block.Count = blockY + block.Count - curY - toInsert.Count;
-        //            //toSave.Text = text;
-        //            //toSave.Count = count;
-        //            block.Position = new Point(line, curY + toInsert.Count);
-        //            //toAdd.Add(block);
-                    
-        //            foreach (UIElement ui in block.BBSUI)
-        //            { BBSCanvas.Children.Remove(ui); }
-        //            block.BBSUI.Clear();
-        //            continue;
-        //        }
-        //        if (blockY < curY && curY + toInsert.Count - 1 < blockY + block.Count - 1)
-        //        {
-        //            toSave = new TelnetData();
-        //            toSave.cloneFrom(block);
-        //            text = CropText(block.Text, 0, curY - blockY - 1);
-        //            count = curY - blockY;
-        //            toSave.Text = text;
-        //            toSave.Count = count;
-        //            toAdd.Add(toSave);
-        //            block.Text = CropText(block.Text, curY + toInsert.Count - blockY, block.Count - 1);
-        //            block.Count = blockY + block.Count - curY - toInsert.Count;
-        //            block.Position = new Point(line, curY + toInsert.Count);
-        //            //toAdd.Add(block);
-        //            foreach (UIElement ui in block.BBSUI)
-        //            { BBSCanvas.Children.Remove(ui); }
-        //            block.BBSUI.Clear();
-        //            continue;
-        //        }
-        //        if (curY <= blockY && blockY + block.Count - 1 <= curY + toInsert.Count - 1)
-        //        {
-        //            toRemove.Add(block);
-        //            foreach (UIElement ui in block.BBSUI)
-        //            { BBSCanvas.Children.Remove(ui); }
-        //            block.BBSUI.Clear();
-        //            continue;
-        //        }
-        //    }
-        //    //BBSPage[line].Clear();
-        //    foreach (TelnetData bk in toRemove)
-        //    { BBSPage[line].Remove(bk); }
-        //    foreach (TelnetData bk in toAdd)
-        //    { BBSPage[line].Add(bk); }
-        //    toRemove.Clear();
-        //    toAdd.Clear();
-        //}
-
-        //public static int transferQty(string source)
-        //{
-        //    int count = 0;
-        //    foreach(char ch in source)
-        //    {
-        //        if(ch < 256)
-        //        { count++; }
-        //        else
-        //        { count += 2; }
-        //    }
-        //    return count;
-        //}
-
-        //public static string CropText(string source, int start, int end)
-        //{
-        //    StringBuilder result = new StringBuilder();
-        //    int current = 0, index = 0;
-        //    while(index < source.Length)
-        //    {
-        //        if (current >= start)
-        //        { result.Append(source[index]); }
-
-        //        if(source[index] < 256)
-        //        { current++; }
-        //        else
-        //        { 
-        //            current += 2;
-        //            if (current - 1 == start)
-        //                result.Append((char)0xA0);
-        //        }
-
-        //        if (current > end)
-        //            break;
-                
-        //        index++;
-        //    }
-        //    return result.ToString();
-        //}
 
         private static void storeDualBytes(string word, int row, int col, AnsiAttr attr)
         {
