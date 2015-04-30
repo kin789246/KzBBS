@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.ApplicationModel;
+using Windows.ApplicationModel.Store;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -60,6 +62,12 @@ namespace KzBBS
             PTTMode.IsChecked = true;
             loadProfile();
             //Current = this;
+
+            Package package = Package.Current;
+            PackageId packageId = package.Id;
+            PackageVersion version = packageId.Version;
+            versionText.Text = String.Format("Version: {0}.{1}.{2}.{3}\n",
+                version.Major, version.Minor, version.Build, version.Revision);
         }
 
         Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
@@ -228,6 +236,41 @@ namespace KzBBS
             else
             {
                 TelnetSocket.ShowMessage("please connect first");
+            }
+        }
+
+        private async void buy_Click(object sender, RoutedEventArgs e)
+        {
+            //StorageFolder proxyDataFolder = await Package.Current.InstalledLocation.GetFolderAsync("ApiData");
+            //StorageFile proxyFile = await proxyDataFolder.GetFileAsync("WindowsStoreProxy.xml");
+            //await CurrentAppSimulator.ReloadSimulatorAsync(proxyFile);
+            //ListingInformation listing = await CurrentAppSimulator.LoadListingInformationAsync();
+            //var product1 = listing.ProductListings["support1USD"];
+            //LicenseInformation licenseInfo = CurrentAppSimulator.LicenseInformation;
+            LicenseInformation licenseInfo = CurrentApp.LicenseInformation;
+            //var productionLicense = licenseInfo.ProductLicenses["support1USD"];
+
+            if (licenseInfo.IsTrial)
+            {
+                //the customer doesn't buy this app
+                try
+                {
+                    //await CurrentAppSimulator.RequestAppPurchaseAsync(true);
+                    await CurrentApp.RequestAppPurchaseAsync(true);
+                    if (!licenseInfo.IsTrial)
+                    { //ShowMessage("感謝你的購買");
+                        TelnetSocket.ShowMessage(loader.GetString("thanksforbuy"));
+                    }
+                }
+                catch (Exception)
+                { //ShowMessage("購買失敗");
+                    TelnetSocket.ShowMessage(loader.GetString("buyfailed"));
+                }
+            }
+            else
+            {
+                //ShowMessage("感謝, 你已經買過了.");
+                TelnetSocket.ShowMessage(loader.GetString("alreadybuy"));
             }
         }
     }

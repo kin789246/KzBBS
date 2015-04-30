@@ -299,4 +299,7 @@
   <data name="pwdTboxWP.Width" xml:space="preserve">
     <value>60</value>
   </data>
+  <data name="PTTMode.Content" xml:space="preserve">
+    <value>PTT觸控模式</value>
+  </data>
 </root>

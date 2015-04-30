@@ -59,56 +59,48 @@ namespace KzBBS
             }
         }
 
-        static int co = 0;
         static byte[] rawdata = new byte[0];
         static List<byte> finalRawData = new List<byte>();
         private async void ClientWaitForMessage()
         {
+            finalRawData.Clear();
             int MAXBuffer = 6000;
             DataReader reader = new DataReader(TelnetSocket.PTTSocket.ClientSocket.InputStream);
             reader.InputStreamOptions = InputStreamOptions.Partial;
-            try
+            while (true)
             {
-                while (true)
+                try
                 {
-                    //uint Message = await reader.LoadAsync((uint)MAXBuffer).AsTask(TelnetSocket.PTTSocket.cts.Token);
-                    IAsyncOperation<uint> taskLoad = reader.LoadAsync((uint)MAXBuffer);
-                    if (taskLoad.Status == AsyncStatus.Started)
-                    {
-                        //co = 0;
-                        TelnetANSIParser.HandleAnsiESC(finalRawData.ToArray());
-                        //PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
-                        //onLinesChanged(new EventArgs());
-                        Debug.WriteLine("finalrawdata count: {0}", finalRawData.Count);
-                        finalRawData.Clear();
-                    }
-                    await taskLoad.AsTask();
-                    uint Message = taskLoad.GetResults();
+                    uint Message = await reader.LoadAsync((uint)MAXBuffer);
+                    //Debug.WriteLine("Message: {0}", Message);
                     rawdata = new byte[Message];
                     reader.ReadBytes(rawdata);
                     if (rawdata.Length != 0)
                     {
-                        finalRawData.AddRange(rawdata);
-                        //TelnetANSIParser.HandleAnsiESC(rawdata);
-                        //PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
-                        //Debug.WriteLine("times: {0}", ++co);
+                        TelnetANSIParser.HandleAnsiESC(rawdata);
+                        PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
                     }
                     else
                     {
                         return;
                     }
                 }
-            }
-            catch (Exception exception)
-            {
-                //TelnetSocket.ShowMessage(exception.Message);
-                if (TelnetSocket.PTTSocket.IsConnected)
+                catch (Exception exception)
                 {
-                    TelnetSocket.PTTSocket.Disconnect();
-                }
+                    //TelnetSocket.ShowMessage(exception.Message);
+                    if (TelnetSocket.PTTSocket.IsConnected)
+                    {
+                        TelnetSocket.PTTSocket.Disconnect();
+                    }
 
-                Debug.WriteLine("Read stream failed with error: " + exception.Message);
-                //throw;
+                    Debug.WriteLine("Read stream failed with error: " + exception.Message);
+                    //throw;
+                }
+                //if (finalRawData.Count != 0)
+                //{
+                //    TelnetANSIParser.HandleAnsiESC(finalRawData.ToArray());
+                //    PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
+                //}
             }
         }
 

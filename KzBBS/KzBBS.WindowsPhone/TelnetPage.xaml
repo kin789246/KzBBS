@@ -23,39 +23,38 @@
 
         <!--TODO: Content should be placed within the following grid-->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="0">
-            <Canvas Name="PTTCanvas" Width="600" Height="360" Margin="0,-8,0,0" />
-            <StackPanel Name="BBSStackPanel" Width="600" Height="360" VerticalAlignment="Top" Margin="0,-8,0,0" >
+            <StackPanel Name="BBSStackPanel" Width="600" Height="360" VerticalAlignment="Top" >
                 <StackPanel Name="topStackPanel" Height="45" />
-                
                 <ListView Name="BBSListView" Width="600" Height="300" VerticalAlignment="Top" SelectionMode="None" 
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Black"
                       ItemClick="BBSListVitemItem_Click" IsItemClickEnabled="True" />
 
                 <StackPanel Name="bottomStackPanel" Height="15" />
             </StackPanel>
-            <Viewbox Name="operationBoard" Width="600" Height="360" Margin="0,-8,0,0" Visibility="Visible" >
+            <Canvas Name="PTTCanvas" Width="600" Height="360" />
+            <Canvas Name="operationBoard" Width="600" Height="360" />
+            <Viewbox Name="boundControlBtns" Width="600" Height="360">
                 <Canvas Width="600" Height="360" >
-                    <RepeatButton Content="▲" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" />
-                    <RepeatButton Content="▼" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Canvas.Top="300" Width="160" Height="60" BorderThickness="0" Click="hotKey_Click" />
-                    <RepeatButton Content="◄" Foreground="Transparent" FontFamily="Arial" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Top="100"  MinWidth="60" Width="60" Height="160" BorderThickness="0" Click="hotKey_Click" />
-                    <RepeatButton Content="►" Foreground="Transparent" FontFamily="Arial" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="540" Canvas.Top="100" MinWidth="60" Width="60" Height="160" BorderThickness="0" Click="hotKey_Click" />
-                    <Button Content="Home" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" />
-                    <Button Content="End" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Top="300" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" />
-                    <Button Content="PgUp" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="480" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" />
-                    <Button Content="PgDn" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="480" Canvas.Top="300" Width="120" Height="60" Click="hotKey_Click" BorderThickness="0" />
-                    <Button Content="Enter" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="240" Canvas.Top="120" Width="120" Height="120" Click="Enter_Click" BorderThickness="0" />
-                    <TextBox Name="sendCmd" Padding="0" FontSize="12" KeyUp="cmdOrText_KeyUp" KeyDown="cmdOrText_KeyDown" Margin="2,0,0,0" VerticalAlignment="Center"
-                    Text="" MinWidth="12" MinHeight="15" Height="22" IsSpellCheckEnabled="False" Opacity="0.7" />
+                    <RepeatButton Content="▲" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Width="160" Height="40" MinHeight="40" BorderThickness="0" Click="hotKey_Click" />
+                    <RepeatButton Content="▼" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Canvas.Top="320" Width="160" Height="40" MinHeight="40" BorderThickness="0" Click="hotKey_Click" />
+                    <RepeatButton Content="◄" Foreground="Transparent" FontFamily="Arial" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Top="100"  MinWidth="40" Width="40" Height="160" BorderThickness="0" Click="hotKey_Click" />
+                    <RepeatButton Content="►" Foreground="Transparent" FontFamily="Arial" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="560" Canvas.Top="100" MinWidth="40" Width="40" Height="160" BorderThickness="0" Click="hotKey_Click" />
+                    <Button Content="Home" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Width="120" Height="40" MinHeight="40" Click="hotKey_Click" BorderThickness="0" />
+                    <Button Content="End" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Top="320" Width="120" Height="40" MinHeight="40" Click="hotKey_Click" BorderThickness="0" />
+                    <Button Content="PgUp" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="480" Width="120" Height="40" MinHeight="40" Click="hotKey_Click" BorderThickness="0" />
+                    <Button Content="PgDn" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="480" Canvas.Top="320" Width="120" Height="40" MinHeight="40" Click="hotKey_Click" BorderThickness="0" />
+                    <!--<Button Content="Enter" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="240" Canvas.Top="120" Width="120" Height="120" Click="Enter_Click" BorderThickness="0" />-->
                 </Canvas>
             </Viewbox>
         </Grid>
         <!-- Title Panel -->
         <StackPanel Grid.Row="0" Margin="10,0,0,0" Orientation="Horizontal" >
             <TextBlock Text="KzBBS" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,-5,10,0" VerticalAlignment="Top"/>
-            <Button x:Uid="getInput" Name="getInputBtn" Content="輸入文字" Foreground="White" FontSize="18" Click="getInput_Click" Margin="0,-5,0,0"
-                    Style="{StaticResource ButtonNoPadding}" MinHeight="20" MinWidth="60" BorderThickness="0" />
             <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="11" RequestedTheme="Dark" Foreground="White" FontFamily="Arial" 
                       MinWidth="30" MinHeight="20" Height="22" Style="{StaticResource WP81CheckboxStyle}" Margin="0,-4,0,0" />
+            <TextBox Name="sendCmd" Padding="0" FontSize="12" KeyUp="cmdOrText_KeyUp" KeyDown="cmdOrText_KeyDown" Margin="2,0,0,0" VerticalAlignment="Center"
+                    Text="" MinWidth="12" Width="30" MinHeight="15" Height="22" IsSpellCheckEnabled="False" Opacity="0.7" />
+            <Button Content="Enter" Style="{StaticResource ButtonNoPadding}" MinWidth="45" Width="45" MinHeight="15" Click="Enter_Click" BorderThickness="0" />
             <TextBlock Name="statusBar" Height="15" FontSize="12" Padding="1" Margin="5,0,0,0" />
         </StackPanel>
     </Grid>

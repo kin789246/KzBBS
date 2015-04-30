@@ -60,6 +60,25 @@
                 </StackPanel>
                 <StackPanel Name="settingPanel" Margin="20,0,0,0">
                     <CheckBox x:Uid="PTTMode" Name="PTTMode" FontSize="30" Content="PTT模式" />
+                    <Grid Name="aboutPanel" Canvas.Left="210" Canvas.Top="100" Canvas.ZIndex="11" RequestedTheme="Dark" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="50"/>
+                        </Grid.RowDefinitions>
+                        <Border BorderThickness="3" CornerRadius="5" Grid.RowSpan="2" BorderBrush="White" Background="Black" />
+                        <StackPanel Orientation="Horizontal" Margin="10,5">
+                            <Image Source="Assets/StoreLogo.scale-100.png" Stretch="None" Margin="0,0,5,0" VerticalAlignment="Top" />
+                            <StackPanel>
+                                <TextBlock x:Uid="aboutContentWP" Text="KzBBS is designed for connecting to the telnet (BBS/Mud) server. If you are the newbie to use the BBS, please connect to the default address and then follow the instruction to register a new account. Thank you for downloading KzBBS."
+                              Width="250" TextWrapping="Wrap" FontSize="15" Margin="5,5,0,0" HorizontalAlignment="Right"/>
+                                <TextBlock Name="versionText" Text="v1.0.0.0" FontSize="15" Margin="5,5,0,0" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" RequestedTheme="Dark">
+                            <Button x:Uid="aboutBuy" Content="購買" FontSize="13" Click="buy_Click" Margin="0,0,5,0"
+                    Style="{StaticResource ButtonNoPadding}" MinHeight="40" MinWidth="50" />
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </StackPanel>
         </Grid>

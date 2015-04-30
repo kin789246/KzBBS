@@ -298,4 +298,7 @@
   <data name="pwdTboxWP.Width" xml:space="preserve">
     <value>75</value>
   </data>
+  <data name="PTTMode.Content" xml:space="preserve">
+    <value>PTT Touch</value>
+  </data>
 </root>

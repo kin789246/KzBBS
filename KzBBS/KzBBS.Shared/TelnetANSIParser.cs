@@ -492,7 +492,7 @@ namespace KzBBS
                     }
                     else
                     {
-                        Debug.WriteLine(rawdata[currentIndex]);
+                        Debug.WriteLine("can't analyze: {0}", rawdata[currentIndex]);
                     }
                     currentIndex++;
                     AnsiZone = false;

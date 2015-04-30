@@ -51,23 +51,35 @@
             <StackPanel Grid.Column="2" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="22" FontFamily="Arial" Height="30" />
+                    <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" Width="60" HorizontalAlignment="Left"
+                   Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" TabIndex="-1" Opacity="0.7" Margin="5,0"/>
+                    <Button Content="Enter" FontSize="28" Width="100" MinHeight="40" Click="Enter_Click" BorderThickness="0" />
                     <TextBlock Name="statusBar" FontSize="25" Height="30" Padding="1" Margin="5,0,0,0" />
-                    <TextBlock x:Name="testtb" FontSize="30" />
                 </StackPanel>
             </StackPanel>
         </Grid>
-        <Canvas Name="PTTCanvas" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" />
         <StackPanel Name="BBSStackPanel" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" >
             <StackPanel Name="topStackPanel" Height="90" />
 
             <ListView Name="BBSListView" Width="1200" Height="600" SelectionMode="None" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      ItemClick="BBSListVitemItem_Click" IsItemClickEnabled="True" />
+                      ItemClick="BBSListVitemItem_Click" IsItemClickEnabled="True" Background="Black" />
             
             <StackPanel Name="bottomStackPanel" Height="30" />
         </StackPanel>
-        <Canvas Name="operationBoard" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" >
-            <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" Width="30" HorizontalAlignment="Left"
-                   Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" TabIndex="-1" Opacity="0.7"/>
-        </Canvas>
+        <Canvas Name="PTTCanvas" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" />
+        <Canvas Name="operationBoard" Grid.Row="1" Width="1200" Height="720" VerticalAlignment="Top" />
+        <Viewbox Name="boundControlBtns" Width="1200" Height="720" Grid.Row="1" VerticalAlignment="Top">
+            <Canvas Name="boundCtrlCanvas" Width="600" Height="360">
+                <RepeatButton Content="▲" Foreground="Transparent" Canvas.Left="220" Width="160" Height="40" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
+                <RepeatButton Content="▼" Foreground="Transparent" Canvas.Left="220" Canvas.Top="320" Width="160" Height="40" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
+                <RepeatButton Content="◄" Foreground="Transparent" FontFamily="Arial" Canvas.Top="100"  MinWidth="40" Width="40" Height="160" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
+                <RepeatButton Content="►" Foreground="Transparent" FontFamily="Arial" Canvas.Left="560" Canvas.Top="100" MinWidth="40" Width="40" Height="160" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />
+                <Button Content="Home" Foreground="Transparent" Width="80" Height="40" Click="hotKey_Click"  BorderThickness="0"  IsTabStop="False"/>
+                <Button Content="End" Foreground="Transparent" Canvas.Top="320" Width="80" Height="40" Click="hotKey_Click" BorderThickness="0" IsTabStop="False" />
+                <Button Content="PgUp" Foreground="Transparent" Canvas.Left="520" Width="80" Height="40" Click="hotKey_Click" BorderThickness="0" IsTabStop="False" />
+                <Button Content="PgDn" Foreground="Transparent" Canvas.Left="520" Canvas.Top="320" Width="80" Height="40" Click="hotKey_Click"  BorderThickness="0" IsTabStop="False"/>
+                <!--<Button Content="Enter" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="240" Canvas.Top="120" Width="120" Height="120" Click="Enter_Click" BorderThickness="0" IsTabStop="False"/>-->
+            </Canvas>
+        </Viewbox>
     </Grid>
 </Page>

@@ -51,14 +51,14 @@ namespace KzBBS
         }
 
         UIElement cursor;
+        public static TelnetPage Current;
         public TelnetPage()
         {
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += navigationHelper_LoadState;
             this.navigationHelper.SaveState += navigationHelper_SaveState;
-            
-            PTTDisplay.pttDisplay.LinesPropChanged += telnetConnect_LinesPropChanged;
+
             Window.Current.SizeChanged += Current_SizeChanged;
             DetermineSize();
             if (!PTTDisplay.PTTMode)
@@ -67,6 +67,7 @@ namespace KzBBS
                         , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
                 cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
             }
+            Current = this;
         }
 
         private void Current_SizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
@@ -99,6 +100,8 @@ namespace KzBBS
 
                 BBSListView.Width = 1200 * factor;
                 BBSListView.Height = 720 * factor;
+                boundControlBtns.Width = 1200 * factor;
+                boundControlBtns.Height = 720 * factor;
             }
             else
             {
@@ -264,7 +267,7 @@ namespace KzBBS
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 });
-                    loadCount = 0;
+                    //loadCount = 0;
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Right)
@@ -272,7 +275,7 @@ namespace KzBBS
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand(new byte[] { 27, 91, 67 });
-                    loadCount = 0;
+                    //loadCount = 0;
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Home)
@@ -316,56 +319,158 @@ namespace KzBBS
             }
         }
 
-        static int loadCount = 0;
-        private async void onDataChange()
+        private async void Enter_Click(object sender, RoutedEventArgs e)
         {
-            if (PTTDisplay.PTTMode)
+            if (string.IsNullOrEmpty(sendCmd.Text))
             {
-                if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
-                {
-                    if (PTTDisplay.LastMode != BBSMode.ArticleBrowse)
-                    {
-                        BBSListView.Items.Clear();
-                        PTTCanvas.Children.Clear();
-                        topStackPanel.Children.Clear();
-                        bottomStackPanel.Children.Clear();
-                        PTTCanvas.Children.Add(PTTDisplay.showWord("Loading...", TelnetANSIParser.nGray, PTTDisplay._fontSize / 2 * 10, 0, 0, 0));
-                        PTTDisplay.CurrPage.Clear();
-                        PTTDisplay.CurrPage = PTTDisplay.Lines.ToList();
-                        if (!PTTDisplay.CurrPage[PTTDisplay.CurrPage.Count-1].Text.Contains("100%"))
-                        {
-                            PTTDisplay.CurrPage.RemoveAt(PTTDisplay.CurrPage.Count - 1);
-                        }
-                    }
-
-                    PTTDisplay.articleAddToCurrPage();
-                    if (!PTTDisplay.Lines[PTTDisplay.Lines.Count - 1].Text.Contains("100%") && loadCount < 5)
-                    {  //keep pagedown until 100%
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 });
-                        //await TelnetConnect.sendCommand("j");
-                        //await Task.Delay(200);
-                        loadCount++;
-                        return;
-                    }
-                    PTTCanvas.Children.Clear();
-                    PTTDisplay.CurrPage.Add(PTTDisplay.Lines[PTTDisplay.Lines.Count - 1]);
-                }
-                //else if (PTTDisplay.currentMode == BBSMode.BoardList)
-                //{
-
-                //}
-                else
-                {
-                    PTTDisplay.CurrPage.Clear();
-                    PTTDisplay.CurrPage = PTTDisplay.Lines.ToList();
-                }
-                PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.CurrPage);
+                await TelnetConnect.sendCommand("\r");
+                statusBar.Text = "";
             }
             else
             {
-                PTTDisplay.showBBS(PTTCanvas, PTTDisplay.Lines);
-                Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-                Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+                if (sendCmd.Text.Length == 1 && ctrlChecked.IsChecked == true)
+                {
+                    string upper = sendCmd.Text.ToUpper();
+                    char ctrlWord = upper[0];
+                    if (64 < ctrlWord && ctrlWord < 128)
+                    {
+                        int uletter = ctrlWord - 64;
+                        byte[] cmd = { (byte)uletter };
+                        await TelnetConnect.sendCommand(cmd);
+                        statusBar.Text = "Ctrl + " + sendCmd.Text + " sent!";
+                        sendCmd.Text = "";
+                        ctrlChecked.IsChecked = false;
+                    }
+                }
+                else
+                {
+                    byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
+
+                    await TelnetConnect.sendCommand(cmd);
+                    sendCmd.Text = "";
+                    statusBar.Text = "";
+                }
+            }
+        }
+
+        private async void hotKey_Click(object sender, RoutedEventArgs e)
+        {
+            ButtonBase bn = sender as ButtonBase;
+            if (bn == null) return;
+            string cmd = bn.Content as string;
+            if (cmd.Length == 1 && char.IsLetterOrDigit(cmd[0]))
+            {
+                await TelnetConnect.sendCommand(cmd);
+            }
+            else if (cmd[0] == '^')
+            {
+                int send = cmd[1] - 96;
+                await TelnetConnect.sendCommand(new byte[] { (byte)send });
+            }
+            else
+            {
+                switch (cmd)
+                {
+                    case "SPACE":
+                        await TelnetConnect.sendCommand(" ");
+                        break;
+                    case "←":
+                        await TelnetConnect.sendCommand("\b");
+                        break;
+                    case "▲":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 65 });
+                        break;
+                    case "▼":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 66 });
+                        break;
+                    case "◄":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 });
+                        break;
+                    case "►":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 67 });
+                        break;
+                    case "PgUp":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 }); //Esc [ 5 ~
+                        break;
+                    case "PgDn":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~
+                        break;
+                    case "/":
+                        await TelnetConnect.sendCommand("/");
+                        break;
+                    case "[":
+                        await TelnetConnect.sendCommand("[");
+                        break;
+                    case "]":
+                        await TelnetConnect.sendCommand("]");
+                        break;
+                    case "=":
+                        await TelnetConnect.sendCommand("=");
+                        break;
+                    case "#":
+                        await TelnetConnect.sendCommand("#");
+                        break;
+                    case "Home":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 49, 126 }); //ESC [ 1 ~
+                        break;
+                    case "End":
+                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 52, 126 }); //ESC [ 4 ~
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        //static int loadCount = 0;
+        public void onDataChange()
+        {
+            if (PTTDisplay.PTTMode)
+            {
+                PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.Lines, operationBoard);
+                //if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
+                //{
+                //    if (PTTDisplay.LastMode != BBSMode.ArticleBrowse)
+                //    {
+                //        BBSListView.Items.Clear();
+                //        PTTCanvas.Children.Clear();
+                //        topStackPanel.Children.Clear();
+                //        bottomStackPanel.Children.Clear();
+                //        PTTCanvas.Children.Add(PTTDisplay.showWord("Loading...", TelnetANSIParser.nGray, PTTDisplay._fontSize / 2 * 10, 0, 0, 0));
+                //        PTTDisplay.ToShowLines.Clear();
+                //        PTTDisplay.ToShowLines = PTTDisplay.Lines.ToList();
+                //        if (!PTTDisplay.ToShowLines[PTTDisplay.ToShowLines.Count-1].Text.Contains("100%"))
+                //        {
+                //            PTTDisplay.ToShowLines.RemoveAt(PTTDisplay.ToShowLines.Count - 1);
+                //        }
+                //    }
+
+                //    PTTDisplay.articleAddToCurrPage();
+                //    if (!PTTDisplay.Lines[PTTDisplay.Lines.Count - 1].Text.Contains("100%") && loadCount < 5)
+                //    {  //keep pagedown until 100%
+                //        await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 });
+                //        loadCount++;
+                //        return;
+                //    }
+                //    PTTCanvas.Children.Clear();
+                //    PTTDisplay.ToShowLines.Add(PTTDisplay.Lines[PTTDisplay.Lines.Count - 1]);
+                //}
+                ////else if (PTTDisplay.currentMode == BBSMode.BoardList)
+                ////{
+
+                ////}
+                //else
+                //{
+                //    PTTDisplay.ToShowLines.Clear();
+                //    PTTDisplay.ToShowLines = PTTDisplay.Lines.ToList();
+                //}
+                //PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.ToShowLines);
+            }
+            else
+            {
+                PTTDisplay.showBBS(PTTCanvas, PTTDisplay.Lines, operationBoard);
+                //Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+                //Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
                 Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
                 Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
             }
