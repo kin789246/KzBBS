@@ -1,10 +1,12 @@
 ﻿<Page
-    x:Class="KzBBS.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:KzBBS"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:UI="using:Microsoft.Advertising.WinRT.UI"
+    xmlns:UI1="using:Microsoft.Advertising.Mobile.UI"
+    x:Class="KzBBS.MainPage"
     mc:Ignorable="d"
     Background="Black"
     IsTextScaleFactorEnabled="False">
@@ -18,8 +20,9 @@
         </Grid.ChildrenTransitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="60" />
         </Grid.RowDefinitions>
 
         <!-- Title Panel -->
@@ -30,37 +33,37 @@
         <!--TODO: Content should be placed within the following grid-->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="0">
             <StackPanel Grid.Row="1" Orientation="Horizontal">
-                <StackPanel Name="connInfoBoard">
+                <StackPanel x:Name="connInfoBoard">
                     <StackPanel Orientation="Horizontal" Margin="7,0,0,0">
                         <TextBlock x:Uid="addressTag" Text="Addr:" FontSize="13" Height="15" Padding="1" />
-                        <TextBox x:Uid="addressTboxWP" Name="tIP" Text="ptt.cc" FontSize="13" Width="80" MinHeight="25" Padding="0" Height="21"  IsSpellCheckEnabled="False"/>
+                        <TextBox x:Uid="addressTboxWP" x:Name="tIP" Text="ptt.cc" FontSize="13" Width="80" MinHeight="25" Padding="0" Height="21"  IsSpellCheckEnabled="False"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="7,0,0,0">
                         <TextBlock Text="Port:" FontSize="13" Height="15" Padding="1" />
-                        <TextBox Name="tPort" Text="23" FontSize="13" MinWidth="15" MinHeight="25" Height="25" Padding="0"  IsSpellCheckEnabled="False" />
+                        <TextBox x:Name="tPort" Text="23" FontSize="13" MinWidth="15" MinHeight="25" Height="25" Padding="0"  IsSpellCheckEnabled="False" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="7,0,0,0">
                         <TextBlock x:Uid="account" Text="Acct:" FontSize="13" Height="15" Padding="1" />
-                        <TextBox x:Uid="accountTboxWP" Name="tAccount" FontSize="13" MinWidth="60" Width="75" MinHeight="25" Height="25" Padding="0"  IsSpellCheckEnabled="False"/>
+                        <TextBox x:Uid="accountTboxWP" x:Name="tAccount" FontSize="13" MinWidth="60" Width="75" MinHeight="25" Height="25" Padding="0"  IsSpellCheckEnabled="False"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="7,0,0,0">
                         <TextBlock x:Uid="password" Text="Pwd:" FontSize="13" Height="15" Padding="1" />
-                        <PasswordBox x:Uid="pwdTboxWP" Name="tPwd" FontSize="13" PasswordChar="*" MinWidth="60" Width="75" MinHeight="25" Height="25" Padding="0" />
+                        <PasswordBox x:Uid="pwdTboxWP" x:Name="tPwd" FontSize="13" PasswordChar="*" MinWidth="60" Width="75" MinHeight="25" Height="25" Padding="0" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="2,0,0,0">
-                        <CheckBox x:Uid="remember" Name="rememberAcPd" Style="{StaticResource WP81CheckboxStyle}" FontSize="12" MinWidth="40" MinHeight="20" Content="Save" Checked="remember_Checked"  />
-                        <Button x:Uid="clearSaved" Name="clearSaved" Style="{StaticResource ButtonNoPadding}" FontSize="12" MinWidth="60" Padding="0,1,0,0" 
-                           IsEnabled="False" BorderThickness="0" MinHeight="20" Content="Delete" Click="clearSaved_Click" />
+                        <CheckBox x:Uid="remember" x:Name="rememberAcPd" Style="{StaticResource WP81CheckboxStyle}" FontSize="12" MinWidth="40" MinHeight="20" Content="Save" Checked="remember_Checked"  />
+                        <Button x:Uid="clearSaved" x:Name="clearSaved" Style="{StaticResource ButtonNoPadding}" FontSize="12" MinWidth="60" Padding="0,1,0,0" 
+							IsEnabled="False" BorderThickness="0" MinHeight="20" Content="Delete" Click="clearSaved_Click" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="5,0,5,0">
-                        <Button x:Uid="connBtnWP" Name="connBtn" Content="Conn" FontSize="13" Click="connect_Click" MinHeight="50" MinWidth="50" Style="{StaticResource ButtonNoPadding}"/>
-                        <Button x:Uid="disconnBtnWP" Name="disconnBtn" Content="Disconn" FontSize="13" MinHeight="50" MinWidth="50" Click="disconnect_Click" Style="{StaticResource ButtonNoPadding}"/>
-                        <Button Name="toTelnetPage" Style="{StaticResource NavigationForwardButtonNormalStyle}" Click="goTelnetPage" MinHeight="40" MinWidth="50" VerticalAlignment="Center" />
+                        <Button x:Uid="connBtnWP" x:Name="connBtn" Content="Conn" FontSize="13" Click="connect_Click" MinHeight="50" MinWidth="50" Style="{StaticResource ButtonNoPadding}"/>
+                        <Button x:Uid="disconnBtnWP" x:Name="disconnBtn" Content="Disconn" FontSize="13" MinHeight="50" MinWidth="50" Click="disconnect_Click" Style="{StaticResource ButtonNoPadding}"/>
+                        <Button x:Name="toTelnetPage" Style="{StaticResource NavigationForwardButtonNormalStyle}" Click="goTelnetPage" MinHeight="40" MinWidth="50" VerticalAlignment="Center" />
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Name="settingPanel" Margin="20,0,0,0">
-                    <CheckBox x:Uid="PTTMode" Name="PTTMode" FontSize="30" Content="PTT模式" />
-                    <Grid Name="aboutPanel" Canvas.Left="210" Canvas.Top="100" Canvas.ZIndex="11" RequestedTheme="Dark" >
+                <StackPanel x:Name="settingPanel" Margin="20,0,0,0">
+                    <CheckBox x:Uid="PTTMode" x:Name="PTTMode" FontSize="30" Content="PTT模式" />
+                    <Grid x:Name="aboutPanel" Canvas.Left="210" Canvas.Top="100" Canvas.ZIndex="11" RequestedTheme="Dark" >
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition Height="50"/>
@@ -70,17 +73,22 @@
                             <Image Source="Assets/StoreLogo.scale-100.png" Stretch="None" Margin="0,0,5,0" VerticalAlignment="Top" />
                             <StackPanel>
                                 <TextBlock x:Uid="aboutContentWP" Text="KzBBS is designed for connecting to the telnet (BBS/Mud) server. If you are the newbie to use the BBS, please connect to the default address and then follow the instruction to register a new account. Thank you for downloading KzBBS."
-                              Width="250" TextWrapping="Wrap" FontSize="15" Margin="5,5,0,0" HorizontalAlignment="Right"/>
-                                <TextBlock Name="versionText" Text="v1.0.0.0" FontSize="15" Margin="5,5,0,0" HorizontalAlignment="Right" />
+									Width="250" TextWrapping="Wrap" FontSize="15" Margin="5,5,0,0" HorizontalAlignment="Right"/>
+                                <TextBlock x:Name="versionText" Text="v1.0.0.0" FontSize="15" Margin="5,5,0,0" HorizontalAlignment="Right" />
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" RequestedTheme="Dark">
                             <Button x:Uid="aboutBuy" Content="購買" FontSize="13" Click="buy_Click" Margin="0,0,5,0"
-                    Style="{StaticResource ButtonNoPadding}" MinHeight="40" MinWidth="50" />
+								Style="{StaticResource ButtonNoPadding}" MinHeight="40" MinWidth="50" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
             </StackPanel>
         </Grid>
+        <StackPanel Grid.Row="2">
+            <UI1:AdControl Name="adPanel" AutoRefreshIntervalInSeconds="60" IsAutoRefreshEnabled="True"
+                           ApplicationId="db2dbf68-7bb6-46c2-b7b4-605bf442a234" AdUnitId="218478" 
+                           Height="50" Width="320"/>
+        </StackPanel>
     </Grid>
 </Page>

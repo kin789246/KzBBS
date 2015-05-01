@@ -217,8 +217,9 @@ namespace KzBBS
                     statusBar.Text = "Ctrl + " + e.Key.ToString() + " sent";
                     sendCmd.Text = "";
                     bskey = true;
-                    return;
                 }
+                ctrlChecked.IsChecked = false;
+                return;
             }
             //check single letter command
             if (sendCmd.Text.Length == 1)
