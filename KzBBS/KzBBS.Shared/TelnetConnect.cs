@@ -72,7 +72,6 @@ namespace KzBBS
                 try
                 {
                     uint Message = await reader.LoadAsync((uint)MAXBuffer);
-                    //Debug.WriteLine("Message: {0}", Message);
                     rawdata = new byte[Message];
                     reader.ReadBytes(rawdata);
                     if (rawdata.Length != 0)
@@ -80,27 +79,21 @@ namespace KzBBS
                         TelnetANSIParser.HandleAnsiESC(rawdata);
                         PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
                     }
-                    else
-                    {
-                        return;
-                    }
+                    //else
+                    //{
+                    //    return;
+                    //}
                 }
                 catch (Exception exception)
                 {
-                    //TelnetSocket.ShowMessage(exception.Message);
                     if (TelnetSocket.PTTSocket.IsConnected)
                     {
                         TelnetSocket.PTTSocket.Disconnect();
                     }
-
                     Debug.WriteLine("Read stream failed with error: " + exception.Message);
+                    return;
                     //throw;
                 }
-                //if (finalRawData.Count != 0)
-                //{
-                //    TelnetANSIParser.HandleAnsiESC(finalRawData.ToArray());
-                //    PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
-                //}
             }
         }
 
@@ -126,9 +119,8 @@ namespace KzBBS
             }
             catch (Exception exception)
             {
-                TelnetSocket.ShowMessage(exception.Message);
                 TelnetSocket.PTTSocket.Disconnect();
-                //ClientAddLine("Send failed with message: " + exception.Message);
+                Debug.WriteLine(exception.Message);
             }
         }
 
@@ -146,10 +138,8 @@ namespace KzBBS
             }
             catch (Exception exception)
             {
-                string source = exception.Message;
-                TelnetSocket.ShowMessage(source);
                 TelnetSocket.PTTSocket.Disconnect();
-                //ClientAddLine("Send failed with message: " + exception.Message);
+                Debug.WriteLine(exception.Message);
             }
         }
 

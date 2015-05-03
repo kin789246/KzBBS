@@ -21,7 +21,7 @@
         * Row 0 contains the back button and page title
         * Row 1 contains the rest of the page layout
     -->
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="Black">
         <Grid.ChildrenTransitions>
             <TransitionCollection>
                 <EntranceThemeTransition/>
@@ -51,7 +51,7 @@
             <StackPanel Grid.Column="2" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="22" FontFamily="Arial" Height="30" />
-                    <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" Width="60" HorizontalAlignment="Left"
+                    <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" HorizontalAlignment="Left"
                    Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" TabIndex="-1" Opacity="0.7" Margin="5,0"/>
                     <Button Content="Enter" FontSize="28" Width="100" MinHeight="40" Click="Enter_Click" BorderThickness="0" />
                     <TextBlock Name="statusBar" FontSize="25" Height="30" Padding="1" Margin="5,0,0,0" />
@@ -62,7 +62,7 @@
             <StackPanel Name="topStackPanel" Height="90" />
 
             <ListView Name="BBSListView" Width="1200" Height="600" SelectionMode="None" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      ItemClick="BBSListVitemItem_Click" IsItemClickEnabled="True" Background="Black" />
+                      ItemClick="BBSListViewItem_Click" RightTapped="BBSListViewItem_RTapped" IsItemClickEnabled="True" Background="Black" />
             
             <StackPanel Name="bottomStackPanel" Height="30" />
         </StackPanel>

@@ -9,6 +9,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
 using Windows.UI;
+using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -82,7 +83,7 @@ namespace KzBBS
                 PTTCanvas.Height = 360 * factor;
 
                 sendCmd.Height = 22 * factor;
-                sendCmd.MinWidth = 12 * factor;
+                sendCmd.MinWidth = 12 * 2 * factor;
                 sendCmd.MinHeight = 15 * factor;
                 sendCmd.FontSize = 12 * factor;
 
@@ -197,9 +198,16 @@ namespace KzBBS
                 }
                 else
                 {
-                    byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
-                    await TelnetConnect.sendCommand(cmd);
-                    statusBar.Text = sendCmd.Text + " sent";
+                    //byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
+                    //await TelnetConnect.sendCommand(cmd);
+                    //statusBar.Text = sendCmd.Text + " sent";
+                    //send big5 words one by one
+                    foreach (var item in sendCmd.Text)
+                    {
+                        byte[] cmd = Big5Util.ToBig5Bytes(item.ToString());
+                        await TelnetConnect.sendCommand(cmd);
+                        statusBar.Text = item + " sent";
+                    }
                     sendCmd.Text = "";
                 }
                 return;
@@ -364,11 +372,9 @@ namespace KzBBS
                         break;
                     case "◄":
                         await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 });
-                        loadCount = 0;
                         break;
                     case "►":
                         await TelnetConnect.sendCommand(new byte[] { 27, 91, 67 });
-                        loadCount = 0;
                         break;
                     case "PgUp":
                         await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 }); //Esc [ 5 ~
@@ -403,7 +409,6 @@ namespace KzBBS
             }
         }
 
-        static int loadCount = 0;
         public void onDataChange()
         {
             if (PTTDisplay.PTTMode)
@@ -420,7 +425,7 @@ namespace KzBBS
             }
         }
 
-        private async void BBSListVitemItem_Click(object sender, ItemClickEventArgs e)
+        private async void BBSListViewItem_Click(object sender, ItemClickEventArgs e)
         {
             Canvas lineCanvas = e.ClickedItem as Canvas;
             if (lineCanvas != null)
@@ -432,42 +437,17 @@ namespace KzBBS
                 }
                 if (!string.IsNullOrEmpty(id))
                 {
-                    if (Regex.IsMatch(lineCanvas.Tag.ToString(), @"[a-zA-Z]+")) //letter
-                    //if (PTTDisplay.currentMode == BBSMode.MainList)
+                    PTTLine pl = PTTDisplay.Lines.Find(x => x.UniqueId == id);
+                    if (pl != null)
                     {
-                        await TelnetConnect.sendCommand(id + "\r");
+                        int jumpCount = (int)(TelnetANSIParser.curPos.X - pl.No);
+                        await PTTDisplay.upOrDown(jumpCount);
+                        await TelnetConnect.sendCommand("\r");
                     }
-                    else if (Regex.IsMatch(lineCanvas.Tag.ToString(), @"\d+")) //numbers
-                    //else if (PTTDisplay.currentMode == BBSMode.BoardList || PTTDisplay.currentMode == BBSMode.Essence)
-                    {
-                        //updatePage = false;
-                        if (PTTDisplay.currentMode == BBSMode.MainList)
-                        {
-                            await TelnetConnect.sendCommand(id + "\r");
-                        }
-                        else
-                        {
-                            await TelnetConnect.sendCommand(id + "\r\r");
-                        }
-                        //if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
-                        //{
-                        //    await TelnetConnect.sendCommand("Q");
-                        //    PTTLine line = PTTDisplay.Lines.First(x => x.No == 19);
-                        //    if (line != null)
-                        //    {
-                        //       foreach( var text in line.Text.Split(' '))
-                        //       {
-                        //           if(Regex.IsMatch(text, @"#\w+\s"))
-                        //           {
-                        //               Debug.WriteLine("文章代碼: " + text);
-                        //           }
-                        //       }
-                        //    }
-                        //    await TelnetConnect.sendCommand(" ");
-                        //}
-                        //onDataChange();
-                        //updatePage = true;
-                    }
+                }
+                if (PTTDisplay.currentMode == BBSMode.PressAnyKey || PTTDisplay.currentMode == BBSMode.AnimationPlay)
+                {
+                    await TelnetConnect.sendCommand(" ");
                 }
             }
             else
@@ -475,6 +455,90 @@ namespace KzBBS
                 if (PTTDisplay.currentMode == BBSMode.PressAnyKey || PTTDisplay.currentMode == BBSMode.AnimationPlay)
                 {
                     await TelnetConnect.sendCommand(" ");
+                }
+            }
+        }
+
+        private async void BBSListViewItem_RTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            TextBlock tb = e.OriginalSource as TextBlock;
+            if (tb != null)
+            {
+                Canvas cs = tb.Parent as Canvas;
+                if (cs != null && cs.Tag != null)
+                {
+                    string uniqueId = cs.Tag.ToString();
+                    PTTLine currentLine = PTTDisplay.Lines.FindLast(x => x.UniqueId == uniqueId);
+                    if (currentLine == null)
+                    {
+                        return;
+                    }
+                    if (PTTDisplay.currentMode == BBSMode.ArticleList)
+                    {
+                        int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
+                        var menu = new PopupMenu();
+                        menu.Commands.Add(new UICommand("推文", async (command) =>
+                            {
+                                await PTTDisplay.upOrDown(jumpCount);
+                                await TelnetConnect.sendCommand("X");
+                            }));
+
+                        //menu.Commands.Add(new UICommandSeparator());
+
+                        menu.Commands.Add(new UICommand("回應", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("y");
+                        }));
+
+                        if (currentLine.Author == PTTDisplay.User)
+                        {
+                            menu.Commands.Add(new UICommand("編輯", async (command) =>
+                            {
+                                await PTTDisplay.upOrDown(jumpCount);
+                                await TelnetConnect.sendCommand("E");
+                            }));
+
+                            menu.Commands.Add(new UICommand("刪除", async (command) =>
+                            {
+                                await PTTDisplay.upOrDown(jumpCount);
+                                await TelnetConnect.sendCommand("d");
+                            }));
+                        }
+
+                        menu.Commands.Add(new UICommand("同主題串接", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("S");
+                        }));
+                        
+                        await menu.ShowAsync(e.GetPosition(this));
+                    }
+
+                    if (PTTDisplay.currentMode == BBSMode.MailList)
+                    {
+                        int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
+                        var menu = new PopupMenu();
+                        menu.Commands.Add(new UICommand("回信", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("y");
+                        }));
+
+                        menu.Commands.Add(new UICommand("刪除", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("d");
+                        }));
+
+                        menu.Commands.Add(new UICommand("站內轉寄", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("x");
+                        }));
+
+                        await menu.ShowAsync(e.GetPosition(this));
+                    }
                 }
             }
         }

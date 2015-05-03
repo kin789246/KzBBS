@@ -59,7 +59,7 @@ namespace KzBBS
 
             TelnetSocket.PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
             disconnBtn.IsEnabled = false;
-            PTTMode.IsChecked = true;
+            //PTTMode.IsChecked = true;
             loadProfile();
             //Current = this;
 
@@ -171,14 +171,7 @@ namespace KzBBS
                 TelnetSocket.ShowMessage(exp.Message);
                 return;
             }
-            if (PTTMode.IsChecked == true)
-            {
-                PTTDisplay.PTTMode = true;
-            }
-            else
-            {
-                PTTDisplay.PTTMode = false;
-            }
+
             this.Frame.Navigate(typeof(TelnetPage));
         }
 
@@ -222,9 +215,34 @@ namespace KzBBS
             }
         }
 
-        private void clearSaved_Click(object sender, RoutedEventArgs e)
+        private async void clearSaved_Click(object sender, RoutedEventArgs e)
         {
-
+            bool isYes = true;
+            Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+            if (roamingSettings.Values.ContainsKey("telnetAccount") && roamingSettings.Values.ContainsKey("telnetPassword"))
+            {
+                //isYes = await confirmDialog("要刪除帳號: " + roamingSettings.Values["telnetAccount"]
+                //    + " 嗎?");
+                isYes = await TelnetSocket.confirmDialog(loader.GetString("todeleteacct") + roamingSettings.Values["telnetAccount"]
+                    + loader.GetString("yesornot"));
+                if (isYes)
+                {
+                    roamingSettings.Values.Remove("telnetAccount");
+                    roamingSettings.Values.Remove("telnetPassword");
+                    roamingSettings.Values.Remove("telnetAddress");
+                    roamingSettings.Values.Remove("telnetPort");
+                    clearSaved.IsEnabled = false;
+                }
+                else
+                { //ShowMessage("帳號密碼未刪除");
+                    TelnetSocket.ShowMessage(loader.GetString("notdeleted"));
+                }
+            }
+            else
+            {
+                //ShowMessage("找不到已儲存的帳號密碼.");
+                TelnetSocket.ShowMessage(loader.GetString("cantfind"));
+            }
         }
 
         private void goTelnetPage(object sender, RoutedEventArgs e)
@@ -235,7 +253,8 @@ namespace KzBBS
             }
             else
             {
-                TelnetSocket.ShowMessage("please connect first");
+                //TelnetSocket.ShowMessage("please connect first");
+                TelnetSocket.ShowMessage(loader.GetString("plsConn"));
             }
         }
 
@@ -272,6 +291,24 @@ namespace KzBBS
                 //ShowMessage("感謝, 你已經買過了.");
                 TelnetSocket.ShowMessage(loader.GetString("alreadybuy"));
             }
+        }
+        private void PTT_Checked(object sender, RoutedEventArgs e)
+        {
+            //TelnetSocket.ShowMessage("勾選PTT可能會造成非PTT站台顯示不正常, 請斟酌使用.");
+            if (tIP != null)
+            {
+                if (!tIP.Text.Contains("ptt"))
+                {
+                    TelnetSocket.ShowMessage("勾選PTT可能會造成非PTT站台顯示不正常, 請斟酌使用.");
+                }
+            }
+            
+            PTTDisplay.PTTMode = true;
+        }
+
+        private void PTT_Unchecked(object sender, RoutedEventArgs e)
+        {
+            PTTDisplay.PTTMode = false;
         }
     }
 }

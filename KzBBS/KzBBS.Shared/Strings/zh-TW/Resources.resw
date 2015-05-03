@@ -302,4 +302,7 @@
   <data name="PTTMode.Content" xml:space="preserve">
     <value>PTT觸控模式</value>
   </data>
+  <data name="plsConn" xml:space="preserve">
+    <value>請先連線</value>
+  </data>
 </root>

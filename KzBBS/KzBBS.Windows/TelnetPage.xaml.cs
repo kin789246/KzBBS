@@ -12,6 +12,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage.Streams;
 using Windows.UI;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -87,14 +88,14 @@ namespace KzBBS
                 PTTDisplay._fontSize = 30 * factor;
                 PTTDisplay.chtOffset = 5 * factor;
                 BBSStackPanel.Width = 1200 * factor;
-                BBSStackPanel.Height = 720 * factor;
+                BBSStackPanel.Height = 800 * factor;
                 operationBoard.Width = 1200 * factor;
                 operationBoard.Height = 720 * factor;
                 PTTCanvas.Width = 1200 * factor;
                 PTTCanvas.Height = 720 * factor;
 
                 sendCmd.Height = 33 * factor;
-                sendCmd.MinWidth = 15 * factor;
+                sendCmd.MinWidth = 15 * 2 * factor;
                 sendCmd.MinHeight = 33 * factor;
                 sendCmd.FontSize = 22 * factor;
 
@@ -198,9 +199,15 @@ namespace KzBBS
                 }
                 else
                 {//TODO: send big5 words one by one
-                    byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
-                    await TelnetConnect.sendCommand(cmd);
-                    statusBar.Text = sendCmd.Text + " sent";
+                    //byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
+                    //await TelnetConnect.sendCommand(cmd);
+                    foreach (var item in sendCmd.Text)
+                    {
+                        byte[] cmd = Big5Util.ToBig5Bytes(item.ToString());
+                        await TelnetConnect.sendCommand(cmd);
+                        statusBar.Text = item + " sent";
+                    }
+                    //statusBar.Text = sendCmd.Text + " sent";
                     sendCmd.Text = "";
                 }
                 bskey = true;
@@ -423,61 +430,21 @@ namespace KzBBS
             }
         }
 
-        //static int loadCount = 0;
         public void onDataChange()
         {
             if (PTTDisplay.PTTMode)
             {
                 PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.Lines, operationBoard);
-                //if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
-                //{
-                //    if (PTTDisplay.LastMode != BBSMode.ArticleBrowse)
-                //    {
-                //        BBSListView.Items.Clear();
-                //        PTTCanvas.Children.Clear();
-                //        topStackPanel.Children.Clear();
-                //        bottomStackPanel.Children.Clear();
-                //        PTTCanvas.Children.Add(PTTDisplay.showWord("Loading...", TelnetANSIParser.nGray, PTTDisplay._fontSize / 2 * 10, 0, 0, 0));
-                //        PTTDisplay.ToShowLines.Clear();
-                //        PTTDisplay.ToShowLines = PTTDisplay.Lines.ToList();
-                //        if (!PTTDisplay.ToShowLines[PTTDisplay.ToShowLines.Count-1].Text.Contains("100%"))
-                //        {
-                //            PTTDisplay.ToShowLines.RemoveAt(PTTDisplay.ToShowLines.Count - 1);
-                //        }
-                //    }
-
-                //    PTTDisplay.articleAddToCurrPage();
-                //    if (!PTTDisplay.Lines[PTTDisplay.Lines.Count - 1].Text.Contains("100%") && loadCount < 5)
-                //    {  //keep pagedown until 100%
-                //        await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 });
-                //        loadCount++;
-                //        return;
-                //    }
-                //    PTTCanvas.Children.Clear();
-                //    PTTDisplay.ToShowLines.Add(PTTDisplay.Lines[PTTDisplay.Lines.Count - 1]);
-                //}
-                ////else if (PTTDisplay.currentMode == BBSMode.BoardList)
-                ////{
-
-                ////}
-                //else
-                //{
-                //    PTTDisplay.ToShowLines.Clear();
-                //    PTTDisplay.ToShowLines = PTTDisplay.Lines.ToList();
-                //}
-                //PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.ToShowLines);
             }
             else
             {
                 PTTDisplay.showBBS(PTTCanvas, PTTDisplay.Lines, operationBoard);
-                //Canvas.SetLeft(sendCmd, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-                //Canvas.SetTop(sendCmd, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
                 Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
                 Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
             }
         }
 
-        private async void BBSListVitemItem_Click(object sender, ItemClickEventArgs e)
+        private async void BBSListViewItem_Click(object sender, ItemClickEventArgs e)
         {
             Canvas lineCanvas = e.ClickedItem as Canvas;
             if (lineCanvas != null)
@@ -489,42 +456,17 @@ namespace KzBBS
                 }
                 if (!string.IsNullOrEmpty(id))
                 {
-                    if (Regex.IsMatch(lineCanvas.Tag.ToString(), @"[a-zA-Z]+")) //letter
-                    //if (PTTDisplay.currentMode == BBSMode.MainList)
+                    PTTLine pl = PTTDisplay.Lines.Find(x => x.UniqueId == id);
+                    if (pl != null)
                     {
-                        await TelnetConnect.sendCommand(id + "\r");
+                        int jumpCount = (int)(TelnetANSIParser.curPos.X - pl.No);
+                        await PTTDisplay.upOrDown(jumpCount);
+                        await TelnetConnect.sendCommand("\r");
                     }
-                    else if (Regex.IsMatch(lineCanvas.Tag.ToString(), @"\d+")) //numbers
-                    //else if (PTTDisplay.currentMode == BBSMode.BoardList || PTTDisplay.currentMode == BBSMode.Essence)
-                    {
-                        //updatePage = false;
-                        if (PTTDisplay.currentMode == BBSMode.MainList)
-                        {
-                            await TelnetConnect.sendCommand(id + "\r");
-                        }
-                        else
-                        {
-                            await TelnetConnect.sendCommand(id + "\r\r");
-                        }
-                        //if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
-                        //{
-                        //    await TelnetConnect.sendCommand("Q");
-                        //    PTTLine line = PTTDisplay.Lines.First(x => x.No == 19);
-                        //    if (line != null)
-                        //    {
-                        //       foreach( var text in line.Text.Split(' '))
-                        //       {
-                        //           if(Regex.IsMatch(text, @"#\w+\s"))
-                        //           {
-                        //               Debug.WriteLine("文章代碼: " + text);
-                        //           }
-                        //       }
-                        //    }
-                        //    await TelnetConnect.sendCommand(" ");
-                        //}
-                        //onDataChange();
-                        //updatePage = true;
-                    }
+                }
+                if (PTTDisplay.currentMode == BBSMode.PressAnyKey || PTTDisplay.currentMode == BBSMode.AnimationPlay)
+                {
+                    await TelnetConnect.sendCommand(" ");
                 }
             }
             else
@@ -532,6 +474,59 @@ namespace KzBBS
                 if (PTTDisplay.currentMode == BBSMode.PressAnyKey || PTTDisplay.currentMode == BBSMode.AnimationPlay)
                 {
                     await TelnetConnect.sendCommand(" ");
+                }
+            }
+        }
+
+        private async void BBSListViewItem_RTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            TextBlock tb = e.OriginalSource as TextBlock;
+            if (tb != null)
+            {
+                Canvas cs = tb.Parent as Canvas;
+                if (cs != null && cs.Tag != null)
+                {
+                    string uniqueId = cs.Tag.ToString();
+                    PTTLine currentLine = PTTDisplay.Lines.FindLast(x => x.UniqueId == uniqueId);
+                    if (currentLine == null)
+                    {
+                        return;
+                    }
+                    if (currentLine.Author != "")
+                    {
+                        int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
+                        var menu = new PopupMenu();
+                        menu.Commands.Add(new UICommand("推文", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("X");
+                        }));
+
+                        //menu.Commands.Add(new UICommandSeparator());
+
+                        menu.Commands.Add(new UICommand("回應", async (command) =>
+                            {
+                                await PTTDisplay.upOrDown(jumpCount);
+                                await TelnetConnect.sendCommand("y");
+                            }));
+
+                        if (currentLine.Author == PTTDisplay.User)
+                        {
+                            menu.Commands.Add(new UICommand("編輯", async (command) =>
+                            {
+                                await PTTDisplay.upOrDown(jumpCount);
+                                await TelnetConnect.sendCommand("E");
+                            }));
+                        }
+
+                        menu.Commands.Add(new UICommand("同主題串接", async (command) =>
+                            {
+                                await PTTDisplay.upOrDown(jumpCount);
+                                await TelnetConnect.sendCommand("S");
+                            }));
+
+                        await menu.ShowAsync(e.GetPosition(this));
+                    }
                 }
             }
         }

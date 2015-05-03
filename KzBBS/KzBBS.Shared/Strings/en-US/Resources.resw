@@ -301,4 +301,7 @@
   <data name="PTTMode.Content" xml:space="preserve">
     <value>PTT Touch</value>
   </data>
+  <data name="plsConn" xml:space="preserve">
+    <value>Please connect first</value>
+  </data>
 </root>
