@@ -52,8 +52,16 @@
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="22" FontFamily="Arial" Height="30" />
                     <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" HorizontalAlignment="Left"
-                   Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" TabIndex="-1" Opacity="0.7" Margin="5,0"/>
-                    <Button Content="Enter" FontSize="28" Width="100" MinHeight="40" Click="Enter_Click" BorderThickness="0" />
+                   Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" Opacity="0.7" Margin="5,0"/>
+                    <Button Content="Enter" FontSize="28" Width="100" MinHeight="40" Click="Enter_Click" BorderThickness="1" />
+                    <Button Content="y" FontSize="28" Width="60" MinHeight="40" Click="hotKey_Click" BorderThickness="1" />
+                    <Button Content="n" FontSize="28" Width="60" MinHeight="40" Click="hotKey_Click" BorderThickness="1" />
+
+                    <Button Content="選單" x:Name="menuBtn" FontSize="28" Width="120" MinHeight="40" BorderThickness="1" >
+                        <Button.Flyout>
+                            <MenuFlyout x:Name="menuFlyout" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" />
+                        </Button.Flyout>
+                    </Button>
                     <TextBlock Name="statusBar" FontSize="25" Height="30" Padding="1" Margin="5,0,0,0" />
                 </StackPanel>
             </StackPanel>
@@ -62,7 +70,8 @@
             <StackPanel Name="topStackPanel" Height="90" />
 
             <ListView Name="BBSListView" Width="1200" Height="600" SelectionMode="None" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      ItemClick="BBSListViewItem_Click" RightTapped="BBSListViewItem_RTapped" IsItemClickEnabled="True" Background="Black" />
+                      ItemClick="BBSListViewItem_Click" RightTapped="BBSListViewItem_RTapped"
+                      IsItemClickEnabled="True" Background="Black" />
             
             <StackPanel Name="bottomStackPanel" Height="30" />
         </StackPanel>

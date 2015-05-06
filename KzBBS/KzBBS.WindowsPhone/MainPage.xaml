@@ -84,10 +84,10 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-        <StackPanel Grid.Row="2">
+        <StackPanel Name="adStackPanel" Grid.Row="2">
             <UI1:AdControl Name="adPanel" AutoRefreshIntervalInSeconds="60" IsAutoRefreshEnabled="True"
                            ApplicationId="db2dbf68-7bb6-46c2-b7b4-605bf442a234" AdUnitId="218478" 
-                           Height="50" Width="320"/>
+                           Height="50" Width="320" ErrorOccurred="ad_ErrorOccurred" />
         </StackPanel>
     </Grid>
 </Page>

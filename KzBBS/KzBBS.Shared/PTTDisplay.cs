@@ -243,11 +243,11 @@ namespace KzBBS
                         {
                             currentMode = BBSMode.PressAnyKey;
                         }
-                        else
-                        {
-                            PTTLine line = Lines.First(x => x.No == 0);
-                            checkMode(line.Text.Substring(0, 12));
-                        }
+                        //else
+                        //{
+                        //    PTTLine line = Lines.First(x => x.No == 0);
+                        //    checkMode(line.Text.Substring(0, 12));
+                        //}
                     }
                     //find login user
                     if (currentMode == BBSMode.MainList && pttline.Text.Contains("我是"))

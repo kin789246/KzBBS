@@ -434,13 +434,170 @@ namespace KzBBS
         {
             if (PTTDisplay.PTTMode)
             {
+                buildMenuButton();
                 PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.Lines, operationBoard);
             }
             else
             {
+                menuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
                 PTTDisplay.showBBS(PTTCanvas, PTTDisplay.Lines, operationBoard);
                 Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
                 Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+            }
+        }
+
+        private void buildMenuButton()
+        {
+            menuFlyout.Items.Clear();
+            menuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+            //choose menu items
+            if (PTTDisplay.currentMode == BBSMode.Editor)
+            {
+                MenuFlyoutItem mfi = new MenuFlyoutItem();
+                mfi.Text = "檔案處理 (Ctrl+X)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand(new byte[] { 24 }); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "說明 (Ctrl+Z)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand(new byte[] { 26 }); });
+                menuFlyout.Items.Add(mfi);
+            }
+            else if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
+            {
+                MenuFlyoutItem mfi = new MenuFlyoutItem();
+                mfi.Text = "回應 (y)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("y"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "推文 (X)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("X"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "同主題第一篇 (=)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("="); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "同主題前篇 ([)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("["); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "同主題後篇 (])";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("]"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "說明 (h)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("h"); });
+                menuFlyout.Items.Add(mfi);
+            }
+            else if (PTTDisplay.currentMode == BBSMode.MainList)
+            {
+                MenuFlyoutItem mfi = new MenuFlyoutItem();
+                mfi.Text = "搜尋看板 (s)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("s"); });
+                menuFlyout.Items.Add(mfi);
+            }
+            else if (PTTDisplay.currentMode == BBSMode.ArticleList)
+            {
+                MenuFlyoutItem mfi = new MenuFlyoutItem();
+                mfi.Text = "搜尋看板 (s)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("s"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "發表文章 (Ctrl+P)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand(new byte[] { 16 }); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "搜尋文章 (/)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("/"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "搜尋作者 (a)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("a"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "搜尋文章代碼 (#)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("#"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "精華區 (z)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("z"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "說明 (h)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("h"); });
+                menuFlyout.Items.Add(mfi);
+            }
+            else if (PTTDisplay.currentMode == BBSMode.BoardList || PTTDisplay.currentMode == BBSMode.ClassBoard)
+            {
+                MenuFlyoutItem mfi = new MenuFlyoutItem();
+                mfi.Text = "搜尋看板 (s)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("s"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "搜尋 (/)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("/"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "說明 (h)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("h"); });
+                menuFlyout.Items.Add(mfi);
+            }
+            else if (PTTDisplay.currentMode == BBSMode.MailList)
+            {
+                MenuFlyoutItem mfi = new MenuFlyoutItem();
+                mfi.Text = "發新郵件 (Ctrl+P)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand(new byte[] { 16 }); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "資源回收桶 (~)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("~"); });
+                menuFlyout.Items.Add(mfi);
+
+                mfi = new MenuFlyoutItem();
+                mfi.Text = "說明 (h)";
+                mfi.Click += new RoutedEventHandler(async (x, y) =>
+                { await TelnetConnect.sendCommand("h"); });
+                menuFlyout.Items.Add(mfi);
+            }
+            else
+            {
+                menuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
         }
 
@@ -492,43 +649,79 @@ namespace KzBBS
                     {
                         return;
                     }
-                    if (currentLine.Author != "")
+
+                    if (PTTDisplay.currentMode == BBSMode.ArticleList)
                     {
                         int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
                         var menu = new PopupMenu();
-                        menu.Commands.Add(new UICommand("推文", async (command) =>
+                        menu.Commands.Add(new UICommand("推文 (X)", async (command) =>
                         {
                             await PTTDisplay.upOrDown(jumpCount);
                             await TelnetConnect.sendCommand("X");
                         }));
 
-                        //menu.Commands.Add(new UICommandSeparator());
-
-                        menu.Commands.Add(new UICommand("回應", async (command) =>
-                            {
-                                await PTTDisplay.upOrDown(jumpCount);
-                                await TelnetConnect.sendCommand("y");
-                            }));
+                        menu.Commands.Add(new UICommand("回應 (y)", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("y");
+                        }));
 
                         if (currentLine.Author == PTTDisplay.User)
                         {
-                            menu.Commands.Add(new UICommand("編輯", async (command) =>
+                            menu.Commands.Add(new UICommand("編輯 (E)", async (command) =>
                             {
                                 await PTTDisplay.upOrDown(jumpCount);
                                 await TelnetConnect.sendCommand("E");
                             }));
-                        }
 
-                        menu.Commands.Add(new UICommand("同主題串接", async (command) =>
+                            menu.Commands.Add(new UICommand("刪除 (d)", async (command) =>
                             {
                                 await PTTDisplay.upOrDown(jumpCount);
-                                await TelnetConnect.sendCommand("S");
+                                await TelnetConnect.sendCommand("d");
                             }));
+                        }
+
+                        menu.Commands.Add(new UICommand("同主題串接 (S)", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("S");
+                        }));
+
+                        menu.Commands.Add(new UICommand("轉錄 (Ctrl+X)", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand(new byte[] { 24 });
+                        }));
+
+                        await menu.ShowAsync(e.GetPosition(this));
+                    }
+
+                    if (PTTDisplay.currentMode == BBSMode.MailList)
+                    {
+                        int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
+                        var menu = new PopupMenu();
+                        menu.Commands.Add(new UICommand("回信 (y)", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("y");
+                        }));
+
+                        menu.Commands.Add(new UICommand("刪除 (d)", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("d");
+                        }));
+
+                        menu.Commands.Add(new UICommand("站內轉寄 (x)", async (command) =>
+                        {
+                            await PTTDisplay.upOrDown(jumpCount);
+                            await TelnetConnect.sendCommand("x");
+                        }));
 
                         await menu.ShowAsync(e.GetPosition(this));
                     }
                 }
             }
-        }
+        }        
     }
 }

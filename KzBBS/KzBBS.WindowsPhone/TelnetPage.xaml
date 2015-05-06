@@ -7,7 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     IsTextScaleFactorEnabled="False" Background="Black" >
-
     <Grid x:Name="LayoutRoot">
 
         <Grid.ChildrenTransitions>
@@ -23,15 +22,21 @@
 
         <!--TODO: Content should be placed within the following grid-->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="0,-5,0,0">
+            <ScrollViewer Name="normalScrollViewer" Width="600" Height="360" VerticalAlignment="Top"
+                          SizeChanged="SV_sizeChanged">
+                <Canvas Name="PTTCanvas" Width="600" Height="360" VerticalAlignment="Top" />
+            </ScrollViewer>
+            <ScrollViewer Name="pttScrollViewer" Width="600" Height="360" VerticalAlignment="Top"
+                          SizeChanged="SV_sizeChanged">
             <StackPanel Name="BBSStackPanel" Width="600" Height="360" VerticalAlignment="Top" >
                 <StackPanel Name="topStackPanel" Height="45" />
                 <ListView Name="BBSListView" Width="600" Height="300" VerticalAlignment="Top" SelectionMode="None" 
-                      ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Black"
-                      ItemClick="BBSListViewItem_Click" RightTapped="BBSListViewItem_RTapped" IsItemClickEnabled="True" />
+                      ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" RightTapped="BBSListViewItem_RTapped"
+                      ItemClick="BBSListViewItem_Click" IsItemClickEnabled="True" />
 
                 <StackPanel Name="bottomStackPanel" Height="15" />
             </StackPanel>
-            <Canvas Name="PTTCanvas" Width="600" Height="360" VerticalAlignment="Top" />
+            </ScrollViewer>
             <Canvas Name="operationBoard" Width="600" Height="360" VerticalAlignment="Top" />
             <Viewbox Name="boundControlBtns" Width="600" Height="360" VerticalAlignment="Top" >
                 <Canvas Width="600" Height="360" >
@@ -52,10 +57,66 @@
             <TextBlock Text="KzBBS" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,0,10,0" VerticalAlignment="Top"/>
             <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="11" RequestedTheme="Dark" Foreground="White" FontFamily="Arial" 
                       MinWidth="30" MinHeight="20" Height="22" Style="{StaticResource WP81CheckboxStyle}" Margin="0,0,0,0" />
-            <TextBox Name="sendCmd" Padding="0" FontSize="12" KeyUp="cmdOrText_KeyUp" KeyDown="cmdOrText_KeyDown" Margin="2,0,0,0" VerticalAlignment="Center"
-                    Text="" MinWidth="12" MinHeight="15" Height="22" IsSpellCheckEnabled="False" Opacity="0.7" />
-            <Button Content="Enter" Style="{StaticResource ButtonNoPadding}" MinWidth="45" Width="45" MinHeight="30" Click="Enter_Click" BorderThickness="0" />
+            <!--<Button x:Uid="getInput" Name="getInputBtn" Content="輸入文字" Click="getInput_Click" 
+                    Style="{StaticResource ButtonNoPadding}" MinHeight="30" MinWidth="60" BorderThickness="1" />-->
+            <TextBox Name="sendCmd" Padding="0" FontSize="12" KeyUp="cmdOrText_KeyUp" KeyDown="cmdOrText_KeyDown" Margin="2,0,0,0"
+                     VerticalAlignment="Center" Text="" MinWidth="12" MinHeight="15" Height="22" 
+                        IsSpellCheckEnabled="False" Opacity="0.7" />
+            <Button Content="Enter" Style="{StaticResource ButtonNoPadding}" MinWidth="45" Width="45" MinHeight="30" 
+                    Click="Enter_Click" BorderThickness="1" />
+            <Button Content="y" Style="{StaticResource ButtonNoPadding}" MinWidth="30" Width="30" MinHeight="30" 
+                    Click="hotKey_Click" BorderThickness="1" />
+            <Button Content="n" Style="{StaticResource ButtonNoPadding}" MinWidth="30" Width="30" MinHeight="30" 
+                    Click="hotKey_Click" BorderThickness="1" />
+
+            <Button Content="選單" x:Name="menuBtn" Style="{StaticResource ButtonNoPadding}"
+                    MinWidth="45" Width="45" MinHeight="30" BorderThickness="1" >
+                <Button.Flyout>
+                    <MenuFlyout x:Name="menuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
+                        <MenuFlyoutItem Name="mfi_fileProcess" Text="檔案處理 (Ctrl+X)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_response" Text="回應 (y)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_push" Text="推文 (X)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_sameFirst" Text="同主題第一篇 (=)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_samePre" Text="同主題前篇 ([)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_sameNext" Text="同主題後篇 (])" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_searchBoard" Text="搜尋看板 (s)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_post" Text="發表文章 (Ctrl+P)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_newMail" Text="發新郵件 (Ctrl+P)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_searchArticle" Text="搜尋文章 (/)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_search" Text="搜尋 (/)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_searchAuthor" Text="搜尋作者 (a)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_searchCode" Text="搜尋文章代碼 (#)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_essense" Text="精華區 (z)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_recycle" Text="資源回收桶 (~)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_help" Text="說明 (h)" Click="mfi_Click" />
+                        <MenuFlyoutItem Name="mfi_editorHelp" Text="說明 (Ctrl+Z)" Click="mfi_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
             <TextBlock Name="statusBar" Height="15" FontSize="12" Padding="1" Margin="5,0,0,0" />
+            <Button Visibility="Collapsed">
+                <Button.Flyout>
+                    <MenuFlyout x:Name="articleListMenu" ScrollViewer.HorizontalScrollMode="Enabled" 
+                                MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}">
+                        <MenuFlyoutItem Text="推文 (X)" Click="rt_Click" />
+                        <MenuFlyoutItem Text="回應 (y)" Click="rt_Click" />
+                        <MenuFlyoutItem Text="編輯 (E)" Click="rt_Click" />
+                        <MenuFlyoutItem Text="刪除 (d)" Click="rt_Click" />
+                        <MenuFlyoutItem Text="同主題串接 (S)" Click="rt_Click" />
+                        <MenuFlyoutItem Text="轉錄 (Ctrl+X)" Click="rt_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+            <Button Visibility="Collapsed">
+                <Button.Flyout>
+                    <MenuFlyout x:Name="mailListMenu" ScrollViewer.HorizontalScrollMode="Enabled" 
+                                MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}">
+                        <MenuFlyoutItem Text="回信 (y)" Click="rt_Click" />
+                        <MenuFlyoutItem Text="刪除 (d)" Click="rt_Click" />
+                        <MenuFlyoutItem Text="站內轉寄 (x)" Click="rt_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
         </StackPanel>
     </Grid>
 </Page>

@@ -1,6 +1,8 @@
 ﻿using KzBBS.Common;
+using Microsoft.Advertising.Mobile.UI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -113,6 +115,19 @@ namespace KzBBS
         /// session.  The state will be null the first time a page is visited.</param>
         private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
+            ////建立新的AdControl元件
+            //string ApplicationId = "db2dbf68-7bb6-46c2-b7b4-605bf442a234";
+            //string AdUnit = "218478";
+            //AdControl adControl = new AdControl(ApplicationId, AdUnit, true);
+            //adControl.Width = 320;
+            //adControl.Height = 50;
+            //adControl.IsAutoRefreshEnabled = true;
+            //adControl.AutoRefreshIntervalInSeconds = 60;
+            ////更新AdControl的Templated()
+            //adControl.ApplyTemplate();
+            //adStackPanel.Children.Add(adControl);
+            ////註冊ErrorOccurred事件
+            //adControl.ErrorOccurred += ad_ErrorOccurred;
         }
 
         /// <summary>
@@ -309,6 +324,11 @@ namespace KzBBS
         private void PTT_Unchecked(object sender, RoutedEventArgs e)
         {
             PTTDisplay.PTTMode = false;
+        }
+
+        private void ad_ErrorOccurred(object sender, Microsoft.Advertising.Mobile.Common.AdErrorEventArgs e)
+        {
+            Debug.WriteLine(e.Error.Message);
         }
     }
 }
