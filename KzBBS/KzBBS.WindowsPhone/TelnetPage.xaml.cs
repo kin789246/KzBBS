@@ -663,6 +663,16 @@ namespace KzBBS
                     }
                     if (PTTDisplay.currentMode == BBSMode.ArticleList)
                     {
+                        if (currentLine.Author == PTTDisplay.User)
+                        {
+                            editor.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                            delete.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                        }
+                        else
+                        {
+                            editor.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                            delete.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                        }
                         articleListMenu.ShowAt(cs);
                         //int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
                         //var menu = new PopupMenu();

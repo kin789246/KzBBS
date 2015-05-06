@@ -100,8 +100,8 @@
                                 MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}">
                         <MenuFlyoutItem Text="推文 (X)" Click="rt_Click" />
                         <MenuFlyoutItem Text="回應 (y)" Click="rt_Click" />
-                        <MenuFlyoutItem Text="編輯 (E)" Click="rt_Click" />
-                        <MenuFlyoutItem Text="刪除 (d)" Click="rt_Click" />
+                        <MenuFlyoutItem Name="editor" Text="編輯 (E)" Click="rt_Click" />
+                        <MenuFlyoutItem Name="delete" Text="刪除 (d)" Click="rt_Click" />
                         <MenuFlyoutItem Text="同主題串接 (S)" Click="rt_Click" />
                         <MenuFlyoutItem Text="轉錄 (Ctrl+X)" Click="rt_Click" />
                     </MenuFlyout>
