@@ -245,32 +245,32 @@ namespace KzBBS
             //}
             //Debug.WriteLine(rdataString.ToString());
             ////raw text
-            //List<byte> noCmd = new List<byte>();
-            //noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
-            //string removeIAC = Big5Util.ToUni(noCmd.ToArray());
-            //if (!string.IsNullOrEmpty(removeIAC))
-            //{
-            //    string printIt = "";
-            //    foreach (char byteword in removeIAC)
-            //    {
-            //        if (byteword == '\n')
-            //        {
-            //            printIt += "\\n\n";
-            //        }
-            //        else if (byteword == '\r')
-            //        { printIt += "\\r"; }
-            //        else if (byteword == '\b')
-            //        {
-            //            printIt += "\\b";
-            //        }
-            //        else
-            //        {
-            //            printIt += byteword;
-            //        }
-            //    }
-            //    printIt += "-received.";
-            //    Debug.WriteLine(printIt);
-            //}
+            List<byte> noCmd = new List<byte>();
+            noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
+            string removeIAC = Big5Util.ToUni(noCmd.ToArray());
+            if (!string.IsNullOrEmpty(removeIAC))
+            {
+                string printIt = "";
+                foreach (char byteword in removeIAC)
+                {
+                    if (byteword == '\n')
+                    {
+                        printIt += "\\n\n";
+                    }
+                    else if (byteword == '\r')
+                    { printIt += "\\r"; }
+                    else if (byteword == '\b')
+                    {
+                        printIt += "\\b";
+                    }
+                    else
+                    {
+                        printIt += byteword;
+                    }
+                }
+                printIt += "-received.";
+                Debug.WriteLine(printIt);
+            }
             ////////////////////////////////////
 
             #endregion
@@ -363,18 +363,39 @@ namespace KzBBS
                     else if (rawdata[currentIndex] == 74) // *[ J
                     {
                         beforeMoveCursor = new Point(curPos.X, curPos.Y - 1);
-                        int[] tempAnsi = new int[6];
-                        tempAnsi = analyzeAnsiCode(AnsiCode);
-                        //clear entire screen = delete all stored words
-                        if (tempAnsi[0] == 2)
+                        if (AnsiCode.Count == 0) // *[J = clear from cursor to the end of screen
                         {
-                            curPos.Y = 0; curPos.X = 0;
-                            for (int row = 0; row < ROW; row++)
+                            for (int col = 0; col < COL; col++)
+                            {
+                                BBSPage[(int)curPos.X, col].resetData();
+                            }
+                            for (int row = (int)curPos.X + 1; row < ROW; row++)
                             {
                                 for (int col = 0; col < COL; col++)
                                 {
                                     BBSPage[row, col].resetData();
                                 }
+                            }
+                        }
+                        else
+                        {
+                            int[] tempAnsi = new int[6];
+                            tempAnsi = analyzeAnsiCode(AnsiCode);
+                            //clear entire screen = delete all stored words
+                            if (tempAnsi[0] == 2)
+                            {
+                                curPos.Y = 0; curPos.X = 0;
+                                for (int row = 0; row < ROW; row++)
+                                {
+                                    for (int col = 0; col < COL; col++)
+                                    {
+                                        BBSPage[row, col].resetData();
+                                    }
+                                }
+                            }
+                            else if(tempAnsi[0] == 1)
+                            {
+
                             }
                         }
                     }
@@ -568,6 +589,7 @@ namespace KzBBS
                             lastAttr.setAtt(fg, bg, isBlinking);
                             hiPosition = curPos;
                             curPos.Y++;
+                            if (curPos.Y > 79) curPos.Y = 0;
                             currentIndex++;
                         }
                     }
@@ -659,11 +681,14 @@ namespace KzBBS
             {
                 if (word == 32) //non-breaking space
                     word = 0xA0;
-                BBSPage[row, col].Text = (char)word + "";
-                BBSPage[row, col].Count = 1;
-                BBSPage[row, col].setData(attr.FgColor, attr.BgColor, attr.IsBlinking, false, new Point(row, col));
-                BBSPage[row, col].DualColor = false;
-                curPos.Y++;
+                if (curPos.Y < 80 && curPos.X < 24) //make sure mud display won't over screen
+                {
+                    BBSPage[row, col].Text = (char)word + "";
+                    BBSPage[row, col].Count = 1;
+                    BBSPage[row, col].setData(attr.FgColor, attr.BgColor, attr.IsBlinking, false, new Point(row, col));
+                    BBSPage[row, col].DualColor = false;
+                    curPos.Y++;
+                }
             }
         }
 
@@ -678,25 +703,28 @@ namespace KzBBS
 
         private static void storeDualBytes(string word, int row, int col, AnsiAttr attr)
         {
-            bool isTwWord = false;
-            if(word == "")
+            if (curPos.Y < 80 && curPos.X < 24) //make sure mud display won't over screen
             {
-                isTwWord = BBSPage[row, col - 1].TwWord;
-            }
-            else if (word[0] > 0x3040)
-            {
-                isTwWord = true;
-            }
-            else
-            { isTwWord = false; }
-            BBSPage[row, col].setData(attr.FgColor, attr.BgColor, attr.IsBlinking, isTwWord, new Point(row, col));
-            BBSPage[row, col].DualColor = false;
-            BBSPage[row, col].Text = word;
-            BBSPage[row, col].Count = 1;
-            if (isDualColor)
-            {
-                BBSPage[row, col].DualColor = true;
-                isDualColor = false;
+                bool isTwWord = false;
+                if (word == "")
+                {
+                    isTwWord = BBSPage[row, col - 1].TwWord;
+                }
+                else if (word[0] > 0x3040)
+                {
+                    isTwWord = true;
+                }
+                else
+                { isTwWord = false; }
+                BBSPage[row, col].setData(attr.FgColor, attr.BgColor, attr.IsBlinking, isTwWord, new Point(row, col));
+                BBSPage[row, col].DualColor = false;
+                BBSPage[row, col].Text = word;
+                BBSPage[row, col].Count = 1;
+                if (isDualColor)
+                {
+                    BBSPage[row, col].DualColor = true;
+                    isDualColor = false;
+                }
             }
         }
     }

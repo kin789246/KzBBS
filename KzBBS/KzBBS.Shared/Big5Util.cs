@@ -14,14 +14,9 @@ namespace KzBBS
 {
     class Big5Util
     {
+        public static bool isBig5Encode = true;
         private static Dictionary<int, int> mBIG5_Unicode_MAP;
         private static Dictionary<int, int> mUnicode_BIG5_MAP;
-        //public static bool TableSeted = false;
-        //public static Dictionary<int, int> Big5UnicodeTable
-        //{
-        //    get { return mBIG5_Unicode_MAP; }
-        //    set { mBIG5_Unicode_MAP = value; }
-        //}
 
         public static async Task generateTable()
         {
@@ -29,11 +24,19 @@ namespace KzBBS
             mUnicode_BIG5_MAP = new Dictionary<int, int>();
             Windows.ApplicationModel.Package package = Windows.ApplicationModel.Package.Current;
             Windows.Storage.StorageFolder installedLocation = package.InstalledLocation;
-            //TODO: support GBK code
             StorageFile readBig5toUni = await installedLocation.GetFileAsync("moz18-b2u.txt");
             StorageFile readUnitoBig5 = await installedLocation.GetFileAsync("moz18-u2b.txt");
-            IList<string> temp = await FileIO.ReadLinesAsync(readBig5toUni);
-            IList<string> temp2 = await FileIO.ReadLinesAsync(readUnitoBig5);
+            StorageFile readGBKtoUni = await installedLocation.GetFileAsync("GBK_to_unicode.TXT");
+            IList<string> temp, temp2;
+            if (isBig5Encode)
+            {
+                temp = await FileIO.ReadLinesAsync(readBig5toUni);
+            }
+            else
+            {
+                temp = await FileIO.ReadLinesAsync(readGBKtoUni);
+            }
+            temp2 = await FileIO.ReadLinesAsync(readUnitoBig5);
 
             String line = null;
             for (int i = 0; i < temp.Count; i++ )
@@ -51,7 +54,7 @@ namespace KzBBS
                 }
                 catch (Exception)
                 {
-                    throw; // No mapping
+                    Debug.WriteLine("no mapping"); // No mapping
                 }
             }
 
@@ -71,11 +74,9 @@ namespace KzBBS
                 catch (Exception e)
                 {
                     Debug.WriteLine(e.Message);
-                    throw; // No mapping
+                    Debug.WriteLine("no mapping"); // No mapping
                 }
             }
-
-            //TableSeted = true;
         }
 
         public static string ToUni(byte[] pureText)
@@ -100,7 +101,7 @@ namespace KzBBS
 //0xF9D6-0xFEFE 保留給使用者自定義字元（造字區） 
                 else if (big5Buffer[0] != 0)
                 {
-                    if ((input >= 0x40 && input <= 0x7E) || (input >= 0xA1 && input <= 0xFE))
+                    if (input >= 0x40)// && input <= 0x7E) || (input >= 0xA1 && input <= 0xFE))
                     {
                         big5Buffer[1] = (byte)input; // big 5 low bits
                         {
@@ -110,10 +111,9 @@ namespace KzBBS
                                 int UTF8Char = mBIG5_Unicode_MAP[Big5Char];
                                 _StringBuilder.Append((char)UTF8Char);
                             }
-                            catch (Exception)
-                            {
-                                _StringBuilder.Append((char)mBIG5_Unicode_MAP[0xA148]); 
-                                // No mapping, use replacement character
+                            catch
+                            { // No mapping, use replacement character
+                                _StringBuilder.Append((char)0xFF1F);
                             }
                         }
                     }
@@ -151,13 +151,28 @@ namespace KzBBS
                 }
                 else
                 {
-                    int big5Key = 0;
-                    big5Key = mUnicode_BIG5_MAP[unicodeValue];
-                    if (big5Key != 0)
+                    if (isBig5Encode)
                     {
+                        int big5Key = 0;
+                        try
+                        { big5Key = mUnicode_BIG5_MAP[unicodeValue]; }
+                        catch
+                        { big5Key = 0; }
                         byte[] big5Array = BitConverter.GetBytes(big5Key);
                         final.Add(big5Array[1]);
                         final.Add(big5Array[0]);
+                    }
+                    else
+                    {
+                        int gbkKey = 0;
+                        try
+                        { gbkKey = mBIG5_Unicode_MAP.First(x => x.Value == unicodeValue).Key; }
+                        catch
+                        { gbkKey = 0; }
+                        byte[] gbkArray = BitConverter.GetBytes(gbkKey);
+                        final.Add(gbkArray[1]);
+                        final.Add(gbkArray[0]);
+                        
                     }
                 }
             }

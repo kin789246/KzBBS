@@ -46,6 +46,7 @@ namespace KzBBS
             TelnetSocket.PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
             disconnBtn.IsEnabled = false;
             PTTMode.IsChecked = true;
+            isBig5.IsChecked = true;
             loadProfile();
 
             Package package = Package.Current;
@@ -58,10 +59,11 @@ namespace KzBBS
         private void loadProfile()
         {
             Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+        
             if (roamingSettings.Values.ContainsKey("telnetAccount"))
             {
                 tAccount.Text = roamingSettings.Values["telnetAccount"].ToString();
-                clearSaved.IsEnabled = true;
+                //clearSaved.IsEnabled = true;
             }
             if (roamingSettings.Values.ContainsKey("telnetPassword"))
             {
@@ -75,12 +77,28 @@ namespace KzBBS
             { tPort.Text = roamingSettings.Values["telnetPort"].ToString(); }
             else
             { tPort.Text = "23"; }
+            if (roamingSettings.Values.ContainsKey("PTTMode"))
+            {
+                if (roamingSettings.Values["PTTMode"].ToString() == "yes")
+                { PTTMode.IsChecked = true; }
+                else
+                { PTTMode.IsChecked = false; }
+            }
+            if (roamingSettings.Values.ContainsKey("telnetEncode"))
+            {
+                if (roamingSettings.Values["telnetEncode"].ToString() == "big5")
+                { isBig5.IsChecked = true; }
+                else
+                { isGBK.IsChecked = true; }
+            }
         }
 
         void PTTSocket_SocketDisconnect(object sender, EventArgs e)
         {
             connBtn.IsEnabled = true;
             disconnBtn.IsEnabled = false;
+            isBig5.IsEnabled = true;
+            isGBK.IsEnabled = true;
             PTTDisplay.resetAllSetting();
             TelnetANSIParser.resetAllSetting();
         }
@@ -115,6 +133,7 @@ namespace KzBBS
         /// session.  The state will be null the first time a page is visited.</param>
         private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
+            loadProfile();
             ////建立新的AdControl元件
             //string ApplicationId = "db2dbf68-7bb6-46c2-b7b4-605bf442a234";
             //string AdUnit = "218478";
@@ -140,6 +159,19 @@ namespace KzBBS
         /// serializable state.</param>
         private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
+            Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+            roamingSettings.Values["telnetAccount"] = tAccount.Text;
+            roamingSettings.Values["telnetPassword"] = tPwd.Password;
+            roamingSettings.Values["telnetAddress"] = tIP.Text;
+            roamingSettings.Values["telnetPort"] = tPort.Text;
+            if (PTTMode.IsChecked == true)
+            { roamingSettings.Values["PTTMode"] = "yes"; }
+            else
+            { roamingSettings.Values["PTTMode"] = "no"; }
+            if (isBig5.IsChecked == true)
+            { roamingSettings.Values["telnetEncode"] = "big5"; }
+            else
+            { roamingSettings.Values["telnetEncode"] = "gbk"; }
         }
 
         #region NavigationHelper registration
@@ -173,6 +205,8 @@ namespace KzBBS
         {
             disconnBtn.IsEnabled = true;
             connBtn.IsEnabled = false;
+            isBig5.IsEnabled = false;
+            isGBK.IsEnabled = false;
             if (string.IsNullOrEmpty(tIP.Text) || string.IsNullOrEmpty(tPort.Text)) return;
             if (!string.IsNullOrEmpty(tAccount.Text) && !string.IsNullOrEmpty(tPwd.Password))
             {
@@ -197,70 +231,70 @@ namespace KzBBS
             TelnetConnect.connection.OnDisconnect();
         }
 
-        private async void remember_Checked(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(tAccount.Text) || string.IsNullOrEmpty(tPwd.Password))
-            {
-                //ShowMessage("帳號密碼都要輸入的啦! 請重發, 謝謝.");
-                TelnetSocket.ShowMessage(loader.GetString("plsreinput"));
-                rememberAcPd.IsChecked = false;
-                return;
-            }
-            bool isYes = true;
-            Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
-            if (roamingSettings.Values.ContainsKey("telnetAccount") || roamingSettings.Values.ContainsKey("telnetPassword"))
-            {
-                //confirm overwrite
-                //isYes = await confirmDialog("已經存在帳號: " + roamingSettings.Values["telnetAccount"]
-                //    + ", 要覆蓋嗎?");
-                isYes = await TelnetSocket.confirmDialog(loader.GetString("existaccount") + roamingSettings.Values["telnetAccount"]
-                    + loader.GetString("needoverwrite"));
-            }
-            if (isYes)
-            {
-                roamingSettings.Values["telnetAccount"] = tAccount.Text;
-                roamingSettings.Values["telnetPassword"] = tPwd.Password;
-                roamingSettings.Values["telnetAddress"] = tIP.Text;
-                roamingSettings.Values["telnetPort"] = tPort.Text;
-                clearSaved.IsEnabled = true;
-                //ShowMessage("位址, 帳號, 密碼已存");
-                TelnetSocket.ShowMessage(loader.GetString("itsaved"));
-            }
-            else
-            { //ShowMessage("位址, 帳號, 密碼未存入"); 
-                TelnetSocket.ShowMessage(loader.GetString("itdoesntsaved"));
-            }
-        }
+        //private async void remember_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    if (string.IsNullOrEmpty(tAccount.Text) || string.IsNullOrEmpty(tPwd.Password))
+        //    {
+        //        //ShowMessage("帳號密碼都要輸入的啦! 請重發, 謝謝.");
+        //        TelnetSocket.ShowMessage(loader.GetString("plsreinput"));
+        //        rememberAcPd.IsChecked = false;
+        //        return;
+        //    }
+        //    bool isYes = true;
+        //    Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+        //    if (roamingSettings.Values.ContainsKey("telnetAccount") || roamingSettings.Values.ContainsKey("telnetPassword"))
+        //    {
+        //        //confirm overwrite
+        //        //isYes = await confirmDialog("已經存在帳號: " + roamingSettings.Values["telnetAccount"]
+        //        //    + ", 要覆蓋嗎?");
+        //        isYes = await TelnetSocket.confirmDialog(loader.GetString("existaccount") + roamingSettings.Values["telnetAccount"]
+        //            + loader.GetString("needoverwrite"));
+        //    }
+        //    if (isYes)
+        //    {
+        //        roamingSettings.Values["telnetAccount"] = tAccount.Text;
+        //        roamingSettings.Values["telnetPassword"] = tPwd.Password;
+        //        roamingSettings.Values["telnetAddress"] = tIP.Text;
+        //        roamingSettings.Values["telnetPort"] = tPort.Text;
+        //        clearSaved.IsEnabled = true;
+        //        //ShowMessage("位址, 帳號, 密碼已存");
+        //        TelnetSocket.ShowMessage(loader.GetString("itsaved"));
+        //    }
+        //    else
+        //    { //ShowMessage("位址, 帳號, 密碼未存入"); 
+        //        TelnetSocket.ShowMessage(loader.GetString("itdoesntsaved"));
+        //    }
+        //}
 
-        private async void clearSaved_Click(object sender, RoutedEventArgs e)
-        {
-            bool isYes = true;
-            Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
-            if (roamingSettings.Values.ContainsKey("telnetAccount") && roamingSettings.Values.ContainsKey("telnetPassword"))
-            {
-                //isYes = await confirmDialog("要刪除帳號: " + roamingSettings.Values["telnetAccount"]
-                //    + " 嗎?");
-                isYes = await TelnetSocket.confirmDialog(loader.GetString("todeleteacct") + roamingSettings.Values["telnetAccount"]
-                    + loader.GetString("yesornot"));
-                if (isYes)
-                {
-                    roamingSettings.Values.Remove("telnetAccount");
-                    roamingSettings.Values.Remove("telnetPassword");
-                    roamingSettings.Values.Remove("telnetAddress");
-                    roamingSettings.Values.Remove("telnetPort");
-                    clearSaved.IsEnabled = false;
-                }
-                else
-                { //ShowMessage("帳號密碼未刪除");
-                    TelnetSocket.ShowMessage(loader.GetString("notdeleted"));
-                }
-            }
-            else
-            {
-                //ShowMessage("找不到已儲存的帳號密碼.");
-                TelnetSocket.ShowMessage(loader.GetString("cantfind"));
-            }
-        }
+        //private async void clearSaved_Click(object sender, RoutedEventArgs e)
+        //{
+        //    bool isYes = true;
+        //    Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+        //    if (roamingSettings.Values.ContainsKey("telnetAccount") && roamingSettings.Values.ContainsKey("telnetPassword"))
+        //    {
+        //        //isYes = await confirmDialog("要刪除帳號: " + roamingSettings.Values["telnetAccount"]
+        //        //    + " 嗎?");
+        //        isYes = await TelnetSocket.confirmDialog(loader.GetString("todeleteacct") + roamingSettings.Values["telnetAccount"]
+        //            + loader.GetString("yesornot"));
+        //        if (isYes)
+        //        {
+        //            roamingSettings.Values.Remove("telnetAccount");
+        //            roamingSettings.Values.Remove("telnetPassword");
+        //            roamingSettings.Values.Remove("telnetAddress");
+        //            roamingSettings.Values.Remove("telnetPort");
+        //            clearSaved.IsEnabled = false;
+        //        }
+        //        else
+        //        { //ShowMessage("帳號密碼未刪除");
+        //            TelnetSocket.ShowMessage(loader.GetString("notdeleted"));
+        //        }
+        //    }
+        //    else
+        //    {
+        //        //ShowMessage("找不到已儲存的帳號密碼.");
+        //        TelnetSocket.ShowMessage(loader.GetString("cantfind"));
+        //    }
+        //}
 
         private void goTelnetPage(object sender, RoutedEventArgs e)
         {
@@ -324,6 +358,18 @@ namespace KzBBS
         private void PTT_Unchecked(object sender, RoutedEventArgs e)
         {
             PTTDisplay.PTTMode = false;
+        }
+
+        private void encode_Checked(object sender, RoutedEventArgs e)
+        {
+            if (isBig5.IsChecked == true)
+            {
+                Big5Util.isBig5Encode = true;
+            }
+            else
+            {
+                Big5Util.isBig5Encode = false;
+            }
         }
 
         private void ad_ErrorOccurred(object sender, Microsoft.Advertising.Mobile.Common.AdErrorEventArgs e)
