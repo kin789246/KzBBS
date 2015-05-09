@@ -28,6 +28,7 @@
     <Content Include="$(MSBuildThisFileDirectory)ApiData\WindowsStoreProxy.xml" />
     <Content Include="$(MSBuildThisFileDirectory)bahamut_sample.txt" />
     <Content Include="$(MSBuildThisFileDirectory)BIG5ToUNI.TXT" />
+    <Content Include="$(MSBuildThisFileDirectory)GBK_to_unicode.TXT" />
     <Content Include="$(MSBuildThisFileDirectory)kaiu.ttf" />
     <Content Include="$(MSBuildThisFileDirectory)moz18-b2u.txt" />
     <Content Include="$(MSBuildThisFileDirectory)moz18-u2b.txt" />

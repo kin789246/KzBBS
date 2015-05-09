@@ -13,6 +13,7 @@ using Windows.Foundation.Collections;
 using Windows.Storage.Streams;
 using Windows.UI;
 using Windows.UI.Popups;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -68,7 +69,48 @@ namespace KzBBS
                         , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
                 cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
             }
+
+            InputPane inpa = InputPane.GetForCurrentView();
+            inpa.Showing += inpa_Showing;
+            inpa.Hiding += inpa_Hiding;
             Current = this;
+        }
+
+        void inpa_Hiding(InputPane sender, InputPaneVisibilityEventArgs args)
+        {
+            normalScrollViewer.Height = 720 * factor;
+            pttScrollViewer.Height = 800 * factor;
+        }
+
+        void inpa_Showing(InputPane sender, InputPaneVisibilityEventArgs args)
+        {
+            InputPane inpa = sender as InputPane;
+            if (inpa != null)
+            {
+                if (PTTDisplay.PTTMode)
+                {
+                    pttScrollViewer.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                }
+                else
+                {
+                    pttScrollViewer.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                }
+                if (normalScrollViewer.Height > inpa.OccludedRect.Height)
+                {
+                    normalScrollViewer.Height -= inpa.OccludedRect.Height;
+                    pttScrollViewer.Height -= inpa.OccludedRect.Height;
+                }
+            }
+        }
+
+        private void SV_sizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            double cursorPosition = (TelnetANSIParser.curPos.X + 1) * PTTDisplay._fontSize;
+            if (cursorPosition > normalScrollViewer.Height)
+            {
+                normalScrollViewer.ChangeView(null, cursorPosition - normalScrollViewer.Height, null);
+                pttScrollViewer.ChangeView(null, cursorPosition - normalScrollViewer.Height, null);
+            }
         }
 
         private void Current_SizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
@@ -91,6 +133,8 @@ namespace KzBBS
                 BBSStackPanel.Height = 800 * factor;
                 operationBoard.Width = 1200 * factor;
                 operationBoard.Height = 720 * factor;
+                boundControlBtns.Width = 1200 * factor;
+                boundControlBtns.Height = 720 * factor;
                 PTTCanvas.Width = 1200 * factor;
                 PTTCanvas.Height = 720 * factor;
 
@@ -101,8 +145,10 @@ namespace KzBBS
 
                 BBSListView.Width = 1200 * factor;
                 BBSListView.Height = 720 * factor;
-                boundControlBtns.Width = 1200 * factor;
-                boundControlBtns.Height = 720 * factor;
+                normalScrollViewer.Width = 1200 * factor;
+                normalScrollViewer.Height = 720 * factor;
+                pttScrollViewer.Width = 1200 * factor;
+                pttScrollViewer.Height = 800 * factor;
             }
             else
             {
@@ -114,11 +160,6 @@ namespace KzBBS
                 PTTDisplay._fontSize = 25 * factor;
             }
             //PTTDisplay.pt_sendCmd = sendCmd;
-        }
-
-        void telnetConnect_LinesPropChanged(object sender, EventArgs e)
-        {
-            onDataChange();
         }
 
         /// <summary>
@@ -275,7 +316,6 @@ namespace KzBBS
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 });
-                    //loadCount = 0;
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Right)
@@ -283,7 +323,6 @@ namespace KzBBS
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand(new byte[] { 27, 91, 67 });
-                    //loadCount = 0;
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Home)
@@ -439,7 +478,6 @@ namespace KzBBS
             }
             else
             {
-                menuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
                 PTTDisplay.showBBS(PTTCanvas, PTTDisplay.Lines, operationBoard);
                 Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
                 Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
@@ -448,159 +486,130 @@ namespace KzBBS
 
         private void buildMenuButton()
         {
-            menuFlyout.Items.Clear();
-            menuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
-            //choose menu items
             if (PTTDisplay.currentMode == BBSMode.Editor)
             {
-                MenuFlyoutItem mfi = new MenuFlyoutItem();
-                mfi.Text = "檔案處理 (Ctrl+X)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand(new byte[] { 24 }); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "說明 (Ctrl+Z)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand(new byte[] { 26 }); });
-                menuFlyout.Items.Add(mfi);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
             {
-                MenuFlyoutItem mfi = new MenuFlyoutItem();
-                mfi.Text = "回應 (y)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("y"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "推文 (X)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("X"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "同主題第一篇 (=)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("="); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "同主題前篇 ([)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("["); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "同主題後篇 (])";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("]"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "說明 (h)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("h"); });
-                menuFlyout.Items.Add(mfi);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.MainList)
             {
-                MenuFlyoutItem mfi = new MenuFlyoutItem();
-                mfi.Text = "搜尋看板 (s)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("s"); });
-                menuFlyout.Items.Add(mfi);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;   
             }
             else if (PTTDisplay.currentMode == BBSMode.ArticleList)
             {
-                MenuFlyoutItem mfi = new MenuFlyoutItem();
-                mfi.Text = "搜尋看板 (s)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("s"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "發表文章 (Ctrl+P)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand(new byte[] { 16 }); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "搜尋文章 (/)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("/"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "搜尋作者 (a)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("a"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "搜尋文章代碼 (#)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("#"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "精華區 (z)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("z"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "說明 (h)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("h"); });
-                menuFlyout.Items.Add(mfi);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.BoardList || PTTDisplay.currentMode == BBSMode.ClassBoard)
             {
-                MenuFlyoutItem mfi = new MenuFlyoutItem();
-                mfi.Text = "搜尋看板 (s)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("s"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "搜尋 (/)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("/"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "說明 (h)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("h"); });
-                menuFlyout.Items.Add(mfi);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.MailList)
             {
-                MenuFlyoutItem mfi = new MenuFlyoutItem();
-                mfi.Text = "發新郵件 (Ctrl+P)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand(new byte[] { 16 }); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "資源回收桶 (~)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("~"); });
-                menuFlyout.Items.Add(mfi);
-
-                mfi = new MenuFlyoutItem();
-                mfi.Text = "說明 (h)";
-                mfi.Click += new RoutedEventHandler(async (x, y) =>
-                { await TelnetConnect.sendCommand("h"); });
-                menuFlyout.Items.Add(mfi);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
             }
             else
             {
-                menuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;   
             }
         }
 
+        async void mfi_Click(object sender, RoutedEventArgs e)
+        {
+            MenuFlyoutItem mfi = sender as MenuFlyoutItem;
+            if (mfi != null)
+            {
+                switch (mfi.Text)
+                {
+                    case "檔案處理 (Ctrl+X)":
+                        await TelnetConnect.sendCommand(new byte[] { 24 });
+                        break;
+                    case "說明 (Ctrl+Z)":
+                        await TelnetConnect.sendCommand(new byte[] { 26 });
+                        break;
+                    case "回應 (y)":
+                        await TelnetConnect.sendCommand("y");
+                        break;
+                    case "推文 (X)":
+                        await TelnetConnect.sendCommand("X");
+                        break;
+                    case "同主題第一篇 (=)":
+                        await TelnetConnect.sendCommand("=");
+                        break;
+                    case "同主題前篇 ([)":
+                        await TelnetConnect.sendCommand("[");
+                        break;
+                    case "同主題後篇 (])":
+                        await TelnetConnect.sendCommand("]");
+                        break;
+                    case "說明 (h)":
+                        await TelnetConnect.sendCommand("h");
+                        break;
+                    case "搜尋看板 (s)":
+                        await TelnetConnect.sendCommand("s");
+                        break;
+                    case "發表文章 (Ctrl+P)":
+                    case "發新郵件 (Ctrl+P)":
+                        await TelnetConnect.sendCommand(new byte[] { 16 });
+                        break;
+                    case "搜尋文章 (/)":
+                    case "搜尋 (/)":
+                        await TelnetConnect.sendCommand("/");
+                        break;
+                    case "搜尋作者 (a)":
+                        await TelnetConnect.sendCommand("a");
+                        break;
+                    case "搜尋文章代碼 (#)":
+                        await TelnetConnect.sendCommand("#");
+                        break;
+                    case "精華區 (z)":
+                        await TelnetConnect.sendCommand("z");
+                        break;
+                    case "資源回收桶 (~)":
+                        await TelnetConnect.sendCommand("~");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
         private async void BBSListViewItem_Click(object sender, ItemClickEventArgs e)
         {
             Canvas lineCanvas = e.ClickedItem as Canvas;
@@ -635,7 +644,8 @@ namespace KzBBS
             }
         }
 
-        private async void BBSListViewItem_RTapped(object sender, RightTappedRoutedEventArgs e)
+        PTTLine currentLine;
+        private void BBSListViewItem_RTapped(object sender, RightTappedRoutedEventArgs e)
         {
             TextBlock tb = e.OriginalSource as TextBlock;
             if (tb != null)
@@ -644,84 +654,68 @@ namespace KzBBS
                 if (cs != null && cs.Tag != null)
                 {
                     string uniqueId = cs.Tag.ToString();
-                    PTTLine currentLine = PTTDisplay.Lines.FindLast(x => x.UniqueId == uniqueId);
+                    currentLine = PTTDisplay.Lines.FindLast(x => x.UniqueId == uniqueId);
                     if (currentLine == null)
                     {
                         return;
                     }
-
                     if (PTTDisplay.currentMode == BBSMode.ArticleList)
                     {
-                        int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
-                        var menu = new PopupMenu();
-                        menu.Commands.Add(new UICommand("推文 (X)", async (command) =>
-                        {
-                            await PTTDisplay.upOrDown(jumpCount);
-                            await TelnetConnect.sendCommand("X");
-                        }));
-
-                        menu.Commands.Add(new UICommand("回應 (y)", async (command) =>
-                        {
-                            await PTTDisplay.upOrDown(jumpCount);
-                            await TelnetConnect.sendCommand("y");
-                        }));
-
                         if (currentLine.Author == PTTDisplay.User)
                         {
-                            menu.Commands.Add(new UICommand("編輯 (E)", async (command) =>
-                            {
-                                await PTTDisplay.upOrDown(jumpCount);
-                                await TelnetConnect.sendCommand("E");
-                            }));
-
-                            menu.Commands.Add(new UICommand("刪除 (d)", async (command) =>
-                            {
-                                await PTTDisplay.upOrDown(jumpCount);
-                                await TelnetConnect.sendCommand("d");
-                            }));
+                            editor.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                            delete.Visibility = Windows.UI.Xaml.Visibility.Visible;
                         }
-
-                        menu.Commands.Add(new UICommand("同主題串接 (S)", async (command) =>
+                        else
                         {
-                            await PTTDisplay.upOrDown(jumpCount);
-                            await TelnetConnect.sendCommand("S");
-                        }));
-
-                        menu.Commands.Add(new UICommand("轉錄 (Ctrl+X)", async (command) =>
-                        {
-                            await PTTDisplay.upOrDown(jumpCount);
-                            await TelnetConnect.sendCommand(new byte[] { 24 });
-                        }));
-
-                        await menu.ShowAsync(e.GetPosition(this));
+                            editor.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                            delete.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                        }
+                        articleListMenu.ShowAt(cs);
                     }
 
                     if (PTTDisplay.currentMode == BBSMode.MailList)
                     {
-                        int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
-                        var menu = new PopupMenu();
-                        menu.Commands.Add(new UICommand("回信 (y)", async (command) =>
-                        {
-                            await PTTDisplay.upOrDown(jumpCount);
-                            await TelnetConnect.sendCommand("y");
-                        }));
-
-                        menu.Commands.Add(new UICommand("刪除 (d)", async (command) =>
-                        {
-                            await PTTDisplay.upOrDown(jumpCount);
-                            await TelnetConnect.sendCommand("d");
-                        }));
-
-                        menu.Commands.Add(new UICommand("站內轉寄 (x)", async (command) =>
-                        {
-                            await PTTDisplay.upOrDown(jumpCount);
-                            await TelnetConnect.sendCommand("x");
-                        }));
-
-                        await menu.ShowAsync(e.GetPosition(this));
+                        mailListMenu.ShowAt(cs);
                     }
                 }
             }
-        }        
+        }
+        private async void rt_Click(object sender, RoutedEventArgs e)
+        {
+            MenuFlyoutItem mfi = sender as MenuFlyoutItem;
+            if (mfi != null)
+            {
+                int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
+                await PTTDisplay.upOrDown(jumpCount);
+                switch (mfi.Text)
+                {
+                    case "推文 (X)":
+                        await TelnetConnect.sendCommand("X");
+                        break;
+                    case "回應 (y)":
+                    case "回信 (y)":
+                        await TelnetConnect.sendCommand("y");
+                        break;
+                    case "編輯 (E)":
+                        await TelnetConnect.sendCommand("E");
+                        break;
+                    case "刪除 (d)":
+                        await TelnetConnect.sendCommand("d");
+                        break;
+                    case "同主題串接 (S)":
+                        await TelnetConnect.sendCommand("S");
+                        break;
+                    case "轉錄 (Ctrl+X)":
+                        await TelnetConnect.sendCommand(new byte[] { 24 });
+                        break;
+                    case "站內轉寄 (x)":
+                        await TelnetConnect.sendCommand("x");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 }

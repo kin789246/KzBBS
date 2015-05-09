@@ -43,7 +43,6 @@ namespace KzBBS
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
 
-            //TelnetConnect.connection.LinesPropChanged += telnetConnect_LinesPropChanged;
             Window.Current.SizeChanged += Current_SizeChanged;
             DetermineSize();
 
@@ -97,7 +96,6 @@ namespace KzBBS
             }
         }
 
-
         private void Current_SizeChanged(object sender, Windows.UI.Core.WindowSizeChangedEventArgs e)
         {
             DetermineSize();
@@ -147,11 +145,6 @@ namespace KzBBS
                 //Canvas.SetLeft(TelnetViewbox, 0);
                 PTTDisplay._fontSize = 12.5 * factor;
             }
-        }
-
-        void telnetConnect_LinesPropChanged(object sender, EventArgs e)
-        {
-            onDataChange();
         }
 
         /// <summary>
@@ -260,6 +253,7 @@ namespace KzBBS
                 }
                 return;
             }
+            //check ctrl + ? combination key
             if (ctrlChecked.IsChecked == true)
             {
                 if (64 < (int)e.Key && (int)e.Key < 91)
@@ -273,6 +267,7 @@ namespace KzBBS
                 ctrlChecked.IsChecked = false;
                 return;
             }
+            //check single letter command
             if (sendCmd.Text.Length == 1)
             {
                 if (sendCmd.Text[0] < 256)
@@ -459,9 +454,9 @@ namespace KzBBS
 
         public void onDataChange()
         {
-            buildMenuButton();
             if (PTTDisplay.PTTMode)
             {
+                buildMenuButton();
                 PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.Lines, operationBoard);
             }
             else
@@ -474,82 +469,69 @@ namespace KzBBS
 
         private void buildMenuButton()
         {
-            menuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
-            //choose menu items
             if (PTTDisplay.currentMode == BBSMode.Editor)
             {
-                Visibility[] mfiVisibilty = { Visibility.Visible, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Visible };
-                setMenu(mfiVisibilty);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
             {
-                Visibility[] mfiVisibilty = { Visibility.Collapsed, Visibility.Visible, Visibility.Visible, Visibility.Visible,
-                    Visibility.Visible, Visibility.Visible, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Visible, Visibility.Collapsed };
-                setMenu(mfiVisibilty);
-                
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.MainList)
             {
-                Visibility[] mfiVisibilty = { Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Visible, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed};
-                setMenu(mfiVisibilty);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.ArticleList)
             {
-                Visibility[] mfiVisibilty = { Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Visible, Visibility.Visible, Visibility.Collapsed,
-                    Visibility.Visible, Visibility.Collapsed, Visibility.Visible, Visibility.Visible, Visibility.Visible,
-                    Visibility.Collapsed, Visibility.Visible, Visibility.Collapsed};
-                setMenu(mfiVisibilty);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.BoardList || PTTDisplay.currentMode == BBSMode.ClassBoard)
             {
-                Visibility[] mfiVisibilty = { Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Visible, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Visible, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Visible, Visibility.Collapsed};
-                setMenu(mfiVisibilty);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else if (PTTDisplay.currentMode == BBSMode.MailList)
             {
-                Visibility[] mfiVisibilty = { Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Visible,
-                    Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed, Visibility.Collapsed,
-                    Visibility.Visible, Visibility.Visible, Visibility.Collapsed};
-                setMenu(mfiVisibilty);
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Visible;
             }
             else
             {
-                menuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                editorMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleBrowseMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mainMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                articleListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                boardListMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                mailMenuBtn.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
-        }
-
-        private void setMenu(Windows.UI.Xaml.Visibility[] mfiVisibilty)
-        {
-            mfi_fileProcess.Visibility = mfiVisibilty[0];
-            mfi_response.Visibility = mfiVisibilty[1];
-            mfi_push.Visibility = mfiVisibilty[2];
-            mfi_sameFirst.Visibility = mfiVisibilty[3];
-            mfi_samePre.Visibility = mfiVisibilty[4];
-            mfi_sameNext.Visibility = mfiVisibilty[5];
-            mfi_searchBoard.Visibility = mfiVisibilty[6];
-            mfi_post.Visibility = mfiVisibilty[7];
-            mfi_newMail.Visibility = mfiVisibilty[8];
-            mfi_searchArticle.Visibility = mfiVisibilty[9];
-            mfi_search.Visibility = mfiVisibilty[10];
-            mfi_searchAuthor.Visibility = mfiVisibilty[11];
-            mfi_searchCode.Visibility = mfiVisibilty[12];
-            mfi_essense.Visibility = mfiVisibilty[13];
-            mfi_recycle.Visibility = mfiVisibilty[14];
-            mfi_help.Visibility = mfiVisibilty[15];
-            mfi_editorHelp.Visibility = mfiVisibilty[16];
         }
 
         async void mfi_Click(object sender, RoutedEventArgs e)
@@ -674,86 +656,14 @@ namespace KzBBS
                             delete.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
                         }
                         articleListMenu.ShowAt(cs);
-                        //int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
-                        //var menu = new PopupMenu();
-                        //menu.Commands.Add(new UICommand("推文 (X)", async (command) =>
-                        //    {
-                        //        await PTTDisplay.upOrDown(jumpCount);
-                        //        await TelnetConnect.sendCommand("X");
-                        //    }));
-
-                        //menu.Commands.Add(new UICommand("回應 (y)", async (command) =>
-                        //{
-                        //    await PTTDisplay.upOrDown(jumpCount);
-                        //    await TelnetConnect.sendCommand("y");
-                        //}));
-
-                        //if (currentLine.Author == PTTDisplay.User)
-                        //{
-                        //    menu.Commands.Add(new UICommand("編輯 (E)", async (command) =>
-                        //    {
-                        //        await PTTDisplay.upOrDown(jumpCount);
-                        //        await TelnetConnect.sendCommand("E");
-                        //    }));
-
-                        //    menu.Commands.Add(new UICommand("刪除 (d)", async (command) =>
-                        //    {
-                        //        await PTTDisplay.upOrDown(jumpCount);
-                        //        await TelnetConnect.sendCommand("d");
-                        //    }));
-                        //}
-
-                        //menu.Commands.Add(new UICommand("同主題串接 (S)", async (command) =>
-                        //{
-                        //    await PTTDisplay.upOrDown(jumpCount);
-                        //    await TelnetConnect.sendCommand("S");
-                        //}));
-
-                        //menu.Commands.Add(new UICommand("轉錄 (Ctrl+X)", async (command) =>
-                        //{
-                        //    await PTTDisplay.upOrDown(jumpCount);
-                        //    await TelnetConnect.sendCommand(new byte[] { 24 });
-                        //}));
-                        //try
-                        //{ 
-                        //    await menu.ShowAsync(new Point(PTTCanvas.Width / 2, 0));
-                        //}
-                        //catch(Exception exp)
-                        //{ Debug.WriteLine(exp.Message); }
                     }
 
                     if (PTTDisplay.currentMode == BBSMode.MailList)
                     {
                         mailListMenu.ShowAt(cs);
-                        //int jumpCount = (int)(TelnetANSIParser.curPos.X - currentLine.No);
-                        //var menu = new PopupMenu();
-                        //menu.Commands.Add(new UICommand("回信 (y)", async (command) =>
-                        //{
-                        //    await PTTDisplay.upOrDown(jumpCount);
-                        //    await TelnetConnect.sendCommand("y");
-                        //}));
-
-                        //menu.Commands.Add(new UICommand("刪除 (d)", async (command) =>
-                        //{
-                        //    await PTTDisplay.upOrDown(jumpCount);
-                        //    await TelnetConnect.sendCommand("d");
-                        //}));
-
-                        //menu.Commands.Add(new UICommand("站內轉寄 (x)", async (command) =>
-                        //{
-                        //    await PTTDisplay.upOrDown(jumpCount);
-                        //    await TelnetConnect.sendCommand("x");
-                        //}));
-
-                        //await menu.ShowAsync(new Point(PTTCanvas.Width / 2, 0));
                     }
                 }
             }
-        }
-
-        private void getInput_Click(object sender, RoutedEventArgs e)
-        {
-            sendCmd.Focus(FocusState.Pointer);
         }
 
         private async void rt_Click(object sender, RoutedEventArgs e)
@@ -792,133 +702,5 @@ namespace KzBBS
                 }
             }
         }
-
-        //private async void menuBtn_Tapped(object sender, TappedRoutedEventArgs e)
-        //{
-        //    if (PTTDisplay.currentMode == BBSMode.Editor)
-        //    {
-        //        PopupMenu menu = new PopupMenu();
-        //        menu.Commands.Add(new UICommand("檔案處理 (Ctrl+X)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand(new byte[] { 24 });
-        //        }));
-        //        menu.Commands.Add(new UICommand("說明 (Ctrl+Z)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand(new byte[] { 26 });
-        //        }));
-        //        await menu.ShowAsync(e.GetPosition(this));
-        //    }
-        //    else if (PTTDisplay.currentMode == BBSMode.ArticleBrowse)
-        //    {
-        //        PopupMenu menu = new PopupMenu();
-                
-        //        menu.Commands.Add(new UICommand("回應 (y)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("y");
-        //        }));
-        //        menu.Commands.Add(new UICommand("推文 (X)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("X");
-        //        }));
-        //        menu.Commands.Add(new UICommand("同主題第一篇 (=)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("=");
-        //        }));
-        //        menu.Commands.Add(new UICommand("同主題前篇 ([)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("[");
-        //        }));
-        //        menu.Commands.Add(new UICommand("同主題後篇 (])", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("]");
-        //        }));
-        //        //menu.Commands.Add(new UICommand("說明 (h)", async (cmd) =>
-        //        //{
-        //        //    await TelnetConnect.sendCommand("h");
-        //        //}));
-        //        await menu.ShowAsync(e.GetPosition(this));
-        //    }
-        //    else if (PTTDisplay.currentMode == BBSMode.MainList)
-        //    {
-        //        PopupMenu menu = new PopupMenu();
-        //        menu.Commands.Add(new UICommand("搜尋看板 (s)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("s");
-        //        }));
-        //        await menu.ShowAsync(e.GetPosition(this));
-        //    }
-        //    else if (PTTDisplay.currentMode == BBSMode.ArticleList)
-        //    {
-        //        PopupMenu menu = new PopupMenu();
-        //        menu.Commands.Add(new UICommand("搜尋看板 (s)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("s");
-        //        }));
-        //        menu.Commands.Add(new UICommand("發表文章 (Ctrl+P)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand(new byte[] { 16 });
-        //        }));
-        //        menu.Commands.Add(new UICommand("搜尋文章 (/)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("/");
-        //        }));
-        //        menu.Commands.Add(new UICommand("搜尋作者 (a)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("a");
-        //        }));
-        //        //menu.Commands.Add(new UICommand("搜尋文章代碼 (#)", async (cmd) =>
-        //        //{
-        //        //    await TelnetConnect.sendCommand("#");
-        //        //}));
-        //        //menu.Commands.Add(new UICommand("精華區 (z)", async (cmd) =>
-        //        //{
-        //        //    await TelnetConnect.sendCommand("z");
-        //        //}));
-        //        menu.Commands.Add(new UICommand("說明 (h)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("h");
-        //        }));
-        //        await menu.ShowAsync(e.GetPosition(this));
-                
-        //    }
-        //    else if (PTTDisplay.currentMode == BBSMode.BoardList || PTTDisplay.currentMode == BBSMode.ClassBoard)
-        //    {
-        //        PopupMenu menu = new PopupMenu();
-        //        menu.Commands.Add(new UICommand("搜尋看板 (s)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("s");
-        //        }));
-        //        menu.Commands.Add(new UICommand("搜尋 (/)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("/");
-        //        }));
-        //        menu.Commands.Add(new UICommand("說明 (h)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("h");
-        //        }));
-        //        await menu.ShowAsync(e.GetPosition(this));
-        //    }
-        //    else if (PTTDisplay.currentMode == BBSMode.MailList)
-        //    {
-        //        PopupMenu menu = new PopupMenu();
-        //        menu.Commands.Add(new UICommand("發新郵件 (Ctrl+P)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand(new byte[] { 16 });
-        //        }));
-        //        menu.Commands.Add(new UICommand("資源回收桶 (~)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("~");
-        //        })); 
-        //        menu.Commands.Add(new UICommand("說明 (h)", async (cmd) =>
-        //        {
-        //            await TelnetConnect.sendCommand("h");
-        //        }));
-        //        await menu.ShowAsync(e.GetPosition(this));
-        //    }
-        //    else
-        //    {
-                
-        //    }
-        //}
     }
 }

@@ -69,30 +69,71 @@
             <Button Content="n" Style="{StaticResource ButtonNoPadding}" MinWidth="30" Width="30" MinHeight="30" 
                     Click="hotKey_Click" BorderThickness="1" />
 
-            <Button Content="選單" x:Name="menuBtn" Style="{StaticResource ButtonNoPadding}"
+            <Button Content="選單" x:Name="mainMenuBtn" Style="{StaticResource ButtonNoPadding}" Visibility="Collapsed"
                     MinWidth="45" Width="45" MinHeight="30" BorderThickness="1" >
                 <Button.Flyout>
-                    <MenuFlyout x:Name="menuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
-                        <MenuFlyoutItem Name="mfi_fileProcess" Text="檔案處理 (Ctrl+X)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_response" Text="回應 (y)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_push" Text="推文 (X)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_sameFirst" Text="同主題第一篇 (=)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_samePre" Text="同主題前篇 ([)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_sameNext" Text="同主題後篇 (])" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_searchBoard" Text="搜尋看板 (s)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_post" Text="發表文章 (Ctrl+P)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_newMail" Text="發新郵件 (Ctrl+P)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_searchArticle" Text="搜尋文章 (/)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_search" Text="搜尋 (/)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_searchAuthor" Text="搜尋作者 (a)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_searchCode" Text="搜尋文章代碼 (#)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_essense" Text="精華區 (z)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_recycle" Text="資源回收桶 (~)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_help" Text="說明 (h)" Click="mfi_Click" />
-                        <MenuFlyoutItem Name="mfi_editorHelp" Text="說明 (Ctrl+Z)" Click="mfi_Click" />
+                    <MenuFlyout x:Name="mainMenuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
+                        <MenuFlyoutItem Text="搜尋看板 (s)" Click="mfi_Click" />
                     </MenuFlyout>
                 </Button.Flyout>
             </Button>
+            <Button Content="選單" x:Name="articleListMenuBtn" Style="{StaticResource ButtonNoPadding}" Visibility="Collapsed"
+                    MinWidth="45" Width="45" MinHeight="30" BorderThickness="1" >
+                <Button.Flyout>
+                    <MenuFlyout x:Name="articleListMenuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
+                        <MenuFlyoutItem Text="搜尋看板 (s)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="發表文章 (Ctrl+P)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="搜尋文章 (/)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="搜尋作者 (a)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="搜尋文章代碼 (#)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="精華區 (z)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="說明 (h)" Click="mfi_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+            <Button Content="選單" x:Name="editorMenuBtn" Style="{StaticResource ButtonNoPadding}" Visibility="Collapsed"
+                    MinWidth="45" Width="45" MinHeight="30" BorderThickness="1" >
+                <Button.Flyout>
+                    <MenuFlyout x:Name="editorMenuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
+                        <MenuFlyoutItem Text="檔案處理 (Ctrl+X)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="說明 (Ctrl+Z)" Click="mfi_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+            <Button Content="選單" x:Name="articleBrowseMenuBtn" Style="{StaticResource ButtonNoPadding}" Visibility="Collapsed"
+                    MinWidth="45" Width="45" MinHeight="30" BorderThickness="1" >
+                <Button.Flyout>
+                    <MenuFlyout x:Name="articleBrowseMenuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
+                        <MenuFlyoutItem Text="回應 (y)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="推文 (X)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="同主題第一篇 (=)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="同主題前篇 ([)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="同主題後篇 (])" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="說明 (h)" Click="mfi_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+            <Button Content="選單" x:Name="boardListMenuBtn" Style="{StaticResource ButtonNoPadding}" Visibility="Collapsed"
+                    MinWidth="45" Width="45" MinHeight="30" BorderThickness="1" >
+                <Button.Flyout>
+                    <MenuFlyout x:Name="boardListMenuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
+                        <MenuFlyoutItem Text="搜尋看板 (s)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="搜尋 (/)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="說明 (h)" Click="mfi_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+            <Button Content="選單" x:Name="mailMenuBtn" Style="{StaticResource ButtonNoPadding}" Visibility="Collapsed"
+                    MinWidth="45" Width="45" MinHeight="30" BorderThickness="1" >
+                <Button.Flyout>
+                    <MenuFlyout x:Name="mailMenuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
+                        <MenuFlyoutItem Text="發新郵件 (Ctrl+P)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="資源回收桶 (~)" Click="mfi_Click" />
+                        <MenuFlyoutItem Text="說明 (h)" Click="mfi_Click" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+            
             <TextBlock Name="statusBar" Height="15" FontSize="12" Padding="1" Margin="5,0,0,0" />
             <Button Visibility="Collapsed">
                 <Button.Flyout>
