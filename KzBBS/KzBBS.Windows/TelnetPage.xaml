@@ -154,13 +154,14 @@
 
                     <ListView Name="BBSListView" Width="1200" Height="600" SelectionMode="None" ScrollViewer.VerticalScrollBarVisibility="Auto"
                       ItemClick="BBSListViewItem_Click" RightTapped="BBSListViewItem_RTapped"
-                      ManipulationStarted="BBSListView_MStarted" ManipulationCompleted="BBSListView_MCompleted"
+                      ManipulationStarted="BBS_MStarted" ManipulationCompleted="BBS_MCompleted" ManipulationMode="TranslateX"         
                       IsItemClickEnabled="True" Background="Transparent" />
 
                     <StackPanel Name="bottomStackPanel" Height="30" />
                 </StackPanel>
             </ScrollViewer>
-            <Canvas Name="operationBoard" Width="1200" Height="720" VerticalAlignment="Top" />
+            <Canvas Name="operationBoard" Width="1200" Height="720" VerticalAlignment="Top"
+                    ManipulationStarted="BBS_MStarted" ManipulationCompleted="BBS_MCompleted" ManipulationMode="TranslateX,TranslateY" />
             <Viewbox Name="boundControlBtns" Width="1200" Height="720" VerticalAlignment="Top">
                 <Canvas Name="boundCtrlCanvas" Width="600" Height="360">
                     <RepeatButton Content="▲" Foreground="Transparent" Canvas.Left="220" Width="160" Height="40" BorderThickness="0" Click="hotKey_Click" IsTabStop="False" />

@@ -632,7 +632,7 @@ namespace KzBBS
                 lineCanvas.Children.Add(showBlinking("_", Colors.White, TelnetANSIParser.bg, _fontSize / 2
                         , TelnetANSIParser.curPos.X * _fontSize, TelnetANSIParser.curPos.Y * _fontSize / 2, 1));
                 list.Items.Add(lineCanvas);
-                if (currentMode == BBSMode.ArticleBrowse)
+                if (currentMode == BBSMode.ArticleBrowse || currentMode == BBSMode.PressAnyKey)
                 {
                     TextBlock tb = getClipTextBlock(Colors.Transparent);
                     generateHyperlink(wholeText, tb, Colors.Transparent);
@@ -693,6 +693,7 @@ namespace KzBBS
 
         public static void ProcessCanvas(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
         {
+            operationBoard.Children.Clear();
             string wholeText = "";
             foreach (var line in currPage)
             {
@@ -720,7 +721,7 @@ namespace KzBBS
                     }
                 }
             }
-            if (currentMode == BBSMode.ArticleBrowse)
+            if (currentMode == BBSMode.ArticleBrowse || currentMode == BBSMode.PressAnyKey)
             {
                 TextBlock tb = getClipTextBlock(Colors.Transparent);
                 generateHyperlink(wholeText, tb, Colors.Transparent);

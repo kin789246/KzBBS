@@ -727,15 +727,32 @@ namespace KzBBS
             operationBoard.Children.Clear();
         }
 
-
-        private void BBSListView_MStarted(object sender, ManipulationStartedRoutedEventArgs e)
+        Point maniStart = new Point(0, 0);
+        private void BBS_MStarted(object sender, ManipulationStartedRoutedEventArgs e)
         {
-            
+            maniStart = e.Position;
         }
 
-        private void BBSListView_MCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
+        private async void BBS_MCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
         {
-
+            if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
+            {
+                return;
+            }
+            double maniOffsetX = e.Position.X - maniStart.X;
+            double maniOffsetY = e.Position.Y - maniStart.Y;
+            if (maniOffsetX > 100)
+            {
+                await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 }); //left key
+            }
+            else if (maniOffsetY < -100)
+            {
+                await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~ PageDown key
+            }
+            else if (maniOffsetY > 100)
+            {
+                await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 }); //ESC [ 5 ~ PageUp key
+            }
         }
     }
 }
