@@ -151,14 +151,8 @@
   <data name="account.Text" xml:space="preserve">
     <value>帳號:</value>
   </data>
-  <data name="accountTbox.Width" xml:space="preserve">
-    <value>120</value>
-  </data>
   <data name="addressTag.Text" xml:space="preserve">
     <value>位址:</value>
-  </data>
-  <data name="addressTbox.Width" xml:space="preserve">
-    <value>120</value>
   </data>
   <data name="alreadybuy" xml:space="preserve">
     <value>感謝, 你已經買過了.</value>
@@ -181,14 +175,8 @@
   <data name="connBtn.Content" xml:space="preserve">
     <value>連線</value>
   </data>
-  <data name="connBtn.FontSize" xml:space="preserve">
-    <value>26</value>
-  </data>
   <data name="disconnBtn.Content" xml:space="preserve">
     <value>斷線</value>
-  </data>
-  <data name="disconnBtn.FontSize" xml:space="preserve">
-    <value>26</value>
   </data>
   <data name="existaccount" xml:space="preserve">
     <value>已經存在帳號:</value>
@@ -228,9 +216,6 @@
   </data>
   <data name="password.Text" xml:space="preserve">
     <value>密碼:</value>
-  </data>
-  <data name="passwordTbox.Width" xml:space="preserve">
-    <value>120</value>
   </data>
   <data name="plsreinput" xml:space="preserve">
     <value>帳號密碼都要輸入的啦! 請重發, 謝謝.</value>
@@ -289,15 +274,6 @@
   </data>
   <data name="disconnBtnWP.Content" xml:space="preserve">
     <value>斷線</value>
-  </data>
-  <data name="accountTboxWP.Width" xml:space="preserve">
-    <value>60</value>
-  </data>
-  <data name="addressTboxWP.Width" xml:space="preserve">
-    <value>60</value>
-  </data>
-  <data name="pwdTboxWP.Width" xml:space="preserve">
-    <value>60</value>
   </data>
   <data name="PTTMode.Content" xml:space="preserve">
     <value>PTT觸控模式</value>

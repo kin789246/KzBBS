@@ -32,40 +32,47 @@
         <!--TODO: Content should be placed within the following grid-->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="0">
             <StackPanel Grid.Row="1" Orientation="Horizontal">
-                <StackPanel x:Name="connInfoBoard">
-                    <StackPanel Orientation="Horizontal" Margin="7,0,0,0">
-                        <TextBlock x:Uid="addressTag" Text="Addr:" FontSize="13" Height="15" Padding="1" />
-                        <TextBox x:Uid="addressTboxWP" x:Name="tIP" Text="ptt.cc" FontSize="13" Width="80" MinHeight="25" Padding="0" Height="21"  IsSpellCheckEnabled="False"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="7,0,0,0">
-                        <TextBlock Text="Port:" FontSize="13" Height="15" Padding="1" />
-                        <TextBox x:Name="tPort" Text="23" FontSize="13" MinWidth="15" MinHeight="25" Height="25" Padding="0"  IsSpellCheckEnabled="False" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="7,0,0,0">
-                        <TextBlock x:Uid="account" Text="Acct:" FontSize="13" Height="15" Padding="1" />
-                        <TextBox x:Uid="accountTboxWP" x:Name="tAccount" FontSize="13" MinWidth="60" Width="75" MinHeight="25" Height="25" Padding="0"  IsSpellCheckEnabled="False"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="7,0,0,0">
-                        <TextBlock x:Uid="password" Text="Pwd:" FontSize="13" Height="15" Padding="1" />
-                        <PasswordBox x:Uid="pwdTboxWP" x:Name="tPwd" FontSize="13" PasswordChar="*" MinWidth="60" Width="75" MinHeight="25" Height="25" Padding="0" />
-                    </StackPanel>
+                <Grid Margin="10,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height="50" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="45" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Uid="addressTag" Text="Addr:" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <TextBox Grid.Column="1" x:Uid="addressTboxWP" x:Name="tIP" Text="ptt.cc" FontSize="20" MinWidth="120" 
+                                 Margin="5" IsSpellCheckEnabled="False" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <TextBlock Grid.Row="1" Text="Port:" FontSize="20" VerticalAlignment="Center" />
+                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="tPort" Text="23" FontSize="20" MinWidth="120" IsSpellCheckEnabled="False" 
+                            VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" />
+                    <TextBlock Grid.Row="2" x:Uid="account" Text="Acct:" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <TextBox Grid.Row="2" Grid.Column="1" x:Uid="accountTboxWP" x:Name="tAccount" FontSize="20" MinWidth="120"
+                                VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" IsSpellCheckEnabled="False"/>
+                    <TextBlock Grid.Row="3" x:Uid="password" Text="Pwd:" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <PasswordBox Grid.Row="3" Grid.Column="1" x:Uid="pwdTboxWP" x:Name="tPwd" FontSize="20" PasswordChar="*" 
+                                VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="120" Margin="5" />
                     <!--<StackPanel Orientation="Horizontal" Margin="2,0,0,0">
                         <CheckBox x:Uid="remember" x:Name="rememberAcPd" Style="{StaticResource WP81CheckboxStyle}" FontSize="12" MinWidth="40" MinHeight="20" Content="Save" Checked="remember_Checked"  />
                         <Button x:Uid="clearSaved" x:Name="clearSaved" Style="{StaticResource ButtonNoPadding}" FontSize="12" MinWidth="60" Padding="0,1,0,0" 
 							IsEnabled="False" BorderThickness="0" MinHeight="20" Content="Delete" Click="clearSaved_Click" />
                     </StackPanel>-->
-                    <StackPanel Orientation="Horizontal" Margin="5,0,5,0">
-                        <Button x:Uid="connBtnWP" x:Name="connBtn" Content="Conn" FontSize="13" Click="connect_Click" MinHeight="50" MinWidth="50" Style="{StaticResource ButtonNoPadding}"/>
-                        <Button x:Uid="disconnBtnWP" x:Name="disconnBtn" Content="Disconn" FontSize="13" MinHeight="50" MinWidth="50" Click="disconnect_Click" Style="{StaticResource ButtonNoPadding}"/>
+                    <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" >
+                        <Button x:Uid="connBtnWP" x:Name="connBtn" Content="Conn" FontSize="20" Click="connect_Click" MinHeight="50" MinWidth="50" Style="{StaticResource ButtonNoPadding}" />
+                        <Button x:Uid="disconnBtnWP" x:Name="disconnBtn" Content="Disconn" FontSize="20" MinHeight="50" MinWidth="50" Click="disconnect_Click" Style="{StaticResource ButtonNoPadding}"/>
                         <Button x:Name="toTelnetPage" Style="{StaticResource NavigationForwardButtonNormalStyle}" Click="goTelnetPage" MinHeight="40" MinWidth="50" VerticalAlignment="Center" />
                     </StackPanel>
-                </StackPanel>
+                </Grid>
                 <StackPanel x:Name="settingPanel" Margin="20,0,0,0">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="isBig5" Content="BIG5" GroupName="encodeGroup" Style="{StaticResource centerRadioButton}"
-                   Checked="encode_Checked" FontSize="20" />
+                   Checked="encode_Checked" FontSize="20" MinWidth="75" />
                         <RadioButton x:Name="isGBK" Content="GBK" GroupName="encodeGroup" Style="{StaticResource centerRadioButton}"
-                   Checked="encode_Checked" FontSize="20" />
+                   Checked="encode_Checked" FontSize="20" MinWidth="75" />
                     </StackPanel>
                     <CheckBox x:Name="PTTMode" FontSize="30" Content="PTT" Checked="PTT_Checked" Unchecked="PTT_Unchecked" />
                     <Grid x:Name="aboutPanel" RequestedTheme="Dark" >
@@ -78,8 +85,8 @@
                             <!--<Image Source="Assets/StoreLogo.scale-100.png" Stretch="None" Margin="0,0,5,0" VerticalAlignment="Top" />-->
                             <StackPanel>
                                 <TextBlock x:Uid="aboutContentWP" Text="KzBBS is designed for connecting to the telnet (BBS/Mud) server. If you are the newbie to use the BBS, please connect to the default address and then follow the instruction to register a new account. Thank you for downloading KzBBS."
-									Width="250" TextWrapping="Wrap" FontSize="15" Margin="5,5,0,0" HorizontalAlignment="Right"/>
-                                <TextBlock x:Name="versionText" Text="v1.0.0.0" FontSize="15" Margin="5,5,0,0" HorizontalAlignment="Right" />
+									Width="250" TextWrapping="Wrap" FontSize="15" HorizontalAlignment="Right"/>
+                                <TextBlock x:Name="versionText" Text="v1.0.0.0" FontSize="15" HorizontalAlignment="Right" />
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" RequestedTheme="Dark">

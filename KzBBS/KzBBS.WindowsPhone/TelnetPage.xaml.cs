@@ -702,5 +702,14 @@ namespace KzBBS
                 }
             }
         }
+
+        public void resetAllSetting()
+        {
+            PTTCanvas.Children.Clear();
+            topStackPanel.Children.Clear();
+            BBSListView.Items.Clear();
+            bottomStackPanel.Children.Clear();
+            operationBoard.Children.Clear();
+        }
     }
 }

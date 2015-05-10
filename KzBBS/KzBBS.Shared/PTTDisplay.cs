@@ -227,9 +227,9 @@ namespace KzBBS
             }
 
             //check login screen
-            if (pttline.No == 22 || pttline.No == 20 || pttline.No == 23)
+            if (pttline.No == 22 || pttline.No == 20 || pttline.No == 23 || pttline.No == 21)
             {
-                if (pttline.Text.Contains("guest") || pttline.Text.Contains("勇者代號"))
+                if (pttline.Text.Contains("請輸入代號") || pttline.Text.Contains("請輸入勇者代號") || pttline.Text.Contains("您的帳號"))
                 { LoginScreen = true; }
             }
             if (pttline.No == 23)
@@ -391,7 +391,8 @@ namespace KzBBS
             }
             else if (text.Contains("呼叫") || text.Contains("主功能表") || text.Contains("電子郵件") || text.Contains("聊天說話")
                 || text.Contains("個人") || text.Contains("工具程式") || text.Contains("熱門話題") || text.Contains("使用者統計")
-                || text.Contains("網路遊樂場") || text.Contains("Ptt") || text.Contains("名單編輯") || text.Contains("星期"))
+                || text.Contains("網路遊樂場") || text.Contains("Ptt量販店") || text.Contains("Ptt棋院")
+                || text.Contains("名單編輯") || text.Contains("星期"))
             {
                 currentMode = BBSMode.MainList;
             }

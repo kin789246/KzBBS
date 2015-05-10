@@ -31,9 +31,7 @@ namespace KzBBS
             {
                 TelnetSocket.PTTSocket.Disconnect();
             }
-            TelnetANSIParser.resetAllSetting();
-            PTTDisplay.resetAllSetting();
-            TelnetConnect.connection.autoLogin = false;
+            connection.autoLogin = false;
         }
 
         public async Task OnConnect(string tIP, string tPort)
@@ -44,7 +42,7 @@ namespace KzBBS
                 try
                 {
                     await TelnetSocket.PTTSocket.Connect(tIP, tPort);
-                    //await Task.Factory.StartNew(ClientWaitForMessage);
+                    //Task.Factory.StartNew(ClientWaitForMessage);
                     ClientWaitForMessage();
                 }
                 catch
@@ -79,10 +77,6 @@ namespace KzBBS
                         TelnetANSIParser.HandleAnsiESC(rawdata);
                         PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
                     }
-                    //else
-                    //{
-                    //    return;
-                    //}
                 }
                 catch (Exception exception)
                 {

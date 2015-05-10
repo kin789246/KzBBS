@@ -717,5 +717,25 @@ namespace KzBBS
                 }
             }
         }
+
+        public void resetAllSetting()
+        {
+            PTTCanvas.Children.Clear();
+            topStackPanel.Children.Clear();
+            BBSListView.Items.Clear();
+            bottomStackPanel.Children.Clear();
+            operationBoard.Children.Clear();
+        }
+
+
+        private void BBSListView_MStarted(object sender, ManipulationStartedRoutedEventArgs e)
+        {
+            
+        }
+
+        private void BBSListView_MCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
+        {
+
+        }
     }
 }

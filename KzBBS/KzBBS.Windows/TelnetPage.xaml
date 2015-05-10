@@ -147,13 +147,14 @@
                           SizeChanged="SV_sizeChanged">
                 <Canvas Name="PTTCanvas" Width="1200" Height="720" VerticalAlignment="Top" />
             </ScrollViewer>
-            <ScrollViewer Name="pttScrollViewer" Width="1200" Height="720" VerticalAlignment="Top"
+            <ScrollViewer Name="pttScrollViewer" Width="1200" Height="720" VerticalAlignment="Top" 
                           SizeChanged="SV_sizeChanged">
                 <StackPanel Name="BBSStackPanel" Width="1200" Height="720" VerticalAlignment="Top" >
                     <StackPanel Name="topStackPanel" Height="90" />
 
                     <ListView Name="BBSListView" Width="1200" Height="600" SelectionMode="None" ScrollViewer.VerticalScrollBarVisibility="Auto"
                       ItemClick="BBSListViewItem_Click" RightTapped="BBSListViewItem_RTapped"
+                      ManipulationStarted="BBSListView_MStarted" ManipulationCompleted="BBSListView_MCompleted"
                       IsItemClickEnabled="True" Background="Transparent" />
 
                     <StackPanel Name="bottomStackPanel" Height="30" />

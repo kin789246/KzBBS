@@ -117,6 +117,8 @@ namespace KzBBS
             isGBK.IsEnabled = true;
             PTTDisplay.resetAllSetting();
             TelnetANSIParser.resetAllSetting();
+            if (TelnetPage.Current != null)
+            { TelnetPage.Current.resetAllSetting(); }
         }
 
         /// <summary>

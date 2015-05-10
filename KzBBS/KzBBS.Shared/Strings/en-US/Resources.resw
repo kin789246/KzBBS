@@ -151,14 +151,8 @@
   <data name="account.Text" xml:space="preserve">
     <value>Acct:</value>
   </data>
-  <data name="accountTbox.Width" xml:space="preserve">
-    <value>140</value>
-  </data>
   <data name="addressTag.Text" xml:space="preserve">
     <value>Addr:</value>
-  </data>
-  <data name="addressTbox.Width" xml:space="preserve">
-    <value>135</value>
   </data>
   <data name="alreadybuy" xml:space="preserve">
     <value>Thank you, but you have purchased KzBBS.</value>
@@ -181,14 +175,8 @@
   <data name="connBtn.Content" xml:space="preserve">
     <value>Conn</value>
   </data>
-  <data name="connBtn.FontSize" xml:space="preserve">
-    <value>20</value>
-  </data>
   <data name="disconnBtn.Content" xml:space="preserve">
     <value>Disconn</value>
-  </data>
-  <data name="disconnBtn.FontSize" xml:space="preserve">
-    <value>20</value>
   </data>
   <data name="existaccount" xml:space="preserve">
     <value>We find the account: </value>
@@ -228,9 +216,6 @@
   </data>
   <data name="password.Text" xml:space="preserve">
     <value>Pwd:</value>
-  </data>
-  <data name="passwordTbox.Width" xml:space="preserve">
-    <value>140</value>
   </data>
   <data name="plsreinput" xml:space="preserve">
     <value>You have to key in both account and password, please try again.</value>
@@ -288,15 +273,6 @@
   </data>
   <data name="disconnBtnWP.Content" xml:space="preserve">
     <value>Disconn</value>
-  </data>
-  <data name="accountTboxWP.Width" xml:space="preserve">
-    <value>75</value>
-  </data>
-  <data name="addressTboxWP.Width" xml:space="preserve">
-    <value>80</value>
-  </data>
-  <data name="pwdTboxWP.Width" xml:space="preserve">
-    <value>75</value>
   </data>
   <data name="PTTMode.Content" xml:space="preserve">
     <value>PTT Touch</value>
