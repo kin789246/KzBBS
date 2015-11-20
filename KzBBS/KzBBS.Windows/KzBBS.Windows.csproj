@@ -158,6 +158,12 @@
     <None Include="Package.StoreAssociation.xml" />
   </ItemGroup>
   <ItemGroup>
+    <SDKReference Include="Microsoft.AdMediatorWindows81, Version=1.0">
+      <Name>Ad Mediator SDK for Windows 8.1 XAML</Name>
+    </SDKReference>
+    <SDKReference Include="Microsoft.VCLibs, Version=12.0">
+      <Name>Microsoft Visual C++ 2013 Runtime Package for Windows</Name>
+    </SDKReference>
     <SDKReference Include="MSAdvertisingXaml, Version=8.1">
       <Name>Microsoft Advertising SDK for Windows 8.1 %28Xaml%29</Name>
     </SDKReference>

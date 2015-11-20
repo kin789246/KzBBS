@@ -1,5 +1,6 @@
-MainPackage=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.0.0_Bundle\KzBBS.Windows_3.0.0.0_AnyCPU.appx
-SymbolPackage=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\AppPackages\KzBBS.Windows_3.0.0.0_Test\KzBBS.Windows_3.0.0.0_AnyCPU.appxsym
-ResourcePack=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.0.0_Bundle\KzBBS.Windows_3.0.0.0_language-zh-hant.appx
-ResourcePack=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.0.0_Bundle\KzBBS.Windows_3.0.0.0_scale-140.appx
-ResourcePack=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.0.0_Bundle\KzBBS.Windows_3.0.0.0_scale-180.appx
+MainPackage=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.1.0_Bundle\KzBBS.Windows_3.0.1.0_AnyCPU.appx
+SymbolPackage=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\AppPackages\KzBBS.Windows_3.0.1.0_Test\KzBBS.Windows_3.0.1.0_AnyCPU.appxsym
+ResourcePack=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.1.0_Bundle\KzBBS.Windows_3.0.1.0_language-en.appx
+ResourcePack=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.1.0_Bundle\KzBBS.Windows_3.0.1.0_language-zh-hant.appx
+ResourcePack=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.1.0_Bundle\KzBBS.Windows_3.0.1.0_scale-140.appx
+ResourcePack=C:\Users\K\Documents\Visual Studio 2013\Projects\KzBBS\KzBBS\KzBBS.Windows\bin\Release\KzBBS.Windows_3.0.1.0_Bundle\KzBBS.Windows_3.0.1.0_scale-180.appx

@@ -32,7 +32,6 @@
                 <StackPanel Name="topStackPanel" Height="45" />
                 <ListView Name="BBSListView" Width="600" Height="300" VerticalAlignment="Top" SelectionMode="None" 
                       ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" RightTapped="BBSListViewItem_RTapped"
-                      ManipulationStarted="BBS_MStarted" ManipulationCompleted="BBS_MCompleted" ManipulationMode="TranslateX" 
                       ItemClick="BBSListViewItem_Click" IsItemClickEnabled="True" />
 
                 <StackPanel Name="bottomStackPanel" Height="15" />
