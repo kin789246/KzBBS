@@ -4,7 +4,7 @@
     xmlns:local="using:KzBBS"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:UI1="using:Microsoft.Advertising.Mobile.UI"
+    xmlns:WindowsPhone81="using:Microsoft.AdMediator.WindowsPhone81"
     x:Class="KzBBS.MainPage"
     mc:Ignorable="d"
     Background="Black"
@@ -46,16 +46,16 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Uid="addressTag" Text="Addr:" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     <TextBox Grid.Column="1" x:Uid="addressTboxWP" x:Name="tIP" Text="ptt.cc" FontSize="20" MinWidth="120" 
-                                 Margin="5" IsSpellCheckEnabled="False" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+						Margin="5" IsSpellCheckEnabled="False" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                     <TextBlock Grid.Row="1" Text="Port:" FontSize="20" VerticalAlignment="Center" />
                     <TextBox Grid.Row="1" Grid.Column="1" x:Name="tPort" Text="23" FontSize="20" MinWidth="120" IsSpellCheckEnabled="False" 
-                            VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" />
+						VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" />
                     <TextBlock Grid.Row="2" x:Uid="account" Text="Acct:" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     <TextBox Grid.Row="2" Grid.Column="1" x:Uid="accountTboxWP" x:Name="tAccount" FontSize="20" MinWidth="120"
-                                VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" IsSpellCheckEnabled="False"/>
+						VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5" IsSpellCheckEnabled="False"/>
                     <TextBlock Grid.Row="3" x:Uid="password" Text="Pwd:" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     <PasswordBox Grid.Row="3" Grid.Column="1" x:Uid="pwdTboxWP" x:Name="tPwd" FontSize="20" PasswordChar="*" 
-                                VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="120" Margin="5" />
+						VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="120" Margin="5" />
                     <!--<StackPanel Orientation="Horizontal" Margin="2,0,0,0">
                         <CheckBox x:Uid="remember" x:Name="rememberAcPd" Style="{StaticResource WP81CheckboxStyle}" FontSize="12" MinWidth="40" MinHeight="20" Content="Save" Checked="remember_Checked"  />
                         <Button x:Uid="clearSaved" x:Name="clearSaved" Style="{StaticResource ButtonNoPadding}" FontSize="12" MinWidth="60" Padding="0,1,0,0" 
@@ -70,9 +70,9 @@
                 <StackPanel x:Name="settingPanel" Margin="20,0,0,0">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="isBig5" Content="BIG5" GroupName="encodeGroup" Style="{StaticResource centerRadioButton}"
-                   Checked="encode_Checked" FontSize="20" MinWidth="75" />
+							Checked="encode_Checked" FontSize="20" MinWidth="75" />
                         <RadioButton x:Name="isGBK" Content="GBK" GroupName="encodeGroup" Style="{StaticResource centerRadioButton}"
-                   Checked="encode_Checked" FontSize="20" MinWidth="75" />
+							Checked="encode_Checked" FontSize="20" MinWidth="75" />
                     </StackPanel>
                     <CheckBox x:Name="PTTMode" FontSize="30" Content="PTT" Checked="PTT_Checked" Unchecked="PTT_Unchecked" />
                     <Grid x:Name="aboutPanel" RequestedTheme="Dark" >
@@ -97,10 +97,11 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-        <StackPanel Name="adStackPanel" Grid.Row="2">
-            <UI1:AdControl Name="adPanel" AutoRefreshIntervalInSeconds="60" IsAutoRefreshEnabled="True"
+        <StackPanel x:Name="adStackPanel" Grid.Row="2">
+            <!--<UI1:AdControl Name="adPanel" AutoRefreshIntervalInSeconds="60" IsAutoRefreshEnabled="True"
                            ApplicationId="db2dbf68-7bb6-46c2-b7b4-605bf442a234" AdUnitId="218478" 
-                           Height="50" Width="320" ErrorOccurred="ad_ErrorOccurred" />
+                           Height="50" Width="320" ErrorOccurred="ad_ErrorOccurred" />-->
+            <WindowsPhone81:AdMediatorControl x:Name="ad01" Height="50" Width="320" HorizontalAlignment="Center" Id="mainPageAd01" />
         </StackPanel>
     </Grid>
 </Page>

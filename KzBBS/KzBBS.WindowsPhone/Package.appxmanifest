@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
-  <Identity Name="10342ChiaChing-Chiu.KzBBS" Publisher="CN=A1CD38D1-3A96-475C-8CDE-8A7EF4676FC2" Version="3.0.1.0" />
+  <Identity Name="10342ChiaChing-Chiu.KzBBS" Publisher="CN=A1CD38D1-3A96-475C-8CDE-8A7EF4676FC2" Version="3.1.0.0" />
   <mp:PhoneIdentity PhoneProductId="5991ab90-3168-4caa-a893-c17250a9e18f" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>KzBBS</DisplayName>

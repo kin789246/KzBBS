@@ -177,7 +177,7 @@ namespace KzBBS
         /// session.  The state will be null the first time a page is visited.</param>
         private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            if (PTTDisplay.Lines.Count != 0)
+            if (PTTDisplay.CurrentPage.Lines.Count != 0)
             {
                 onDataChange();
             }
@@ -457,13 +457,13 @@ namespace KzBBS
             if (PTTDisplay.PTTMode)
             {
                 buildMenuButton();
-                PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.Lines, operationBoard);
+                PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.CurrentPage.Lines, operationBoard);
             }
             else
             {
-                PTTDisplay.showBBS(PTTCanvas, PTTDisplay.Lines, operationBoard);
-                Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-                Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+                //PTTDisplay.showBBS(PTTCanvas, PTTDisplay.CurrentPage.Lines, operationBoard);
+                //Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+                //Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
             }
         }
 
@@ -606,7 +606,7 @@ namespace KzBBS
                 }
                 if (!string.IsNullOrEmpty(id))
                 {
-                    PTTLine pl = PTTDisplay.Lines.Find(x => x.UniqueId == id);
+                    PTTLine pl = PTTDisplay.CurrentPage.Lines.Find(x => x.UniqueId == id);
                     if (pl != null)
                     {
                         int jumpCount = (int)(TelnetANSIParser.curPos.X - pl.No);
@@ -638,14 +638,14 @@ namespace KzBBS
                 if (cs != null && cs.Tag != null)
                 {
                     string uniqueId = cs.Tag.ToString();
-                    currentLine = PTTDisplay.Lines.FindLast(x => x.UniqueId == uniqueId);
+                    currentLine = PTTDisplay.CurrentPage.Lines.FindLast(x => x.UniqueId == uniqueId);
                     if (currentLine == null)
                     {
                         return;
                     }
                     if (PTTDisplay.currentMode == BBSMode.ArticleList)
                     {
-                        if (currentLine.Author == PTTDisplay.User)
+                        if (currentLine.Author.text == PTTDisplay.User)
                         {
                             editor.Visibility = Windows.UI.Xaml.Visibility.Visible;
                             delete.Visibility = Windows.UI.Xaml.Visibility.Visible;

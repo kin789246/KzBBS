@@ -359,9 +359,9 @@ namespace KzBBS
             }
         }
 
-        private void ad_ErrorOccurred(object sender, Microsoft.Advertising.WinRT.UI.AdErrorEventArgs e)
-        {
-            Debug.WriteLine(e.Error.Message);
-        }
+        //private void ad_ErrorOccurred(object sender, Microsoft.Advertising.WinRT.UI.AdErrorEventArgs e)
+        //{
+        //    Debug.WriteLine(e.Error.Message);
+        //}
     }
 }

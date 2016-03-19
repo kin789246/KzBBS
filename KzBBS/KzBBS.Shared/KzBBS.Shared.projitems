@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TelnetANSIParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetConnect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelnetClass.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetSocket.cs" />
   </ItemGroup>

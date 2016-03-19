@@ -1,109 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Input;
 using Windows.Foundation;
 using Windows.UI;
-using Windows.Storage.Streams;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Windows.UI.Xaml.Media.Animation;
-using Windows.UI.Xaml.Data;
-using System.Collections.ObjectModel;
 
 namespace KzBBS
 {
-    enum BBSMode : byte
-    {
-        PressAnyKey, //任意鍵        
-        BoardList, //看板列表
-        ArticleList, //文章列表
-        MailList, //郵件選單
-        Essence, //精華區
-        MainList, //主畫面 
-        ClassBoard, //分類看板
-        ArticleBrowse, //文章瀏覽
-        AnimationPlay, //動畫播放
-        Editor, //編輯文章
-        Login, //登入畫面
-        Other,
-    };
-
-    class PTTBlock
-    {
-        public string Text { get; set; }
-        public double LeftPoint { get; set; }
-        public double TopPoint { get; set; }
-        public SolidColorBrush ForeColor { get; set; }
-        public SolidColorBrush BackColor { get; set; }
-        public double Width { get; set; }
-        public string FontName { get; set; }
-        public int ZIndex { get; set; }
-        public bool Blinking { get; set; }
-        public bool DualColor { get; set; }
-    }
-
-    class PTTLine
-    {
-        public int No { get; set; }
-        public string Text { get; set; }
-        public string UniqueId { get; set; }
-        public string Author { get; set; }
-        public bool Changed { get; set; }
-        public List<PTTBlock> Blocks { get; set; }
-
-        public PTTLine()
-        {
-            No = 0;
-            Text = "";
-            UniqueId = "";
-            Author = "";
-            Changed = true;
-            Blocks = new List<PTTBlock>();
-        }
-
-        public PTTLine(PTTLine line)
-        {
-            No = line.No;
-            Text = line.Text;
-            UniqueId = line.UniqueId;
-            Author = line.Author;
-            Changed = line.Changed;
-
-            Blocks = new List<PTTBlock>();
-            foreach (var block in line.Blocks)
-            {
-                Blocks.Add(block);
-            }
-        }
-    }
-
     class PTTDisplay
     {
-//#if WINDOWS_PHONE_APP
+        //#if WINDOWS_PHONE_APP
         public static string cht_fontFamily = "Arial";
         public static string ansi_fontFamily = "kaiu.ttf#DFKai-SB";
-//#endif
+        //#endif
 
-//#if WINDOWS_APP
-//        public static string cht_fontFamily = "Arial";
-//        public static string ansi_fontFamily = "DFKai-SB";
-//#endif
+        //#if WINDOWS_APP
+        //        public static string cht_fontFamily = "Arial";
+        //        public static string ansi_fontFamily = "DFKai-SB";
+        //#endif
         /*---------- define properties ----------*/
         public static double _fontSize = 30; //default font size =30
         public static double chtOffset = 1;
-        public static BBSMode LastMode = BBSMode.Other;
-        public static BBSMode currentMode;
+        public static BBSMode lastMode = BBSMode.Other;
+        public static BBSMode currentMode = BBSMode.Other;
         public static bool LoginScreen = false;
+        public static bool accPwdKeyIn = false;
         public static List<UIElement>[] toRemove = new List<UIElement>[24];
         public static bool PTTMode;
         public static string User = "";
+        public static char lastChar = char.MinValue;
         /*---------------------------------------*/
 
         public static PTTDisplay pttDisplay = new PTTDisplay();
@@ -118,53 +50,101 @@ namespace KzBBS
             set { toShowLines = value; }
         }
 
-        private static List<PTTLine> boardLists = new List<PTTLine>();
-        ///<Summary>
-        ///Save the lists
-        ///</Summary>
-        public static List<PTTLine> BoardLists
-        {
-            get { return boardLists ; }
-            set { boardLists = value; }
-        }
-
-        private static List<PTTLine> lastLines = new List<PTTLine>();
+        private static PTTPage lastPage = new PTTPage();
         /// <summary>
-        /// For compare if changed
+        /// record the last page
         /// </summary>
-        public static List<PTTLine> LastLines
+        public static PTTPage LastPage
         {
-            get { return lastLines; }
+            get { return lastPage; }
         }
 
-        private static List<PTTLine> lines = new List<PTTLine>();
+        private static PTTPage currentPage = new PTTPage();
         /// <summary>
         /// For the page load from server
         /// </summary>
-        public static List<PTTLine> Lines
+        public static PTTPage CurrentPage
         {
-            get { return lines; }
+            get { return currentPage; }
         }
 
         internal static void resetAllSetting()
         {
-            LastMode = BBSMode.Other;
+            User = "";
+            lastMode = BBSMode.Other;
             currentMode = BBSMode.Other;
             LoginScreen = false;
-            lines.Clear();
-            lastLines.Clear();
+            accPwdKeyIn = false;
+            currentPage = new PTTPage();
             toRemove = new List<UIElement>[24];
         }
 
         public void LoadFromSource(TelnetData[,] BBSPage)
         {
-            lines.Clear();
+            lastPage = new PTTPage(currentPage);
+            lastMode = currentMode;
+
+            //check page mode
+            //check line 0 and line 23, if matched, set BBSmode
+            string textL23 = getLineText(BBSPage, 23, 0, 46);
+            string textL0 = getLineText(BBSPage, 0, 0, 20);
+            BBSMode modeL0 = checkMode(textL0);
+            BBSMode modeL23 = checkMode(textL23);
+
+            if (modeL0 == modeL23)
+            {
+                currentMode = modeL0;
+            }
+            else if (modeL23 == BBSMode.PressAnyKey || modeL23 == BBSMode.AnimationPlay || modeL23 == BBSMode.Editor)
+            {
+                currentMode = modeL23;
+            }
+            else if (modeL0 == BBSMode.Other && modeL23 == BBSMode.ArticleBrowse)
+            {
+                currentMode = modeL23;
+            }
+            else if (modeL23 == BBSMode.Other)
+            {
+                if (modeL0 == BBSMode.ClassBoard)
+                {
+                    currentMode = modeL0;
+                }
+                else
+                {
+                    currentMode = modeL23;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            //check partial data received at article browse mode
+            if (currentMode == BBSMode.ArticleBrowse)
+            {
+                string currentPageLastLine = getLineText(BBSPage, 23, 0, 79);
+                if (currentPageLastLine == LastPage.Lines.Last().Text)
+                {
+                    currentMode = lastMode;
+                    return;
+                }
+            }
+
+            if (!checkIfKeepPage(lastChar))
+            {
+                currentMode = lastMode;
+                return;
+            }
+
+            //start to analyze data
+            currentPage = new PTTPage();
+            currentPage.Mode = currentMode;
+
+            lastID = "";
             TelnetData point;
-            lastID = new PTTLine();
             for (int row = 0; row < 24; row++)
             {
                 PTTLine pttline = new PTTLine();
-                pttline.Blocks = new List<PTTBlock>();
                 pttline.No = row;
                 point = new TelnetData();
                 point.cloneFrom(BBSPage[row, 0]);
@@ -175,6 +155,7 @@ namespace KzBBS
                     {
                         point.Text += BBSPage[row, col].Text;
                     }
+                    //save the block with same attribute
                     else
                     {
                         point.Count = col - (int)point.Position.Y;
@@ -192,11 +173,10 @@ namespace KzBBS
                 }
                 point.Count = 80 - (int)point.Position.Y;
                 pttline.Blocks.Add(getBlock(point));
-                getLineProp(pttline);
-                lines.Add(pttline);
+                getLineProp(pttline, BBSPage, row);
+                currentPage.Lines.Add(pttline);
             }
-            saveToLastLines();
-            //onLinesChanged(new EventArgs());
+            //inform the BBS data has changed
             if (TelnetPage.Current != null)
             { TelnetPage.Current.onDataChange(); }
             #region debug
@@ -205,26 +185,69 @@ namespace KzBBS
             //    Debug.WriteLine(line.Text);
             //}
             #endregion
-            Debug.WriteLine("mode: {0}", currentMode.ToString());
+            //Debug.WriteLine("mode: {0}", currentMode.ToString());
         }
 
-        private void saveToLastLines()
+        private bool checkIfKeepPage(char lChar)
         {
-            lastLines.Clear();
-            foreach (var line in lines)
+            bool keep = true;
+            switch (currentMode)
             {
-                lastLines.Add(new PTTLine(line));
+                case BBSMode.BoardList:
+                case BBSMode.ArticleList:
+                case BBSMode.MailList:
+                case BBSMode.Essence:
+                    keep = true;
+                    break;
+                default:
+                    keep = false;
+                    break;
             }
+            if (keep && PTTMode)
+            {
+                if (lChar != 'H')
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        PTTLine lastID = new PTTLine();
-        private void getLineProp(PTTLine pttline)
+        private string getLineText(TelnetData[,] BBSPage, int line, int start, int end)
         {
-            int parseNo = 0;
+            string result = "";
+            for (int i = start; i <= end; i++)
+            {
+                result += BBSPage[line, i].Text;
+            }
+            if (result.Trim() == "")
+            {
+                result = "";
+            }
+            //result may have duplicate words because of dual color word
+            return result;
+        }
+
+        //private void saveToLastLines()
+        //{
+        //    lastLines.Clear();
+        //    foreach (var line in lines)
+        //    {
+        //        lastLines.Add(new PTTLine(line));
+        //    }
+        //}
+
+        string lastID = "";
+        private void getLineProp(PTTLine pttline, TelnetData[,] onePage, int line)
+        {
+            //get line text
             foreach (PTTBlock item in pttline.Blocks)
             {
                 pttline.Text += item.Text;
             }
+
+            // todo: remove "●" for compare page Text only
+
 
             //check login screen
             if (pttline.No == 22 || pttline.No == 20 || pttline.No == 23 || pttline.No == 21)
@@ -232,97 +255,143 @@ namespace KzBBS
                 if (pttline.Text.Contains("請輸入代號") || pttline.Text.Contains("請輸入勇者代號") || pttline.Text.Contains("您的帳號"))
                 { LoginScreen = true; }
             }
-            if (pttline.No == 23)
-            {
-                if (!string.IsNullOrWhiteSpace(pttline.Text))
-                {
-                    checkMode(pttline.Text.Substring(0,12));
-                    if (currentMode == BBSMode.Other)
-                    {
-                        if (pttline.Text.Contains("任意鍵繼續") || pttline.Text.Contains("開始播放") || pttline.Text.Contains("空白鍵"))
-                        {
-                            currentMode = BBSMode.PressAnyKey;
-                        }
-                        //else
-                        //{
-                        //    PTTLine line = Lines.First(x => x.No == 0);
-                        //    checkMode(line.Text.Substring(0, 12));
-                        //}
-                    }
-                    //find login user
-                    if (currentMode == BBSMode.MainList && pttline.Text.Contains("我是"))
-                    {
-                        foreach (var item in pttline.Text.Split('\xA0'))
-                        {
-                            if (Regex.IsMatch(item, @"我是\w+"))
-                            {
-                                User = item.TrimStart('我').TrimStart('是');
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    PTTLine line = Lines.First(x => x.No == 0);
-                    checkMode(line.Text.Substring(0,12));
-                }
-            }
 
-            //get line's unique id
-            string getId = pttline.Text.Substring(0, 40);
-            if (pttline.Text.Contains("★"))
+            //get line's special properties
+            char[] forTrim = { '.', 'X', '●', '\xA0', '(', ')' };
+            if (currentMode == BBSMode.MainList)
             {
-                getId = pttline.Text.Substring(0, 9);
-            }
-            pttline.UniqueId = getSelectedID(getId);
-            
-            if (pttline.UniqueId == "★" && !string.IsNullOrEmpty(lastID.UniqueId))
-            {
-                int id = pttline.No - lastID.No + int.Parse(lastID.UniqueId);
-                pttline.UniqueId = id.ToString();
-            }
-            else if(int.TryParse(pttline.UniqueId, out parseNo))
-            {
-                lastID = pttline;
-            }
-            
-            //get author
-            foreach (var item in Regex.Split(pttline.Text, @"(\d+/\d+\s+\w+\s)"))
-            {
-                if (Regex.IsMatch(item, @"(\d+/\d+\s+\w+\s)"))
+                //find login user, 48th to 51th == "我是", user = 52th to 65th
+                if (pttline.No == 23 && pttline.Text.Contains("我是"))
                 {
-                    pttline.Author = item.Split('\xA0')[1];
+                    User = getLineText(onePage, line, 52, 65).TrimEnd('\xA0');
+                }
+                //get uniqueId = the 23th text
+                if (pttline.No > 11 && pttline.No != 23)
+                {
+                    pttline.UniqueId = onePage[line, 23].Text;
+                    pttline.number.text = getLineText(onePage, line, 22, 34);
+                    pttline.title.text = getLineText(onePage, line, 36, 79);
+                    if (!Regex.IsMatch(pttline.UniqueId, @"[A-Z0-9]"))
+                    {
+                        pttline.UniqueId = "";
+                        pttline.number.text = "";
+                        pttline.title.text = "";
+                    }
                 }
             }
-
-            if (pttline.No == 23)
+            else if (currentMode == BBSMode.Essence)
             {
-                pttline.UniqueId = "";
-                pttline.Author = "";
-            }
-            if (pttline.No == 22 && pttline.Text.Contains("▲ 回應至"))
-            {
-                pttline.UniqueId = "";
-                pttline.Author = "";
-            }
-            //check if changed
-            if (lastLines.Count != 0)
-            {
-                foreach (var line in lastLines)
+                if (pttline.No > 1 && pttline.No != 23)
                 {
-                    if (line.No == pttline.No)
+                    pttline.UniqueId = getLineText(onePage, line, 0, 6).Trim(forTrim);
+                    pttline.number.text = pttline.UniqueId;
+                    pttline.isRead.text = getLineText(onePage, line, 8, 9);
+                    pttline.isRead.fgColor = onePage[line, 8].ForeColor;
+                    pttline.title.text = getLineText(onePage, line, 11, 53);
+                    pttline.Author.text = getLineText(onePage, line, 55, 66);
+                    pttline.date.text = getLineText(onePage, line, 68, 79);
+                }
+            }
+            else if (currentMode == BBSMode.BoardList)
+            {
+                if (pttline.No > 2 && pttline.No != 23)
+                {
+                    pttline.UniqueId = getLineText(onePage, line, 0, 6).Trim(forTrim);
+                    pttline.number.text = pttline.UniqueId;
+                    pttline.isRead.text = getLineText(onePage, line, 8, 9);
+                    pttline.isRead.fgColor = onePage[line, 8].ForeColor;
+                    pttline.board.text = getLineText(onePage, line, 10, 21);
+                    pttline.board.fgColor = onePage[line, 10].ForeColor;
+                    pttline.category.text = getLineText(onePage, line, 23, 26);
+                    pttline.category.fgColor = onePage[line, 23].ForeColor;
+                    pttline.title.text = getLineText(onePage, line, 28, 63);
+                    pttline.hot.text = getLineText(onePage, line, 64, 66);
+                    pttline.hot.fgColor = onePage[line, 64].ForeColor;
+                    pttline.Author.text = getLineText(onePage, line, 67, 79);
+                }
+            }
+            else if (currentMode == BBSMode.ClassBoard)
+            {
+                if (pttline.No > 6)
+                {
+                    pttline.UniqueId = getLineText(onePage, line, 15, 16).Trim(forTrim);
+                    pttline.number.text = pttline.UniqueId;
+                    pttline.isRead.text = getLineText(onePage, line, 18, 19);
+                    pttline.isRead.fgColor = onePage[line, 18].ForeColor;
+                    pttline.title.text = getLineText(onePage, line, 20, 48);
+                    pttline.Author.text = getLineText(onePage, line, 61, 79);
+                }
+            }
+            else if (currentMode == BBSMode.ArticleList)
+            {
+                if (pttline.No > 2 && pttline.No != 23)
+                {
+                    pttline.UniqueId = getLineText(onePage, line, 0, 6).Trim(forTrim);
+                    pttline.number.text = pttline.UniqueId;
+                    //for article no. > 100,000 ex. Gossiping board
+                    int lastIDtoInt;
+                    int uIDtoInt;
+                    if (int.TryParse(pttline.UniqueId, out uIDtoInt) && int.TryParse(lastID, out lastIDtoInt))
                     {
-                        if (line.Text == pttline.Text)
+                        if (uIDtoInt > lastIDtoInt)
                         {
-                            pttline.Changed = false;
-                        }
-                        else
-                        {
-                            pttline.Changed = true;
+                            int result = uIDtoInt + lastIDtoInt / 100000 * 100000;
+                            pttline.UniqueId = result.ToString();
+                            pttline.number.text = pttline.UniqueId;
                         }
                     }
-                    break;
+                    //for bottom title
+                    if (pttline.UniqueId == "★" && int.TryParse(lastID, out lastIDtoInt))
+                    {
+                        pttline.UniqueId = (lastIDtoInt + 1).ToString();
+                        pttline.number.text = "★";
+                        pttline.number.fgColor = onePage[line, 4].ForeColor;
+                    }
+                    if (int.TryParse(pttline.UniqueId, out uIDtoInt))
+                    {
+                        lastID = pttline.UniqueId;
+                    }
+                    pttline.isRead.text = onePage[line, 8].Text;
+                    pttline.isRead.fgColor = onePage[line, 8].ForeColor;
+                    pttline.hot.text = getLineText(onePage, line, 9, 10);
+                    pttline.hot.fgColor = onePage[line, 9].ForeColor;
+                    pttline.date.text = getLineText(onePage, line, 12, 15);
+                    pttline.Author.text = getLineText(onePage, line, 17, 28);
+                    pttline.Author.fgColor = onePage[line, 17].ForeColor;
+                    pttline.title.text = getLineText(onePage, line, 30, 79);
+                    pttline.title.fgColor = onePage[line, 30].ForeColor;
+                }
+            }
+            else if (currentMode == BBSMode.MailList)
+            {
+                if (pttline.No > 2 && pttline.No != 23)
+                {
+                    pttline.UniqueId = getLineText(onePage, line, 0, 6).Trim(forTrim);
+                    pttline.number.text = pttline.UniqueId;
+                    pttline.isRead.text = onePage[line, 7].Text;
+                    pttline.isRead.fgColor = onePage[line, 7].ForeColor;
+                    pttline.date.text = getLineText(onePage, line, 9, 13);
+                    pttline.Author.text = getLineText(onePage, line, 15, 28);
+                    pttline.title.text = getLineText(onePage, line, 30, 79);
+                }
+            }
+            else if (currentMode == BBSMode.ArticleBrowse)
+            {
+                string firstText = getLineText(onePage, line, 0, 1);
+                if (firstText == "推" || firstText == "噓" || firstText == "→")
+                {
+                    pttline.push.text = firstText;
+                    pttline.push.fgColor = onePage[line, 0].ForeColor;
+                    pttline.date.text = getLineText(onePage, line, 67, 79);
+                    pttline.title.text = getLineText(onePage, line, 3, 65);
+                }
+                //don't record the non-push line
+                //date format = 08/23 10:51
+                if (!Regex.IsMatch(pttline.date.text, @"\d{2}/\d{2}\s\d{2}:\d{2}"))
+                {
+                    pttline.push.text = "";
+                    pttline.title.text = "";
+                    pttline.date.text = "";
                 }
             }
         }
@@ -350,64 +419,65 @@ namespace KzBBS
             pb.DualColor = point.DualColor;
             //if (pb.Text.Contains("\x25CF")) { Debug.WriteLine(pb.Text); }
             return pb;
-            
+
         }
 
-        public static bool isPushable = false;
-        private static List<string> bottomTitle = new List<string>();
+        //public static bool isPushable = false;
+        //private static List<string> bottomTitle = new List<string>();
         public static Windows.UI.Xaml.LineStackingStrategy lineStackingStrategy = LineStackingStrategy.BlockLineHeight;
         //public static double lineHeight = 30;
         public static string forClipBoard = "";
-        public static void checkMode(string text)
+        public BBSMode checkMode(string text)
         {
-            LastMode = currentMode;
+            BBSMode result = BBSMode.Other;
             if (text.Contains("動畫播放中"))
             {
-                currentMode = BBSMode.AnimationPlay;
+                result = BBSMode.AnimationPlay;
             }
             else if (text.Contains("任意鍵繼續") || text.Contains("開始播放") || text.Contains("空白鍵"))
             {
-                currentMode = BBSMode.PressAnyKey;
+                result = BBSMode.PressAnyKey;
             }
             else if (text.Contains("瀏覽") || text.Contains("作者"))
             {
-                currentMode = BBSMode.ArticleBrowse;
+                result = BBSMode.ArticleBrowse;
             }
-            else if(text.Contains("編輯文章"))
+            else if (text.Contains("編輯文章"))
             {
-                currentMode = BBSMode.Editor;
+                result = BBSMode.Editor;
             }
             else if (text.Contains("看板列表") || text.Contains("選擇看板"))
             {
-                currentMode = BBSMode.BoardList;
+                result = BBSMode.BoardList;
             }
-            else if (text.Contains("文章選讀") || text.Contains("板主"))
+            else if (text.Contains("文章選讀") || text.Contains("【板主:") || text.Contains("徵求中"))
             {
-                currentMode = BBSMode.ArticleList;
+                result = BBSMode.ArticleList;
             }
             else if (text.Contains("郵件選單") || text.Contains("鴻雁往返"))
             {
-                currentMode = BBSMode.MailList;
+                result = BBSMode.MailList;
             }
-            else if (text.Contains("呼叫") || text.Contains("主功能表") || text.Contains("電子郵件") || text.Contains("聊天說話")
+            else if (text.Contains("呼叫") || text.Contains("星期") || text.Contains("電子郵件") || text.Contains("聊天說話")
                 || text.Contains("個人") || text.Contains("工具程式") || text.Contains("熱門話題") || text.Contains("使用者統計")
-                || text.Contains("網路遊樂場") || text.Contains("Ptt量販店") || text.Contains("Ptt棋院")
-                || text.Contains("名單編輯") || text.Contains("星期"))
+                || text.Contains("網路遊樂場") || text.Contains("Ｐtt量販店") || text.Contains("Ｐtt棋院")
+                || text.Contains("名單編輯") || text.Contains("主功能表"))
             {
-                currentMode = BBSMode.MainList;
+                result = BBSMode.MainList;
             }
             else if (text.Contains("功能鍵") || text.Contains("精華文章"))
             {
-                currentMode = BBSMode.Essence;
+                result = BBSMode.Essence;
             }
             else if (text.Contains("分類看板"))
             {
-                currentMode = BBSMode.ClassBoard;
+                result = BBSMode.ClassBoard;
             }
             else
             {
-                currentMode = BBSMode.Other;
+                result = BBSMode.Other;
             }
+            return result;
         }
 
         public static bool isPortrait = false;
@@ -482,12 +552,12 @@ namespace KzBBS
 
         private static bool isChineseWord(string p)
         {
-            if (p[p.Length-1] > 0x3040)
+            if (p[p.Length - 1] > 0x3040)
             {
                 return true;
             }
             else
-            { 
+            {
                 return false;
             }
         }
@@ -515,14 +585,14 @@ namespace KzBBS
                 {
                     Canvas lineCanvas = getCanvas(list.Width, _fontSize);
                     if (currentMode == BBSMode.MainList && line.No < 12)
-                    { 
-                        line.UniqueId = "";
-                    }
-                    if (currentMode == BBSMode.ArticleList && line.No < 2 )
                     {
                         line.UniqueId = "";
                     }
-                    
+                    if (currentMode == BBSMode.ArticleList && line.No < 2)
+                    {
+                        line.UniqueId = "";
+                    }
+
                     if (string.IsNullOrEmpty(line.UniqueId) && articleTitle == false) //continue non-list
                     {
                         foreach (var block in line.Blocks)
@@ -611,7 +681,7 @@ namespace KzBBS
                 {
                     list.ScrollIntoView(list.Items[index]);
                 }
-                
+
             }
             else
             {
@@ -691,44 +761,44 @@ namespace KzBBS
             return pttCanvas;
         }
 
-        public static void ProcessCanvas(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
-        {
-            operationBoard.Children.Clear();
-            string wholeText = "";
-            foreach (var line in currPage)
-            {
-                wholeText += line.Text + "\n";
-                if (line.Changed)
-                {
-                    if (toRemove[line.No] != null)
-                    {
-                        foreach (var element in toRemove[line.No])
-                        {
-                            PTTCanvas.Children.Remove(element);
-                        }
-                        toRemove[line.No].Clear();
-                    }
+        //public static void ProcessCanvas(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
+        //{
+        //    operationBoard.Children.Clear();
+        //    string wholeText = "";
+        //    foreach (var line in currPage)
+        //    {
+        //        wholeText += line.Text + "\n";
+        //        if (line.Changed)
+        //        {
+        //            if (toRemove[line.No] != null)
+        //            {
+        //                foreach (var element in toRemove[line.No])
+        //                {
+        //                    PTTCanvas.Children.Remove(element);
+        //                }
+        //                toRemove[line.No].Clear();
+        //            }
 
-                    foreach (var block in line.Blocks)
-                    {
-                        if (toRemove[line.No] == null)
-                        { toRemove[line.No] = new List<UIElement>(); }
-                        saveToCanvas(PTTCanvas, block, block.TopPoint);
-                        //background block
-                        toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 2]);
-                        //foreground block
-                        toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
-                    }
-                }
-            }
-            if (currentMode == BBSMode.ArticleBrowse || currentMode == BBSMode.PressAnyKey)
-            {
-                TextBlock tb = getClipTextBlock(Colors.Transparent);
-                generateHyperlink(wholeText, tb, Colors.Transparent);
-                operationBoard.Children.Add(tb);
-            }
-            Debug.WriteLine("children count = {0}", PTTCanvas.Children.Count);
-        }
+        //            foreach (var block in line.Blocks)
+        //            {
+        //                if (toRemove[line.No] == null)
+        //                { toRemove[line.No] = new List<UIElement>(); }
+        //                saveToCanvas(PTTCanvas, block, block.TopPoint);
+        //                //background block
+        //                toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 2]);
+        //                //foreground block
+        //                toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
+        //            }
+        //        }
+        //    }
+        //    if (currentMode == BBSMode.ArticleBrowse || currentMode == BBSMode.PressAnyKey)
+        //    {
+        //        TextBlock tb = getClipTextBlock(Colors.Transparent);
+        //        generateHyperlink(wholeText, tb, Colors.Transparent);
+        //        operationBoard.Children.Add(tb);
+        //    }
+        //    Debug.WriteLine("children count = {0}", PTTCanvas.Children.Count);
+        //}
 
         public event EventHandler LinesPropChanged;
         public virtual void onLinesChanged(EventArgs e)
@@ -933,7 +1003,7 @@ namespace KzBBS
             btb.FontSize = _fontSize;
             btb.Width = tbWidth;
             if (btb.Text[0] > 0x3040)
-            { 
+            {
                 btb.FontFamily = new FontFamily(cht_fontFamily);
                 btb.TextLineBounds = TextLineBounds.TrimToCapHeight;
                 btb.Padding = new Thickness(0, chtOffset, 0, 0);
@@ -970,7 +1040,7 @@ namespace KzBBS
         {
             Run r = new Run();
             r.Text = big5Word;
-            if(r.Text[0] > 0x3040)
+            if (r.Text[0] > 0x3040)
             {
                 r.FontFamily = new FontFamily(cht_fontFamily);
             }
@@ -1039,7 +1109,7 @@ namespace KzBBS
                     {
                         tempHyperLink.NavigateUri = new Uri(toAdd);
                     }
-                    catch(Exception)
+                    catch (Exception)
                     {
                         //Home.ShowMessage(msg.Message);
                     }
@@ -1083,7 +1153,7 @@ namespace KzBBS
         public static int lastNum;
         public static string[] menuList = new string[24];
         public static void getText()
-        { 
+        {
             //int lastY;
             forClipBoard = "";
             TelnetData lastBlock = new TelnetData();
@@ -1107,7 +1177,7 @@ namespace KzBBS
 
             //        forClipBoard += block.Text;
             //        menuList[i] += block.Text;
-                    
+
             //        lastBlock = block;
             //    }
             //    if (menuList[i].Length > 10)
@@ -1119,39 +1189,39 @@ namespace KzBBS
             //}
         }
 
-        internal static async void showBBS(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
-        {
-            //check auto login
-            if (TelnetConnect.connection.autoLogin && LoginScreen)
-            {
-                await TelnetConnect.sendCommand(TelnetConnect.connection.account + "\r" + TelnetConnect.connection.password + "\r");
-                TelnetConnect.connection.autoLogin = false;
-                LoginScreen = false;
-            }
-            ProcessCanvas(PTTCanvas, currPage, operationBoard);
-        }
+        //internal static async void showBBS(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
+        //{
+        //    //check auto login
+        //    if (TelnetConnect.connection.autoLogin && LoginScreen)
+        //    {
+        //        await TelnetConnect.sendCommand(TelnetConnect.connection.account + "\r" + TelnetConnect.connection.password + "\r");
+        //        TelnetConnect.connection.autoLogin = false;
+        //        LoginScreen = false;
+        //    }
+        //    ProcessCanvas(PTTCanvas, currPage, operationBoard);
+        //}
 
-        internal static void articleAddToCurrPage()
-        {
-            if (currentMode == BBSMode.ArticleBrowse)
-            {
-                int start = Lines.FindLastIndex(x => x.Text == ToShowLines[ToShowLines.Count - 1].Text);
-                start++;
-                int last = Lines.Count - 1;
-                if (start == -1) //can't find in Lines
-                {
-                    start = 0;
-                }
-                if (!Lines[lines.Count-1].Text.Contains("100%"))
-                {
-                    last--;
-                }
-                for (int index = start; index < last; index++)
-                {
-                    ToShowLines.Add(Lines[index]);
-                }
-            }
-        }
+        //internal static void articleAddToCurrPage()
+        //{
+        //    if (currentMode == BBSMode.ArticleBrowse)
+        //    {
+        //        int start = Lines.FindLastIndex(x => x.Text == ToShowLines[ToShowLines.Count - 1].Text);
+        //        start++;
+        //        int last = Lines.Count - 1;
+        //        if (start == -1) //can't find in Lines
+        //        {
+        //            start = 0;
+        //        }
+        //        if (!Lines[lines.Count - 1].Text.Contains("100%"))
+        //        {
+        //            last--;
+        //        }
+        //        for (int index = start; index < last; index++)
+        //        {
+        //            ToShowLines.Add(Lines[index]);
+        //        }
+        //    }
+        //}
 
         public static async Task upOrDown(int count)
         {

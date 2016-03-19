@@ -9,6 +9,24 @@ using Windows.UI.Xaml;
 
 namespace KzBBS
 {
+    public class TelnetText
+    {
+        public string text;
+        public Color fgColor;
+
+        public TelnetText()
+        {
+            text = "";
+            fgColor = Color.FromArgb(255, 192, 192, 192);
+        }
+
+        public TelnetText(string t, Color fg)
+        {
+            text = t;
+            fgColor = fg;
+        }
+    }
+
     [DataContract]
     class TelnetData:INotifyPropertyChanged
     {
