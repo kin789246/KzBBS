@@ -86,14 +86,22 @@ namespace KzBBS
 
             //check page mode
             //check line 0 and line 23, if matched, set BBSmode
-            string textL23 = getLineText(BBSPage, 23, 0, 46);
+            string textL23 = getLineText(BBSPage, 23, 0, 79);
             string textL0 = getLineText(BBSPage, 0, 0, 20);
             BBSMode modeL0 = checkMode(textL0);
             BBSMode modeL23 = checkMode(textL23);
 
             if (modeL0 == modeL23)
             {
-                currentMode = modeL0;
+                string text22 = getLineText(BBSPage, 22, 0, 46);
+                if (text22.Contains("▲ 回應至") || text22.Contains("請輸入看板"))
+                {
+                    currentMode = BBSMode.Other;
+                }
+                else
+                {
+                    currentMode = modeL0;
+                }
             }
             else if (modeL23 == BBSMode.PressAnyKey || modeL23 == BBSMode.AnimationPlay || modeL23 == BBSMode.Editor)
             {
@@ -108,6 +116,11 @@ namespace KzBBS
                 if (modeL0 == BBSMode.ClassBoard)
                 {
                     currentMode = modeL0;
+                    string text22 = getLineText(BBSPage, 22, 0, 46);
+                    if (text22.Contains("▲ 回應至") || text22.Contains("請輸入看板"))
+                    {
+                        currentMode = BBSMode.Other;
+                    }
                 }
                 else
                 {
@@ -116,7 +129,7 @@ namespace KzBBS
             }
             else
             {
-                return;
+                currentMode = BBSMode.Other;
             }
 
             //check partial data received at article browse mode
@@ -129,6 +142,13 @@ namespace KzBBS
                     return;
                 }
             }
+
+            //#region debug
+            //if (currentMode == BBSMode.AnimationPlay)
+            //{
+            //    Debug.WriteLine(lastChar.ToString());
+            //}
+            //#endregion
 
             if (!checkIfKeepPage(lastChar))
             {
@@ -190,20 +210,20 @@ namespace KzBBS
 
         private bool checkIfKeepPage(char lChar)
         {
-            bool keep = true;
+            bool pageInJudge = true;
             switch (currentMode)
             {
                 case BBSMode.BoardList:
                 case BBSMode.ArticleList:
                 case BBSMode.MailList:
                 case BBSMode.Essence:
-                    keep = true;
+                    pageInJudge = true;
                     break;
                 default:
-                    keep = false;
+                    pageInJudge = false;
                     break;
             }
-            if (keep && PTTMode)
+            if (pageInJudge && PTTMode)
             {
                 if (lChar != 'H')
                 {
@@ -571,10 +591,10 @@ namespace KzBBS
                 TelnetConnect.connection.autoLogin = false;
                 LoginScreen = false;
             }
-            top.Children.Clear();
-            list.Items.Clear();
-            bottom.Children.Clear();
-            operationBoard.Children.Clear();
+            //top.Children.Clear();
+            //list.Items.Clear();
+            //bottom.Children.Clear();
+            //operationBoard.Children.Clear();
             if (currentMode == BBSMode.MainList || currentMode == BBSMode.ClassBoard || currentMode == BBSMode.BoardList
                 || currentMode == BBSMode.Essence || currentMode == BBSMode.ArticleList || currentMode == BBSMode.MailList)
             {
@@ -584,14 +604,14 @@ namespace KzBBS
                 foreach (var line in currPage)
                 {
                     Canvas lineCanvas = getCanvas(list.Width, _fontSize);
-                    if (currentMode == BBSMode.MainList && line.No < 12)
-                    {
-                        line.UniqueId = "";
-                    }
-                    if (currentMode == BBSMode.ArticleList && line.No < 2)
-                    {
-                        line.UniqueId = "";
-                    }
+                    //if (currentMode == BBSMode.MainList && line.No < 12)
+                    //{
+                    //    line.UniqueId = "";
+                    //}
+                    //if (currentMode == BBSMode.ArticleList && line.No < 2)
+                    //{
+                    //    line.UniqueId = "";
+                    //}
 
                     if (string.IsNullOrEmpty(line.UniqueId) && articleTitle == false) //continue non-list
                     {
@@ -761,44 +781,49 @@ namespace KzBBS
             return pttCanvas;
         }
 
-        //public static void ProcessCanvas(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
-        //{
-        //    operationBoard.Children.Clear();
-        //    string wholeText = "";
-        //    foreach (var line in currPage)
-        //    {
-        //        wholeText += line.Text + "\n";
-        //        if (line.Changed)
-        //        {
-        //            if (toRemove[line.No] != null)
-        //            {
-        //                foreach (var element in toRemove[line.No])
-        //                {
-        //                    PTTCanvas.Children.Remove(element);
-        //                }
-        //                toRemove[line.No].Clear();
-        //            }
+        public static void ProcessCanvas(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
+        {
+            //operationBoard.Children.Clear();
+            //PTTCanvas.Children.Clear();
+            string wholeText = "";
+            foreach (var line in currPage)
+            {
+                wholeText += line.Text + "\n";
+                foreach (var block in line.Blocks)
+                {
+                    saveToCanvas(PTTCanvas, block, block.TopPoint);
+                }
+                //if (line.Changed)
+                //{
+                //    if (toRemove[line.No] != null)
+                //    {
+                //        foreach (var element in toRemove[line.No])
+                //        {
+                //            PTTCanvas.Children.Remove(element);
+                //        }
+                //        toRemove[line.No].Clear();
+                //    }
 
-        //            foreach (var block in line.Blocks)
-        //            {
-        //                if (toRemove[line.No] == null)
-        //                { toRemove[line.No] = new List<UIElement>(); }
-        //                saveToCanvas(PTTCanvas, block, block.TopPoint);
-        //                //background block
-        //                toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 2]);
-        //                //foreground block
-        //                toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
-        //            }
-        //        }
-        //    }
-        //    if (currentMode == BBSMode.ArticleBrowse || currentMode == BBSMode.PressAnyKey)
-        //    {
-        //        TextBlock tb = getClipTextBlock(Colors.Transparent);
-        //        generateHyperlink(wholeText, tb, Colors.Transparent);
-        //        operationBoard.Children.Add(tb);
-        //    }
-        //    Debug.WriteLine("children count = {0}", PTTCanvas.Children.Count);
-        //}
+                //    foreach (var block in line.Blocks)
+                //    {
+                //        if (toRemove[line.No] == null)
+                //        { toRemove[line.No] = new List<UIElement>(); }
+                //        saveToCanvas(PTTCanvas, block, block.TopPoint);
+                //        //background block
+                //        toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 2]);
+                //        //foreground block
+                //        toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
+                //    }
+                //}
+            }
+            if (currentMode == BBSMode.ArticleBrowse || currentMode == BBSMode.PressAnyKey)
+            {
+                TextBlock tb = getClipTextBlock(Colors.Transparent);
+                generateHyperlink(wholeText, tb, Colors.Transparent);
+                operationBoard.Children.Add(tb);
+            }
+            //Debug.WriteLine("children count = {0}", PTTCanvas.Children.Count);
+        }
 
         public event EventHandler LinesPropChanged;
         public virtual void onLinesChanged(EventArgs e)
@@ -1189,17 +1214,17 @@ namespace KzBBS
             //}
         }
 
-        //internal static async void showBBS(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
-        //{
-        //    //check auto login
-        //    if (TelnetConnect.connection.autoLogin && LoginScreen)
-        //    {
-        //        await TelnetConnect.sendCommand(TelnetConnect.connection.account + "\r" + TelnetConnect.connection.password + "\r");
-        //        TelnetConnect.connection.autoLogin = false;
-        //        LoginScreen = false;
-        //    }
-        //    ProcessCanvas(PTTCanvas, currPage, operationBoard);
-        //}
+        internal static async void showBBS(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
+        {
+            //check auto login
+            if (TelnetConnect.connection.autoLogin && LoginScreen)
+            {
+                await TelnetConnect.sendCommand(TelnetConnect.connection.account + "\r" + TelnetConnect.connection.password + "\r");
+                TelnetConnect.connection.autoLogin = false;
+                LoginScreen = false;
+            }
+            ProcessCanvas(PTTCanvas, currPage, operationBoard);
+        }
 
         //internal static void articleAddToCurrPage()
         //{

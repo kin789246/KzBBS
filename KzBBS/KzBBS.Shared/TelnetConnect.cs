@@ -75,6 +75,18 @@ namespace KzBBS
                     if (rawdata.Length != 0)
                     {
                         TelnetANSIParser.HandleAnsiESC(rawdata);
+                        //save the last char received
+                        string lastChar0 = Big5Util.ToUni(new byte[] { rawdata[rawdata.Length - 1] });
+                        //Debug.WriteLine(lastChar0);
+                        if(string.IsNullOrEmpty(lastChar0))
+                        {
+                            PTTDisplay.lastChar = ' ';
+                        }
+                        else
+                        {
+                            PTTDisplay.lastChar = lastChar0[0];
+                        }
+                        
                         PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
                     }
                 }

@@ -245,32 +245,32 @@ namespace KzBBS
             //}
             //Debug.WriteLine(rdataString.ToString());
             ////raw text
-            List<byte> noCmd = new List<byte>();
-            noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
-            string removeIAC = Big5Util.ToUni(noCmd.ToArray());
-            if (!string.IsNullOrEmpty(removeIAC))
-            {
-                string printIt = "";
-                foreach (char byteword in removeIAC)
-                {
-                    if (byteword == '\n')
-                    {
-                        printIt += "\\n\n";
-                    }
-                    else if (byteword == '\r')
-                    { printIt += "\\r"; }
-                    else if (byteword == '\b')
-                    {
-                        printIt += "\\b";
-                    }
-                    else
-                    {
-                        printIt += byteword;
-                    }
-                }
-                printIt += "-received.";
-                Debug.WriteLine(printIt);
-            }
+            //List<byte> noCmd = new List<byte>();
+            //noCmd = TelnetParser.HandleAndRemoveTelnetBytes(rawdata.ToList<byte>());
+            //string removeIAC = Big5Util.ToUni(noCmd.ToArray());
+            //if (!string.IsNullOrEmpty(removeIAC))
+            //{
+            //    string printIt = "";
+            //    foreach (char byteword in removeIAC)
+            //    {
+            //        if (byteword == '\n')
+            //        {
+            //            printIt += "\\n\n";
+            //        }
+            //        else if (byteword == '\r')
+            //        { printIt += "\\r"; }
+            //        else if (byteword == '\b')
+            //        {
+            //            printIt += "\\b";
+            //        }
+            //        else
+            //        {
+            //            printIt += byteword;
+            //        }
+            //    }
+            //    printIt += "-received.";
+            //    Debug.WriteLine(printIt);
+            //}
             ////////////////////////////////////
 
             #endregion

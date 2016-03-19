@@ -235,19 +235,19 @@ namespace KzBBS
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand("\r");
-                    statusBar.Text = e.Key.ToString() + " sent";
+                    statusBar.Text = e.Key.ToString();
                 }
                 else
                 {
                     //byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
                     //await TelnetConnect.sendCommand(cmd);
-                    //statusBar.Text = sendCmd.Text + " sent";
+                    //statusBar.Text = sendCmd.Text;
                     //send big5 words one by one
                     foreach (var item in sendCmd.Text)
                     {
                         byte[] cmd = Big5Util.ToBig5Bytes(item.ToString());
                         await TelnetConnect.sendCommand(cmd);
-                        statusBar.Text = item + " sent";
+                        statusBar.Text = item.ToString();
                     }
                     sendCmd.Text = "";
                 }
@@ -261,7 +261,7 @@ namespace KzBBS
                     int uletter = (int)e.Key - 64;
                     byte[] cmd = { (byte)uletter };
                     await TelnetConnect.sendCommand(cmd);
-                    statusBar.Text = "Ctrl + " + e.Key.ToString() + " sent";
+                    statusBar.Text = "Ctrl + " + e.Key.ToString();
                     sendCmd.Text = "";
                 }
                 ctrlChecked.IsChecked = false;
@@ -273,7 +273,7 @@ namespace KzBBS
                 if (sendCmd.Text[0] < 256)
                 {
                     await TelnetConnect.sendCommand(sendCmd.Text);
-                    statusBar.Text = sendCmd.Text + " sent";
+                    statusBar.Text = sendCmd.Text;
                     sendCmd.Text = "";
                 }
             }
@@ -313,29 +313,29 @@ namespace KzBBS
             else if (e.Key == Windows.System.VirtualKey.Home)
             {
                 await TelnetConnect.sendCommand(new byte[] { 27, 91, 49, 126 });  //ESC [ 1 ~
-                statusBar.Text = "Home key sent";
+                statusBar.Text = "Home";
             }
             else if (e.Key == Windows.System.VirtualKey.End)
             {
                 await TelnetConnect.sendCommand(new byte[] { 27, 91, 52, 126 }); //ESC [ 4 ~
-                statusBar.Text = "End key sent";
+                statusBar.Text = "End";
             }
             else if (e.Key == Windows.System.VirtualKey.PageUp)
             {
                 await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 });  //ESC [ 5 ~
-                statusBar.Text = "PageUp key sent";
+                statusBar.Text = "PageUp";
             }
             else if (e.Key == Windows.System.VirtualKey.PageDown)
             {
                 await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~
-                statusBar.Text = "PageDown key sent";
+                statusBar.Text = "PageDown";
             }
             else if (e.Key == Windows.System.VirtualKey.Space)
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand(" ");
-                    statusBar.Text = "space key sent";
+                    statusBar.Text = "space";
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Back)
@@ -343,7 +343,7 @@ namespace KzBBS
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand("\b");
-                    statusBar.Text = "backspace key sent";
+                    statusBar.Text = "backspace";
                 }
             }
         }
@@ -366,18 +366,27 @@ namespace KzBBS
                         int uletter = ctrlWord - 64;
                         byte[] cmd = { (byte)uletter };
                         await TelnetConnect.sendCommand(cmd);
-                        statusBar.Text = "Ctrl + " + sendCmd.Text + " sent!";
+                        statusBar.Text = "Ctrl + " + sendCmd.Text;
                         sendCmd.Text = "";
                         ctrlChecked.IsChecked = false;
                     }
                 }
                 else
                 {
-                    byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
+                    //byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
 
-                    await TelnetConnect.sendCommand(cmd);
+                    //await TelnetConnect.sendCommand(cmd);
+                    //sendCmd.Text = "";
+                    //statusBar.Text = "";
+
+                    //set text one by one
+                    foreach (var item in sendCmd.Text)
+                    {
+                        byte[] cmd = Big5Util.ToBig5Bytes(item.ToString());
+                        await TelnetConnect.sendCommand(cmd);
+                        statusBar.Text = item.ToString();
+                    }
                     sendCmd.Text = "";
-                    statusBar.Text = "";
                 }
             }
         }

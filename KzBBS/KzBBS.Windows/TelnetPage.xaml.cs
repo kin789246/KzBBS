@@ -236,19 +236,20 @@ namespace KzBBS
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand("\r");
-                    statusBar.Text = e.Key.ToString() + " sent";
+                    statusBar.Text = e.Key.ToString();
                 }
                 else
-                {//TODO: send big5 words one by one
+                {   
+                    //send big5 words one by one
                     //byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
                     //await TelnetConnect.sendCommand(cmd);
                     foreach (var item in sendCmd.Text)
                     {
                         byte[] cmd = Big5Util.ToBig5Bytes(item.ToString());
                         await TelnetConnect.sendCommand(cmd);
-                        statusBar.Text = item + " sent";
+                        statusBar.Text = item.ToString();
                     }
-                    //statusBar.Text = sendCmd.Text + " sent";
+                    //statusBar.Text = sendCmd.Text;
                     sendCmd.Text = "";
                 }
                 bskey = true;
@@ -262,7 +263,7 @@ namespace KzBBS
                     int uletter = (int)e.Key - 64;
                     byte[] cmd = { (byte)uletter };
                     await TelnetConnect.sendCommand(cmd);
-                    statusBar.Text = "Ctrl + " + e.Key.ToString() + " sent";
+                    statusBar.Text = "Ctrl + " + e.Key.ToString();
                     sendCmd.Text = "";
                     bskey = true;
                 }
@@ -275,7 +276,7 @@ namespace KzBBS
                 if (sendCmd.Text[0] < 256)
                 {
                     await TelnetConnect.sendCommand(sendCmd.Text);
-                    statusBar.Text = sendCmd.Text + " sent";
+                    statusBar.Text = sendCmd.Text;
                     sendCmd.Text = "";
                     bskey = true;
                 }
@@ -328,29 +329,29 @@ namespace KzBBS
             else if (e.Key == Windows.System.VirtualKey.Home)
             {
                 await TelnetConnect.sendCommand(new byte[] { 27, 91, 49, 126 });  //ESC [ 1 ~
-                statusBar.Text = "Home key sent";
+                statusBar.Text = "Home";
             }
             else if (e.Key == Windows.System.VirtualKey.End)
             {
                 await TelnetConnect.sendCommand(new byte[] { 27, 91, 52, 126 }); //ESC [ 4 ~
-                statusBar.Text = "End key sent";
+                statusBar.Text = "End";
             }
             else if (e.Key == Windows.System.VirtualKey.PageUp)
             {
                 await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 });  //ESC [ 5 ~
-                statusBar.Text = "PageUp key sent";
+                statusBar.Text = "PageUp";
             }
             else if (e.Key == Windows.System.VirtualKey.PageDown)
             {
                 await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~
-                statusBar.Text = "PageDown key sent";
+                statusBar.Text = "PageDown";
             }
             else if (e.Key == Windows.System.VirtualKey.Space)
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
                     await TelnetConnect.sendCommand(" ");
-                    statusBar.Text = "space key sent";
+                    statusBar.Text = "space";
                     sendCmd.Text = "";
                     bskey = true;
                 }
@@ -360,7 +361,7 @@ namespace KzBBS
                 if (bskey)
                 {
                     await TelnetConnect.sendCommand("\b");
-                    statusBar.Text = "backspace key sent";
+                    statusBar.Text = "backspace";
                     bskey = false;
                 }
             }
@@ -384,18 +385,26 @@ namespace KzBBS
                         int uletter = ctrlWord - 64;
                         byte[] cmd = { (byte)uletter };
                         await TelnetConnect.sendCommand(cmd);
-                        statusBar.Text = "Ctrl + " + sendCmd.Text + " sent!";
+                        statusBar.Text = "Ctrl + " + sendCmd.Text;
                         sendCmd.Text = "";
                         ctrlChecked.IsChecked = false;
                     }
                 }
                 else
                 {
-                    byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
+                    //byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
 
-                    await TelnetConnect.sendCommand(cmd);
+                    //await TelnetConnect.sendCommand(cmd);
+                    //sendCmd.Text = "";
+                    //statusBar.Text = "";
+                    //set text one by one
+                    foreach (var item in sendCmd.Text)
+                    {
+                        byte[] cmd = Big5Util.ToBig5Bytes(item.ToString());
+                        await TelnetConnect.sendCommand(cmd);
+                        statusBar.Text = item.ToString();
+                    }
                     sendCmd.Text = "";
-                    statusBar.Text = "";
                 }
             }
         }
@@ -471,16 +480,46 @@ namespace KzBBS
 
         public void onDataChange()
         {
+            topStackPanel.Children.Clear();
+            BBSListView.Items.Clear();
+            bottomStackPanel.Children.Clear();
+            operationBoard.Children.Clear();
+            PTTCanvas.Children.Clear();
+
             if (PTTDisplay.PTTMode)
             {
                 buildMenuButton();
-                PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.CurrentPage.Lines, operationBoard);
+                bool pageInJudge;
+                //Debug.WriteLine(PTTDisplay.currentMode.ToString());
+                switch (PTTDisplay.currentMode)
+                {
+                    case BBSMode.BoardList:
+                    case BBSMode.ArticleList:
+                    case BBSMode.MailList:
+                    case BBSMode.Essence:
+                    case BBSMode.MainList:
+                    case BBSMode.ClassBoard:
+                        pageInJudge = true;
+                        break;
+                    default:
+                        pageInJudge = false;
+                        break;
+                }
+                if (pageInJudge)
+                {
+                    PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.CurrentPage.Lines, operationBoard);
+                }
+                else
+                {
+                    PTTDisplay.showBBS(PTTCanvas, PTTDisplay.CurrentPage.Lines, operationBoard);
+                }
             }
             else
             {
-                //PTTDisplay.showBBS(PTTCanvas, PTTDisplay.Lines, operationBoard);
-                //Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-                //Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+                PTTDisplay.showBBS(PTTCanvas, PTTDisplay.CurrentPage.Lines, operationBoard);
+                PTTCanvas.Children.Add(cursor);
+                Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+                Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
             }
         }
 
