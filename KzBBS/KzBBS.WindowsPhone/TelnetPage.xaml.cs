@@ -1,24 +1,12 @@
 ﻿using KzBBS.Common;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Graphics.Display;
 using Windows.UI;
-using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkID=390556
@@ -46,12 +34,10 @@ namespace KzBBS
             Window.Current.SizeChanged += Current_SizeChanged;
             DetermineSize();
 
-            if (!PTTDisplay.PTTMode)
-            { //set the cursor
-                PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
-                        , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
-                cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
-            }
+            //set the cursor
+            PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
+                    , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
+            cursor = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
 
             InputPane inpa = InputPane.GetForCurrentView();
             inpa.Showing += inpa_Showing;
@@ -463,16 +449,54 @@ namespace KzBBS
 
         public void onDataChange()
         {
+            topStackPanel.Children.Clear();
+            BBSListView.Items.Clear();
+            bottomStackPanel.Children.Clear();
+            operationBoard.Children.Clear();
+            PTTCanvas.Children.Clear();
+
             if (PTTDisplay.PTTMode)
             {
                 buildMenuButton();
-                PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.CurrentPage.Lines, operationBoard);
+                bool pageInJudge;
+                //Debug.WriteLine(PTTDisplay.currentMode.ToString());
+                switch (PTTDisplay.currentMode)
+                {
+                    case BBSMode.BoardList:
+                    case BBSMode.ArticleList:
+                    case BBSMode.MailList:
+                    case BBSMode.Essence:
+                    case BBSMode.MainList:
+                    case BBSMode.ClassBoard:
+                        pageInJudge = true;
+                        break;
+                    default:
+                        pageInJudge = false;
+                        break;
+                }
+                if (pageInJudge)
+                {
+                    PTTDisplay.ShowBBSListView(topStackPanel, BBSListView, bottomStackPanel, PTTDisplay.CurrentPage.Lines, operationBoard);
+                }
+                else
+                {
+                    PTTDisplay.showBBS(PTTCanvas, PTTDisplay.CurrentPage.Lines, operationBoard);
+                }
+                if (PTTDisplay.currentMode == BBSMode.Editor)
+                {
+                    //put cursor back
+                    PTTCanvas.Children.Add(cursor);
+                    Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+                    Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+                }
             }
             else
             {
-                //PTTDisplay.showBBS(PTTCanvas, PTTDisplay.CurrentPage.Lines, operationBoard);
-                //Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
-                //Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
+                PTTDisplay.showBBS(PTTCanvas, PTTDisplay.CurrentPage.Lines, operationBoard);
+                //put cursor back
+                PTTCanvas.Children.Add(cursor);
+                Canvas.SetLeft(cursor, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2);
+                Canvas.SetTop(cursor, TelnetANSIParser.curPos.X * PTTDisplay._fontSize);
             }
         }
 

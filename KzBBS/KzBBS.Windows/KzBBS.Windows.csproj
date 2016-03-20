@@ -18,7 +18,7 @@
     <PackageCertificateKeyFile>KzBBS.Windows_StoreKey.pfx</PackageCertificateKeyFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundlePlatforms>neutral</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>302728581DE9AB2D09D589630CFE4E20C8CFA1B3</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>83619A381493CBEE79E436ABC7EEEBD0EE8DBD34</PackageCertificateThumbprint>
     <AppxBundle>Always</AppxBundle>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

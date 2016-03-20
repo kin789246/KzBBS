@@ -458,10 +458,6 @@ namespace KzBBS
             {
                 result = BBSMode.PressAnyKey;
             }
-            else if (text.Contains("瀏覽") || text.Contains("作者"))
-            {
-                result = BBSMode.ArticleBrowse;
-            }
             else if (text.Contains("編輯文章"))
             {
                 result = BBSMode.Editor;
@@ -492,6 +488,10 @@ namespace KzBBS
             else if (text.Contains("分類看板"))
             {
                 result = BBSMode.ClassBoard;
+            }
+            else if (text.Contains("瀏覽") || text.Contains("作者"))
+            {
+                result = BBSMode.ArticleBrowse;
             }
             else
             {
@@ -793,28 +793,6 @@ namespace KzBBS
                 {
                     saveToCanvas(PTTCanvas, block, block.TopPoint);
                 }
-                //if (line.Changed)
-                //{
-                //    if (toRemove[line.No] != null)
-                //    {
-                //        foreach (var element in toRemove[line.No])
-                //        {
-                //            PTTCanvas.Children.Remove(element);
-                //        }
-                //        toRemove[line.No].Clear();
-                //    }
-
-                //    foreach (var block in line.Blocks)
-                //    {
-                //        if (toRemove[line.No] == null)
-                //        { toRemove[line.No] = new List<UIElement>(); }
-                //        saveToCanvas(PTTCanvas, block, block.TopPoint);
-                //        //background block
-                //        toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 2]);
-                //        //foreground block
-                //        toRemove[line.No].Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
-                //    }
-                //}
             }
             if (currentMode == BBSMode.ArticleBrowse || currentMode == BBSMode.PressAnyKey)
             {
