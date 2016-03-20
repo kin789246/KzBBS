@@ -298,6 +298,9 @@ namespace KzBBS
                         pttline.title.text = "";
                     }
                 }
+                //debug
+                //Debug.WriteLine("User: "+ User);
+                //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + "\ntitle: " + pttline.title.text);
             }
             else if (currentMode == BBSMode.Essence)
             {
@@ -311,6 +314,9 @@ namespace KzBBS
                     pttline.Author.text = getLineText(onePage, line, 55, 66);
                     pttline.date.text = getLineText(onePage, line, 68, 79);
                 }
+                //debug
+                //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + " isRead: " + pttline.isRead.text 
+                  //  + "\ntitle: " + pttline.title.text + "\nAuthor: " + pttline.Author.text + " date: " + pttline.date.text);
             }
             else if (currentMode == BBSMode.BoardList)
             {
@@ -329,6 +335,9 @@ namespace KzBBS
                     pttline.hot.fgColor = onePage[line, 64].ForeColor;
                     pttline.Author.text = getLineText(onePage, line, 67, 79);
                 }
+                //debug
+                //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + " isRead: " + pttline.isRead.text + " board: " + pttline.board.text
+                  //  + " Category: " + pttline.category.text + "\ntitle: " + pttline.title.text + " hot: " + pttline.hot.text + "\nAuthor: " + pttline.Author.text);
             }
             else if (currentMode == BBSMode.ClassBoard)
             {
@@ -341,6 +350,9 @@ namespace KzBBS
                     pttline.title.text = getLineText(onePage, line, 20, 48);
                     pttline.Author.text = getLineText(onePage, line, 61, 79);
                 }
+                //debug
+                //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + " isRead: " + pttline.isRead.text
+                  //  + "\ntitle: " + pttline.title.text + "\nAuthor: " + pttline.Author.text);
             }
             else if (currentMode == BBSMode.ArticleList)
             {
@@ -353,7 +365,7 @@ namespace KzBBS
                     int uIDtoInt;
                     if (int.TryParse(pttline.UniqueId, out uIDtoInt) && int.TryParse(lastID, out lastIDtoInt))
                     {
-                        if (uIDtoInt > lastIDtoInt)
+                        if (uIDtoInt < lastIDtoInt)
                         {
                             int result = uIDtoInt + lastIDtoInt / 100000 * 100000;
                             pttline.UniqueId = result.ToString();
@@ -381,6 +393,9 @@ namespace KzBBS
                     pttline.title.text = getLineText(onePage, line, 30, 79);
                     pttline.title.fgColor = onePage[line, 30].ForeColor;
                 }
+                //debug
+                //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + " isRead: " + pttline.isRead.text + " hot: " + pttline.hot.text
+                  //  + " date: " + pttline.date.text + "\nAuthor: " + pttline.Author.text + "\ntitle: " + pttline.title.text);
             }
             else if (currentMode == BBSMode.MailList)
             {
@@ -394,6 +409,9 @@ namespace KzBBS
                     pttline.Author.text = getLineText(onePage, line, 15, 28);
                     pttline.title.text = getLineText(onePage, line, 30, 79);
                 }
+                //debug
+                //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + " isRead: " + pttline.isRead.text
+                  //  + " date: " + pttline.date.text + "\nAuthor: " + pttline.Author.text + "\ntitle: " + pttline.title.text);
             }
             else if (currentMode == BBSMode.ArticleBrowse)
             {
@@ -413,6 +431,8 @@ namespace KzBBS
                     pttline.title.text = "";
                     pttline.date.text = "";
                 }
+                //debug
+                //Debug.WriteLine("push: " + pttline.push.text + " date: " + pttline.date.text + "\ntitle: " + pttline.title.text);
             }
         }
 
