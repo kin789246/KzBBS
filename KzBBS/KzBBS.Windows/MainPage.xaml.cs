@@ -1,20 +1,9 @@
 ﻿using KzBBS.Common;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Store;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234237
@@ -46,10 +35,11 @@ namespace KzBBS
         {
             get { return this.navigationHelper; }
         }
-
+        
+        public static TelnetConnect connection = new TelnetConnect();
         static Windows.ApplicationModel.Resources.ResourceLoader loader =
             new Windows.ApplicationModel.Resources.ResourceLoader();
-        //public static MainPage Current;
+        public static MainPage Current;
         public MainPage()
         {
             this.InitializeComponent();
@@ -57,13 +47,13 @@ namespace KzBBS
             this.navigationHelper.LoadState += navigationHelper_LoadState;
             this.navigationHelper.SaveState += navigationHelper_SaveState;
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
-
-            TelnetSocket.PTTSocket.SocketDisconnect += PTTSocket_SocketDisconnect;
+            
+            connection.SocketDisconnect += PTTSocket_SocketDisconnect;
             disconnBtn.IsEnabled = false;
             PTTMode.IsChecked = true;
             isBig5.IsChecked = true;
             loadProfile();
-            //Current = this;
+            Current = this;
 
             Package package = Package.Current;
             PackageId packageId = package.Id;
@@ -194,17 +184,17 @@ namespace KzBBS
             if (string.IsNullOrEmpty(tIP.Text) || string.IsNullOrEmpty(tPort.Text)) return;
             if (!string.IsNullOrEmpty(tAccount.Text) && !string.IsNullOrEmpty(tPwd.Password))
             {
-                TelnetConnect.connection.autoLogin = true;
-                TelnetConnect.connection.account = tAccount.Text;
-                TelnetConnect.connection.password = tPwd.Password;
+                connection.autoLogin = true;
+                connection.account = tAccount.Text;
+                connection.password = tPwd.Password;
             }
             try
             {
-                await TelnetConnect.connection.OnConnect(tIP.Text, tPort.Text);
+                await connection.OnConnect(tIP.Text, tPort.Text);
             }
             catch(Exception exp)
             {
-                TelnetSocket.ShowMessage(exp.Message);
+                TelnetConnect.ShowMessage(exp.Message);
                 return;
             }
 
@@ -213,7 +203,8 @@ namespace KzBBS
 
         private void disconnect_Click(object sender, RoutedEventArgs e)
         {
-            TelnetConnect.connection.OnDisconnect();
+            //TelnetConnect.connection.OnDisconnect();
+            connection.OnDisconnect();
         }
 
         //private async void remember_Checked(object sender, RoutedEventArgs e)
@@ -283,14 +274,14 @@ namespace KzBBS
 
         private void goTelnetPage(object sender, RoutedEventArgs e)
         {
-            if (TelnetSocket.PTTSocket.IsConnected)
+            if (connection.IsConnected)
             {
                 this.Frame.Navigate(typeof(TelnetPage));
             }
             else
             {
                 //TelnetSocket.ShowMessage("please connect first");
-                TelnetSocket.ShowMessage(loader.GetString("plsConn"));
+                TelnetConnect.ShowMessage(loader.GetString("plsConn"));
             }
         }
 
@@ -314,18 +305,18 @@ namespace KzBBS
                     await CurrentApp.RequestAppPurchaseAsync(true);
                     if (!licenseInfo.IsTrial)
                     { //ShowMessage("感謝你的購買");
-                        TelnetSocket.ShowMessage(loader.GetString("thanksforbuy"));
+                        TelnetConnect.ShowMessage(loader.GetString("thanksforbuy"));
                     }
                 }
                 catch (Exception)
                 { //ShowMessage("購買失敗");
-                    TelnetSocket.ShowMessage(loader.GetString("buyfailed"));
+                    TelnetConnect.ShowMessage(loader.GetString("buyfailed"));
                 }
             }
             else
             {
                 //ShowMessage("感謝, 你已經買過了.");
-                TelnetSocket.ShowMessage(loader.GetString("alreadybuy"));
+                TelnetConnect.ShowMessage(loader.GetString("alreadybuy"));
             }
         }
         private void PTT_Checked(object sender, RoutedEventArgs e)
@@ -335,7 +326,7 @@ namespace KzBBS
             {
                 if (!tIP.Text.Contains("ptt"))
                 {
-                    TelnetSocket.ShowMessage("勾選PTT可能會造成非PTT站台顯示不正常, 請斟酌使用.");
+                    TelnetConnect.ShowMessage("勾選PTT可能會造成非PTT站台顯示不正常, 請斟酌使用.");
                 }
             }
             

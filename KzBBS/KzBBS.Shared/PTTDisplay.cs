@@ -32,7 +32,7 @@ namespace KzBBS
         public static BBSMode currentMode = BBSMode.Other;
         public static bool LoginScreen = false;
         public static bool accPwdKeyIn = false;
-        public static List<UIElement>[] toRemove = new List<UIElement>[24];
+        //public static List<UIElement>[] toRemove = new List<UIElement>[24];
         public static bool PTTMode;
         public static string User = "";
         public static char lastChar = char.MinValue;
@@ -76,7 +76,7 @@ namespace KzBBS
             LoginScreen = false;
             accPwdKeyIn = false;
             currentPage = new PTTPage();
-            toRemove = new List<UIElement>[24];
+            //toRemove = new List<UIElement>[24];
         }
 
         public void LoadFromSource(TelnetData[,] BBSPage)
@@ -605,10 +605,10 @@ namespace KzBBS
         public async static void ShowBBSListView(StackPanel top, ListView list, StackPanel bottom, List<PTTLine> currPage, Canvas operationBoard)
         {
             //check auto login
-            if (TelnetConnect.connection.autoLogin && LoginScreen)
+            if (MainPage.connection.autoLogin && LoginScreen)
             {
-                await TelnetConnect.sendCommand(TelnetConnect.connection.account + "\r" + TelnetConnect.connection.password + "\r");
-                TelnetConnect.connection.autoLogin = false;
+                await MainPage.connection.sendCommand(MainPage.connection.account + "\r" + MainPage.connection.password + "\r");
+                MainPage.connection.autoLogin = false;
                 LoginScreen = false;
             }
             //top.Children.Clear();
@@ -1215,10 +1215,10 @@ namespace KzBBS
         internal static async void showBBS(Canvas PTTCanvas, List<PTTLine> currPage, Canvas operationBoard)
         {
             //check auto login
-            if (TelnetConnect.connection.autoLogin && LoginScreen)
+            if (MainPage.connection.autoLogin && LoginScreen)
             {
-                await TelnetConnect.sendCommand(TelnetConnect.connection.account + "\r" + TelnetConnect.connection.password + "\r");
-                TelnetConnect.connection.autoLogin = false;
+                await MainPage.connection.sendCommand(MainPage.connection.account + "\r" + MainPage.connection.password + "\r");
+                MainPage.connection.autoLogin = false;
                 LoginScreen = false;
             }
             ProcessCanvas(PTTCanvas, currPage, operationBoard);
@@ -1252,14 +1252,14 @@ namespace KzBBS
             {
                 for (int i = 0; i < -count; i++)
                 {
-                    await TelnetConnect.sendCommand(new byte[] { 27, 91, 66 });
+                    await MainPage.connection.sendCommand(new byte[] { 27, 91, 66 });
                 }
             }
             else //go up
             {
                 for (int i = 0; i < count; i++)
                 {
-                    await TelnetConnect.sendCommand(new byte[] { 27, 91, 65 });
+                    await MainPage.connection.sendCommand(new byte[] { 27, 91, 65 });
                 }
             }
         }

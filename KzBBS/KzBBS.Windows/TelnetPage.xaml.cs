@@ -219,18 +219,18 @@ namespace KzBBS
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
-                    await TelnetConnect.sendCommand("\r");
+                    await MainPage.connection.sendCommand("\r");
                     statusBar.Text = e.Key.ToString();
                 }
                 else
                 {   
                     //send big5 words one by one
                     //byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
-                    //await TelnetConnect.sendCommand(cmd);
+                    //await MainPage.connection.sendCommand(cmd);
                     foreach (var item in sendCmd.Text)
                     {
                         byte[] cmd = Big5Util.ToBig5Bytes(item.ToString());
-                        await TelnetConnect.sendCommand(cmd);
+                        await MainPage.connection.sendCommand(cmd);
                         statusBar.Text = item.ToString();
                     }
                     //statusBar.Text = sendCmd.Text;
@@ -246,7 +246,7 @@ namespace KzBBS
                 {
                     int uletter = (int)e.Key - 64;
                     byte[] cmd = { (byte)uletter };
-                    await TelnetConnect.sendCommand(cmd);
+                    await MainPage.connection.sendCommand(cmd);
                     statusBar.Text = "Ctrl + " + e.Key.ToString();
                     sendCmd.Text = "";
                     bskey = true;
@@ -259,7 +259,7 @@ namespace KzBBS
             {
                 if (sendCmd.Text[0] < 256)
                 {
-                    await TelnetConnect.sendCommand(sendCmd.Text);
+                    await MainPage.connection.sendCommand(sendCmd.Text);
                     statusBar.Text = sendCmd.Text;
                     sendCmd.Text = "";
                     bskey = true;
@@ -286,55 +286,55 @@ namespace KzBBS
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
-                    await TelnetConnect.sendCommand(new byte[] { 27, 91, 65 });
+                    await MainPage.connection.sendCommand(new byte[] { 27, 91, 65 });
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Down)
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
-                    await TelnetConnect.sendCommand(new byte[] { 27, 91, 66 });
+                    await MainPage.connection.sendCommand(new byte[] { 27, 91, 66 });
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Left)
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
-                    await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 });
+                    await MainPage.connection.sendCommand(new byte[] { 27, 91, 68 });
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Right)
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
-                    await TelnetConnect.sendCommand(new byte[] { 27, 91, 67 });
+                    await MainPage.connection.sendCommand(new byte[] { 27, 91, 67 });
                 }
             }
             else if (e.Key == Windows.System.VirtualKey.Home)
             {
-                await TelnetConnect.sendCommand(new byte[] { 27, 91, 49, 126 });  //ESC [ 1 ~
+                await MainPage.connection.sendCommand(new byte[] { 27, 91, 49, 126 });  //ESC [ 1 ~
                 statusBar.Text = "Home";
             }
             else if (e.Key == Windows.System.VirtualKey.End)
             {
-                await TelnetConnect.sendCommand(new byte[] { 27, 91, 52, 126 }); //ESC [ 4 ~
+                await MainPage.connection.sendCommand(new byte[] { 27, 91, 52, 126 }); //ESC [ 4 ~
                 statusBar.Text = "End";
             }
             else if (e.Key == Windows.System.VirtualKey.PageUp)
             {
-                await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 });  //ESC [ 5 ~
+                await MainPage.connection.sendCommand(new byte[] { 27, 91, 53, 126 });  //ESC [ 5 ~
                 statusBar.Text = "PageUp";
             }
             else if (e.Key == Windows.System.VirtualKey.PageDown)
             {
-                await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~
+                await MainPage.connection.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~
                 statusBar.Text = "PageDown";
             }
             else if (e.Key == Windows.System.VirtualKey.Space)
             {
                 if (string.IsNullOrEmpty(sendCmd.Text))
                 {
-                    await TelnetConnect.sendCommand(" ");
+                    await MainPage.connection.sendCommand(" ");
                     statusBar.Text = "space";
                     sendCmd.Text = "";
                     bskey = true;
@@ -344,7 +344,7 @@ namespace KzBBS
             {
                 if (bskey)
                 {
-                    await TelnetConnect.sendCommand("\b");
+                    await MainPage.connection.sendCommand("\b");
                     statusBar.Text = "backspace";
                     bskey = false;
                 }
@@ -355,7 +355,7 @@ namespace KzBBS
         {
             if (string.IsNullOrEmpty(sendCmd.Text))
             {
-                await TelnetConnect.sendCommand("\r");
+                await MainPage.connection.sendCommand("\r");
                 statusBar.Text = "";
             }
             else
@@ -368,7 +368,7 @@ namespace KzBBS
                     {
                         int uletter = ctrlWord - 64;
                         byte[] cmd = { (byte)uletter };
-                        await TelnetConnect.sendCommand(cmd);
+                        await MainPage.connection.sendCommand(cmd);
                         statusBar.Text = "Ctrl + " + sendCmd.Text;
                         sendCmd.Text = "";
                         ctrlChecked.IsChecked = false;
@@ -378,14 +378,14 @@ namespace KzBBS
                 {
                     //byte[] cmd = Big5Util.ToBig5Bytes(sendCmd.Text);
 
-                    //await TelnetConnect.sendCommand(cmd);
+                    //await MainPage.connection.sendCommand(cmd);
                     //sendCmd.Text = "";
                     //statusBar.Text = "";
                     //set text one by one
                     foreach (var item in sendCmd.Text)
                     {
                         byte[] cmd = Big5Util.ToBig5Bytes(item.ToString());
-                        await TelnetConnect.sendCommand(cmd);
+                        await MainPage.connection.sendCommand(cmd);
                         statusBar.Text = item.ToString();
                     }
                     sendCmd.Text = "";
@@ -400,61 +400,61 @@ namespace KzBBS
             string cmd = bn.Content as string;
             if (cmd.Length == 1 && char.IsLetterOrDigit(cmd[0]))
             {
-                await TelnetConnect.sendCommand(cmd);
+                await MainPage.connection.sendCommand(cmd);
             }
             else if (cmd[0] == '^')
             {
                 int send = cmd[1] - 96;
-                await TelnetConnect.sendCommand(new byte[] { (byte)send });
+                await MainPage.connection.sendCommand(new byte[] { (byte)send });
             }
             else
             {
                 switch (cmd)
                 {
                     case "SPACE":
-                        await TelnetConnect.sendCommand(" ");
+                        await MainPage.connection.sendCommand(" ");
                         break;
                     case "←":
-                        await TelnetConnect.sendCommand("\b");
+                        await MainPage.connection.sendCommand("\b");
                         break;
                     case "▲":
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 65 });
+                        await MainPage.connection.sendCommand(new byte[] { 27, 91, 65 });
                         break;
                     case "▼":
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 66 });
+                        await MainPage.connection.sendCommand(new byte[] { 27, 91, 66 });
                         break;
                     case "◄":
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 });
+                        await MainPage.connection.sendCommand(new byte[] { 27, 91, 68 });
                         break;
                     case "►":
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 67 });
+                        await MainPage.connection.sendCommand(new byte[] { 27, 91, 67 });
                         break;
                     case "PgUp":
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 }); //Esc [ 5 ~
+                        await MainPage.connection.sendCommand(new byte[] { 27, 91, 53, 126 }); //Esc [ 5 ~
                         break;
                     case "PgDn":
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~
+                        await MainPage.connection.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~
                         break;
                     case "/":
-                        await TelnetConnect.sendCommand("/");
+                        await MainPage.connection.sendCommand("/");
                         break;
                     case "[":
-                        await TelnetConnect.sendCommand("[");
+                        await MainPage.connection.sendCommand("[");
                         break;
                     case "]":
-                        await TelnetConnect.sendCommand("]");
+                        await MainPage.connection.sendCommand("]");
                         break;
                     case "=":
-                        await TelnetConnect.sendCommand("=");
+                        await MainPage.connection.sendCommand("=");
                         break;
                     case "#":
-                        await TelnetConnect.sendCommand("#");
+                        await MainPage.connection.sendCommand("#");
                         break;
                     case "Home":
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 49, 126 }); //ESC [ 1 ~
+                        await MainPage.connection.sendCommand(new byte[] { 27, 91, 49, 126 }); //ESC [ 1 ~
                         break;
                     case "End":
-                        await TelnetConnect.sendCommand(new byte[] { 27, 91, 52, 126 }); //ESC [ 4 ~
+                        await MainPage.connection.sendCommand(new byte[] { 27, 91, 52, 126 }); //ESC [ 4 ~
                         break;
                     default:
                         break;
@@ -590,51 +590,51 @@ namespace KzBBS
                 switch (mfi.Text)
                 {
                     case "檔案處理 (Ctrl+X)":
-                        await TelnetConnect.sendCommand(new byte[] { 24 });
+                        await MainPage.connection.sendCommand(new byte[] { 24 });
                         break;
                     case "說明 (Ctrl+Z)":
-                        await TelnetConnect.sendCommand(new byte[] { 26 });
+                        await MainPage.connection.sendCommand(new byte[] { 26 });
                         break;
                     case "回應 (y)":
-                        await TelnetConnect.sendCommand("y");
+                        await MainPage.connection.sendCommand("y");
                         break;
                     case "推文 (X)":
-                        await TelnetConnect.sendCommand("X");
+                        await MainPage.connection.sendCommand("X");
                         break;
                     case "同主題第一篇 (=)":
-                        await TelnetConnect.sendCommand("=");
+                        await MainPage.connection.sendCommand("=");
                         break;
                     case "同主題前篇 ([)":
-                        await TelnetConnect.sendCommand("[");
+                        await MainPage.connection.sendCommand("[");
                         break;
                     case "同主題後篇 (])":
-                        await TelnetConnect.sendCommand("]");
+                        await MainPage.connection.sendCommand("]");
                         break;
                     case "說明 (h)":
-                        await TelnetConnect.sendCommand("h");
+                        await MainPage.connection.sendCommand("h");
                         break;
                     case "搜尋看板 (s)":
-                        await TelnetConnect.sendCommand("s");
+                        await MainPage.connection.sendCommand("s");
                         break;
                     case "發表文章 (Ctrl+P)":
                     case "發新郵件 (Ctrl+P)":
-                        await TelnetConnect.sendCommand(new byte[] { 16 });
+                        await MainPage.connection.sendCommand(new byte[] { 16 });
                         break;
                     case "搜尋文章 (/)":
                     case "搜尋 (/)":
-                        await TelnetConnect.sendCommand("/");
+                        await MainPage.connection.sendCommand("/");
                         break;
                     case "搜尋作者 (a)":
-                        await TelnetConnect.sendCommand("a");
+                        await MainPage.connection.sendCommand("a");
                         break;
                     case "搜尋文章代碼 (#)":
-                        await TelnetConnect.sendCommand("#");
+                        await MainPage.connection.sendCommand("#");
                         break;
                     case "精華區 (z)":
-                        await TelnetConnect.sendCommand("z");
+                        await MainPage.connection.sendCommand("z");
                         break;
                     case "資源回收桶 (~)":
-                        await TelnetConnect.sendCommand("~");
+                        await MainPage.connection.sendCommand("~");
                         break;
                     default:
                         break;
@@ -658,19 +658,19 @@ namespace KzBBS
                     {
                         int jumpCount = (int)(TelnetANSIParser.curPos.X - pl.No);
                         await PTTDisplay.upOrDown(jumpCount);
-                        await TelnetConnect.sendCommand("\r");
+                        await MainPage.connection.sendCommand("\r");
                     }
                 }
                 if (PTTDisplay.currentMode == BBSMode.PressAnyKey || PTTDisplay.currentMode == BBSMode.AnimationPlay)
                 {
-                    await TelnetConnect.sendCommand(" ");
+                    await MainPage.connection.sendCommand(" ");
                 }
             }
             else
             {
                 if (PTTDisplay.currentMode == BBSMode.PressAnyKey || PTTDisplay.currentMode == BBSMode.AnimationPlay)
                 {
-                    await TelnetConnect.sendCommand(" ");
+                    await MainPage.connection.sendCommand(" ");
                 }
             }
         }
@@ -722,26 +722,26 @@ namespace KzBBS
                 switch (mfi.Text)
                 {
                     case "推文 (X)":
-                        await TelnetConnect.sendCommand("X");
+                        await MainPage.connection.sendCommand("X");
                         break;
                     case "回應 (y)":
                     case "回信 (y)":
-                        await TelnetConnect.sendCommand("y");
+                        await MainPage.connection.sendCommand("y");
                         break;
                     case "編輯 (E)":
-                        await TelnetConnect.sendCommand("E");
+                        await MainPage.connection.sendCommand("E");
                         break;
                     case "刪除 (d)":
-                        await TelnetConnect.sendCommand("d");
+                        await MainPage.connection.sendCommand("d");
                         break;
                     case "同主題串接 (S)":
-                        await TelnetConnect.sendCommand("S");
+                        await MainPage.connection.sendCommand("S");
                         break;
                     case "轉錄 (Ctrl+X)":
-                        await TelnetConnect.sendCommand(new byte[] { 24 });
+                        await MainPage.connection.sendCommand(new byte[] { 24 });
                         break;
                     case "站內轉寄 (x)":
-                        await TelnetConnect.sendCommand("x");
+                        await MainPage.connection.sendCommand("x");
                         break;
                     default:
                         break;
@@ -774,15 +774,15 @@ namespace KzBBS
             double maniOffsetY = e.Position.Y - maniStart.Y;
             if (maniOffsetX > 100)
             {
-                await TelnetConnect.sendCommand(new byte[] { 27, 91, 68 }); //left key
+                await MainPage.connection.sendCommand(new byte[] { 27, 91, 68 }); //left key
             }
             else if (maniOffsetY < -100)
             {
-                await TelnetConnect.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~ PageDown key
+                await MainPage.connection.sendCommand(new byte[] { 27, 91, 54, 126 }); //ESC [ 6 ~ PageDown key
             }
             else if (maniOffsetY > 100)
             {
-                await TelnetConnect.sendCommand(new byte[] { 27, 91, 53, 126 }); //ESC [ 5 ~ PageUp key
+                await MainPage.connection.sendCommand(new byte[] { 27, 91, 53, 126 }); //ESC [ 5 ~ PageUp key
             }
         }
     }

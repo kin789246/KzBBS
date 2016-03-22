@@ -1,17 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation;
+using Windows.Networking;
+using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
+using Windows.UI.Popups;
 
 namespace KzBBS
 {
-    class TelnetConnect
+    public class TelnetConnect
     {
-        public static TelnetConnect connection = new TelnetConnect();
+        private StreamSocket clientSocket;
+        private HostName serverHost;
+        private string serverPort;
+        private bool connected = false;
+        private bool connecting = false;
+
+        public CancellationTokenSource cts { get; set; }
+        public StreamSocket ClientSocket { get { return clientSocket; } }
+        public bool IsConnected { get { return connected; } }
+        public bool Connecting { get { return connecting; } }
         public string address { get; set; }
         public string port { get; set; }
         public string account { get; set; }
@@ -20,28 +30,100 @@ namespace KzBBS
 
         static Windows.ApplicationModel.Resources.ResourceLoader loader =
             new Windows.ApplicationModel.Resources.ResourceLoader();
+        public async Task Connect(string host, string port)
+        {
+            serverHost = new HostName(host);
+            serverPort = port;
+            clientSocket = new StreamSocket();
+            cts = new CancellationTokenSource();
+            try
+            {
+                connecting = true;
+                await clientSocket.ConnectAsync(serverHost, serverPort).AsTask(cts.Token);
+                connecting = false;
+                connected = true;
+            }
+            catch
+            {
+                //ShowMessage(exception.Message);
+                Disconnect();
+                throw;
+            }
+        }
 
+        public void Disconnect()
+        {
+            if (connected || connecting)
+            {
+                connected = false;
+                connecting = false;
+            }
+            onSocketDisconnect(new EventArgs());
+            clientSocket.Dispose();
+        }
+        
+        public async static void ShowMessage(string msg)
+        {
+            var messageDialog = new MessageDialog(msg);
+            //messageDialog.Title = "訊息通知";
+            messageDialog.Title = loader.GetString("infoNotify");
+            await messageDialog.ShowAsync();
+        }
+
+        public static async Task<bool> confirmDialog(string msg)
+        {
+            bool isYes = false;
+            // Create the message dialog and set its content
+            var messageDialog = new MessageDialog(msg);
+            //messageDialog.Title = "作決定吧";
+            messageDialog.Title = loader.GetString("todecide");
+            // Add commands and set their callbacks;
+            //messageDialog.Commands.Add(new UICommand("好",
+            //    new UICommandInvokedHandler((cmd) => isYes = true)));
+            //messageDialog.Commands.Add(new UICommand("不好",
+            //    new UICommandInvokedHandler((cmd) => isYes = false)));
+            messageDialog.Commands.Add(new UICommand(loader.GetString("sayok"),
+                new UICommandInvokedHandler((cmd) => isYes = true)));
+            messageDialog.Commands.Add(new UICommand(loader.GetString("sayno"),
+                new UICommandInvokedHandler((cmd) => isYes = false)));
+            // Set the command that will be invoked by default
+            messageDialog.DefaultCommandIndex = 0;
+            // Set the command to be invoked when escape is pressed
+            messageDialog.CancelCommandIndex = 1;
+            // Show the message dialog
+            await messageDialog.ShowAsync();
+            return isYes;
+        }
+
+        public event EventHandler SocketDisconnect;
+        protected virtual void onSocketDisconnect(EventArgs e)
+        {
+            if (SocketDisconnect != null)
+            {
+                SocketDisconnect(this, e);
+            }
+        }
         internal void OnDisconnect()
         {
-            if (TelnetSocket.PTTSocket.Connecting)
+            if (Connecting)
             {
-                TelnetSocket.PTTSocket.cts.Cancel();
+                cts.Cancel();
             }
             else
             {
-                TelnetSocket.PTTSocket.Disconnect();
+                Disconnect();
             }
-            connection.autoLogin = false;
+            autoLogin = false;
         }
 
         public async Task OnConnect(string tIP, string tPort)
         {
             await Big5Util.generateTable();
-            if (!TelnetSocket.PTTSocket.IsConnected)
+            if (!IsConnected)
             {
                 try
                 {
-                    await TelnetSocket.PTTSocket.Connect(tIP, tPort);
+                    await Connect(tIP, tPort);
                     //Task.Factory.StartNew(ClientWaitForMessage);
                     ClientWaitForMessage();
                 }
@@ -53,7 +135,7 @@ namespace KzBBS
             else
             {
                 //ShowMessage("已經連線了好嗎!");
-               TelnetSocket.ShowMessage(loader.GetString("alreadyconnect"));
+                TelnetConnect.ShowMessage(loader.GetString("alreadyconnect"));
             }
         }
 
@@ -63,38 +145,40 @@ namespace KzBBS
         {
             finalRawData.Clear();
             int MAXBuffer = 6000;
-            DataReader reader = new DataReader(TelnetSocket.PTTSocket.ClientSocket.InputStream);
+            DataReader reader = new DataReader(ClientSocket.InputStream);
             reader.InputStreamOptions = InputStreamOptions.Partial;
             while (true)
             {
                 try
                 {
                     uint Message = await reader.LoadAsync((uint)MAXBuffer);
+                    if (Message == 0)
+                    {
+                        //if disconnected
+                        return;
+                    }
                     rawdata = new byte[Message];
                     reader.ReadBytes(rawdata);
-                    if (rawdata.Length != 0)
+                    TelnetANSIParser.HandleAnsiESC(rawdata);
+                    //save the last char received
+                    string lastChar0 = Big5Util.ToUni(new byte[] { rawdata[rawdata.Length - 1] });
+                    //Debug.WriteLine(lastChar0);
+                    if (string.IsNullOrEmpty(lastChar0))
                     {
-                        TelnetANSIParser.HandleAnsiESC(rawdata);
-                        //save the last char received
-                        string lastChar0 = Big5Util.ToUni(new byte[] { rawdata[rawdata.Length - 1] });
-                        //Debug.WriteLine(lastChar0);
-                        if(string.IsNullOrEmpty(lastChar0))
-                        {
-                            PTTDisplay.lastChar = ' ';
-                        }
-                        else
-                        {
-                            PTTDisplay.lastChar = lastChar0[0];
-                        }
-                        
-                        PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
+                        PTTDisplay.lastChar = ' ';
                     }
+                    else
+                    {
+                        PTTDisplay.lastChar = lastChar0[0];
+                    }
+
+                    PTTDisplay.pttDisplay.LoadFromSource(TelnetANSIParser.BBSPage);
                 }
                 catch (Exception exception)
                 {
-                    if (TelnetSocket.PTTSocket.IsConnected)
+                    if (IsConnected)
                     {
-                        TelnetSocket.PTTSocket.Disconnect();
+                        Disconnect();
                     }
                     Debug.WriteLine("Read stream failed with error: " + exception.Message);
                     return;
@@ -112,10 +196,10 @@ namespace KzBBS
             }
         }
 
-        public static async Task sendCommand(byte[] interpretByte)
+        public async Task sendCommand(byte[] interpretByte)
         {
-            if (!TelnetSocket.PTTSocket.IsConnected) return;
-            DataWriter writer = new DataWriter(TelnetSocket.PTTSocket.ClientSocket.OutputStream);
+            if (!IsConnected) return;
+            DataWriter writer = new DataWriter(ClientSocket.OutputStream);
             writer.WriteBytes(interpretByte);
 
             try
@@ -125,16 +209,16 @@ namespace KzBBS
             }
             catch (Exception exception)
             {
-                TelnetSocket.PTTSocket.Disconnect();
+                Disconnect();
                 Debug.WriteLine(exception.Message);
             }
         }
 
-        public static async Task sendCommand(string sourceString)
+        public async Task sendCommand(string sourceString)
         {
-            if (!TelnetSocket.PTTSocket.IsConnected) return;
+            if (!IsConnected) return;
             byte[] interpretByte = interpreteToByte(sourceString);
-            DataWriter writer = new DataWriter(TelnetSocket.PTTSocket.ClientSocket.OutputStream);
+            DataWriter writer = new DataWriter(ClientSocket.OutputStream);
             writer.WriteBytes(interpretByte);
 
             try
@@ -144,7 +228,7 @@ namespace KzBBS
             }
             catch (Exception exception)
             {
-                TelnetSocket.PTTSocket.Disconnect();
+                Disconnect();
                 Debug.WriteLine(exception.Message);
             }
         }

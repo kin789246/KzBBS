@@ -13,9 +13,9 @@ using System.Threading;
 
 namespace KzBBS
 {
-    class TelnetSocket
+    public class TelnetSocket
     {
-        public static TelnetSocket PTTSocket = new TelnetSocket();
+        //public static TelnetSocket PTTSocket = new TelnetSocket();
 
         private StreamSocket clientSocket;
         private HostName serverHost;
@@ -41,7 +41,6 @@ namespace KzBBS
                 connecting = false;
                 connected = true;
             }
-
             catch
             {
                 //ShowMessage(exception.Message);
