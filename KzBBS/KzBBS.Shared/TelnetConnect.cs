@@ -155,6 +155,8 @@ namespace KzBBS
                     if (Message == 0)
                     {
                         //if disconnected
+                        //debug
+                        ShowMessage("Exit the while loop");
                         return;
                     }
                     rawdata = new byte[Message];

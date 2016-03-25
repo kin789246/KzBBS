@@ -1,10 +1,12 @@
 ﻿using KzBBS.Common;
 using System;
+using System.Diagnostics;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Store;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using Microsoft.AdMediator.Core.Events;
 
 // The Basic Page item template is documented at http://go.microsoft.com/fwlink/?LinkID=390556
 
@@ -41,10 +43,33 @@ namespace KzBBS
             PackageVersion version = packageId.Version;
             versionText.Text = String.Format("Version: {0}.{1}.{2}.{3}\n",
                 version.Major, version.Minor, version.Build, version.Revision);
+
+            AdMediator_1697A3.AdMediatorError += AdMediator_Bottom_AdMediatorError;
+        }
+
+        private void AdMediator_Bottom_AdMediatorError(object sender, AdMediatorFailedEventArgs e)
+        {
+            Debug.WriteLine("AdMediatorError:" + e.Error + " " + e.ErrorCode);
+            // if (e.ErrorCode == AdMediatorErrorCode.NoAdAvailable)
+            // AdMediator will not show an ad for this mediation cycle
         }
 
         private void loadProfile()
         {
+            //check if need show ad
+            LicenseInformation licenseInfo = CurrentApp.LicenseInformation;
+            if (licenseInfo.IsActive)
+            {
+                Debug.WriteLine("ad disable");
+                AdMediator_1697A3.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                Debug.WriteLine("ad enable");
+                AdMediator_1697A3.Visibility = Visibility.Visible;
+            }
+
+            //load user profile
             Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
         
             if (roamingSettings.Values.ContainsKey("telnetAccount"))

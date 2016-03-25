@@ -123,6 +123,7 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <Content Include="AdMediator.config" />
     <None Include="KzBBS.Windows_StoreKey.pfx" />
     <None Include="KzBBS.Windows_TemporaryKey.pfx" />
   </ItemGroup>

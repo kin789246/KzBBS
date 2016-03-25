@@ -247,16 +247,7 @@ namespace KzBBS
             //result may have duplicate words because of dual color word
             return result;
         }
-
-        //private void saveToLastLines()
-        //{
-        //    lastLines.Clear();
-        //    foreach (var line in lines)
-        //    {
-        //        lastLines.Add(new PTTLine(line));
-        //    }
-        //}
-
+        
         string lastID = "";
         private void getLineProp(PTTLine pttline, TelnetData[,] onePage, int line)
         {
@@ -462,10 +453,8 @@ namespace KzBBS
 
         }
 
-        //public static bool isPushable = false;
-        //private static List<string> bottomTitle = new List<string>();
+
         public static Windows.UI.Xaml.LineStackingStrategy lineStackingStrategy = LineStackingStrategy.BlockLineHeight;
-        //public static double lineHeight = 30;
         public static string forClipBoard = "";
         public BBSMode checkMode(string text)
         {
@@ -553,43 +542,7 @@ namespace KzBBS
             //ProcessCanvas(PTTCanvas, PTTDisplay.Lines, operationBoard);
             Debug.WriteLine("process canvas time: {0}", Environment.TickCount - debugStart);
         }
-
-        //private static void CompressBBSData(TelnetData[,] BBSPage, List<TelnetData>[] final)
-        //{
-        //    TelnetData point;
-        //    for (int row = 0; row < 24; row++)
-        //    {
-        //        final[row] = new List<TelnetData>();
-        //        point = new TelnetData();
-        //        point.cloneFrom(BBSPage[row, 0]);
-        //        //point.Text = "";
-        //        point.Position = new Point(row, 0);
-        //        for (int col = 1; col < 80; col++)
-        //        {
-        //            if (point == BBSPage[row, col]) //only check backColor, forColor, blinking, dualcolor, isTwWord
-        //            {
-        //                point.Text += BBSPage[row, col].Text;
-        //            }
-        //            else
-        //            {
-        //                point.Count = col - (int)point.Position.Y;
-        //                if(point.Text == "")
-        //                { point.Text = (char)0xA0 + ""; }
-        //                final[row].Add(point);
-        //                point = new TelnetData();
-        //                point.cloneFrom(BBSPage[row, col]);
-        //                point.Position = new Point(row, col);
-        //            }
-        //        }
-        //        if (point.Text == "") //record the final portion
-        //        {
-        //            point.Text = (char)0xA0 + "";
-        //        }
-        //        point.Count = 80 - (int)point.Position.Y;
-        //        final[row].Add(point);
-        //    }
-        //}
-
+        
         private static bool isChineseWord(string p)
         {
             if (p[p.Length - 1] > 0x3040)
@@ -831,193 +784,7 @@ namespace KzBBS
                 LinesPropChanged(this, e);
             }
         }
-
-        //static TelnetData highByte;
-        //static bool lowByte = false;
-        //public static void buildScreen(Canvas PTTCanvas, List<TelnetData>[] BBSPage)
-        //{
-        //    TextBlock tempTB;
-        //    Border tempBgColor;
-        //    TelnetData ptHighByte = new TelnetData();
-        //    int lastY;
-        //    forClipBoard = "";
-        //    debugStart = Environment.TickCount;
-        //    for (int i = 0; i < 24; i++)
-        //    {
-        //        if (TelnetANSIParser.BBSPage[i] == null) continue;
-
-        //        IOrderedEnumerable<TelnetData> show = BBSPage[i].OrderBy(ob => ob.Position.Y);
-
-        //        lastY = -1;
-        //        foreach (TelnetData block in show)
-        //        {
-        //            if (block.Text == "") continue;
-        //            if (block.BBSUI.Count != 0) continue;
-
-        //            tempBgColor = new Border();
-        //            tempBgColor.Background = new SolidColorBrush(block.BackColor);
-        //            if (block.BackColor == TelnetANSIParserCanvas.nBlack)
-        //            { tempBgColor.Background = new SolidColorBrush(Colors.Transparent); }
-        //            tempBgColor.Width = block.Count * _fontSize / 2;
-        //            tempBgColor.Height = _fontSize;
-        //            Canvas.SetLeft(tempBgColor, block.Position.Y * _fontSize / 2);
-        //            Canvas.SetTop(tempBgColor, i * _fontSize);
-        //            PTTCanvas.Children.Add(tempBgColor);
-        //            block.BBSBackground = tempBgColor;
-        //            block.BBSUI.Add(tempBgColor);
-
-        //            tempTB = new TextBlock();
-        //            tempTB.LineStackingStrategy = lineStackingStrategy;
-        //            tempTB.LineHeight = _fontSize;
-        //            tempTB.FontSize = _fontSize;
-        //            if (block.Text[0] > 0x3040)
-        //            {
-        //                tempTB.FontFamily = new FontFamily(cht_fontFamily);
-        //                tempTB.TextLineBounds = TextLineBounds.TrimToCapHeight;
-        //                tempTB.Padding = new Thickness(0, chtOffset, 0, 0);
-        //            }
-        //            else
-        //            { tempTB.FontFamily = new FontFamily(ansi_fontFamily); }
-
-        //            if (highByte != null)
-        //            {
-        //                if (block.DualColor)
-        //                {
-        //                    if (highByte.Blinking)
-        //                    {
-        //                        showBlinking(PTTCanvas, highByte.Text, highByte.ForeColor,
-        //                       highByte.BackColor, _fontSize / 2, i, (int)highByte.Position.Y, 2);
-        //                    }
-        //                    else
-        //                    {
-        //                        showDualColor(PTTCanvas, highByte.Text, highByte.ForeColor, _fontSize / 2,
-        //                            i, (int)highByte.Position.Y, 2);
-        //                    }
-
-        //                    ptHighByte.BBSbldu = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
-        //                    ptHighByte.BBSUI.Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
-        //                    highByte = null;
-        //                    lowByte = true;
-        //                }
-        //            }
-
-        //            if (block.DualColor && lowByte == false)
-        //            {
-        //                ptHighByte = block;
-        //                highByte = new TelnetData();
-        //                highByte.cloneFrom(block);
-        //                tempBgColor.Width = _fontSize / 2;
-        //                lowByte = true;
-        //                continue;
-        //            }
-
-        //            if (lowByte)
-        //            {
-        //                Canvas.SetLeft(tempBgColor, (block.Position.Y + 1) * _fontSize / 2);
-        //                tempBgColor.Width = _fontSize / 2;
-        //                lowByte = false;
-        //            }
-
-        //            if ((int)block.Position.Y - lastY > 0)
-        //            {
-        //                forClipBoard += new string((char)0xA0, (int)block.Position.Y - lastY - 1);
-        //            }
-        //            tempTB.Text += block.Text;
-        //            generateHyperlink(block.Text, tempTB, Colors.LightBlue);
-        //            if (block.Blinking)
-        //            {
-        //                tempTB.Foreground = new SolidColorBrush(block.BackColor);
-        //                showBlinking(PTTCanvas, block.Text, block.ForeColor,
-        //                   block.BackColor, block.Count * _fontSize / 2, i, (int)block.Position.Y, 1);
-        //                block.BBSbldu = PTTCanvas.Children[PTTCanvas.Children.Count - 1];
-        //                block.BBSUI.Add(PTTCanvas.Children[PTTCanvas.Children.Count - 1]);
-        //            }
-        //            else
-        //            {
-        //                tempTB.Foreground = new SolidColorBrush(block.ForeColor);
-        //            }
-        //            lastY = (int)block.Position.Y + block.Count - 1;
-        //            Canvas.SetTop(tempTB, i * _fontSize);
-        //            Canvas.SetLeft(tempTB, block.Position.Y * _fontSize / 2);
-        //            PTTCanvas.Children.Add(tempTB);
-        //            block.BBSText = tempTB;
-        //            block.BBSUI.Add(tempTB);
-        //            forClipBoard += tempTB.Text;
-        //        }
-        //        //contains "★"
-        //        if (Regex.IsMatch(tempTB.Text, @"(\s+\u2605\s+\S)"))
-        //        {
-        //            if (lastID != "")
-        //            {
-        //                if (bottomTitle.Count == 0)
-        //                {
-        //                    bottomTitle.Add(lastID);
-        //                    bottomTitle.Add(tempTB.Text);
-        //                }
-        //                else
-        //                { bottomTitle.Add(tempTB.Text); }
-        //            }
-        //        }
-        //        else
-        //        { lastID = getSelectedID(tempTB.Text); }
-
-        //        forClipBoard += "\n";
-        //    }
-        //    Debug.WriteLine("canvas draw time = {0}, canvas.children count = {1}", Environment.TickCount - debugStart,
-        //        PTTCanvas.Children.Count);
-        //}
-
-        private static void buildPortrait(Canvas PTTCanvas, List<TelnetData>[] BBSPage)
-        {
-            TextBlock tb;
-            Border bbsBground;
-
-            bbsBground = new Border();
-            bbsBground.Height = _fontSize;
-            bbsBground.Width = 40 * _fontSize / 2;
-            bbsBground.Background = new SolidColorBrush(Colors.Yellow);
-            PTTCanvas.Children.Add(bbsBground);
-            Canvas.SetTop(bbsBground, 5 * _fontSize);
-            Canvas.SetLeft(bbsBground, 20 * _fontSize / 2);
-
-            tb = new TextBlock();
-            tb.FontFamily = new FontFamily(cht_fontFamily);
-            tb.FontSize = _fontSize;
-            tb.TextWrapping = TextWrapping.Wrap;
-            tb.Width = PTTCanvas.Width;
-            tb.LineHeight = _fontSize;
-            tb.LineStackingStrategy = lineStackingStrategy;
-
-            Run run1 = new Run();
-            run1.Text = "1234567890一二三四五六七八九零12345678901234567890一二三四五六";
-            run1.Foreground = new SolidColorBrush(Colors.Blue);
-            Run run2 = new Run();
-            run2.Text = "34567890一二三四五七八九零1234567890";
-            run2.Foreground = new SolidColorBrush(Colors.Red);
-            tb.Inlines.Add(run1);
-            tb.Inlines.Add(run2);
-            PTTCanvas.Children.Add(tb);
-            Canvas.SetTop(tb, 5 * _fontSize);
-
-            TextBlock tb2 = new TextBlock();
-            tb2.FontFamily = new FontFamily(cht_fontFamily);
-            tb2.FontSize = _fontSize;
-            tb2.Foreground = new SolidColorBrush(Colors.GreenYellow);
-            tb2.Width = _fontSize / 2;
-            tb2.Text = "二";
-            PTTCanvas.Children.Add(tb2);
-            Canvas.SetLeft(tb2, 13 * _fontSize / 2);
-            Canvas.SetTop(tb2, 5 * _fontSize);
-
-            TextBlock tb3 = new TextBlock();
-            tb3.FontFamily = new FontFamily(cht_fontFamily);
-            tb3.FontSize = _fontSize;
-            tb3.Foreground = new SolidColorBrush(Colors.Gray);
-            tb3.Text = "二二二二二二二二二二二二二二二二三二二二二二四二二八九零12345";
-            PTTCanvas.Children.Add(tb3);
-            Canvas.SetTop(tb3, 6 * _fontSize);
-        }
-
+        
         public static UIElement showBlinking(string word, Color fg, Color bg, double tbWidth, double top, double left, int zIndex)
         {
             TextBlock btb = new TextBlock();

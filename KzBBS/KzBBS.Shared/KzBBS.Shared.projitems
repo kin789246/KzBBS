@@ -22,7 +22,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)TelnetConnect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TelnetClass.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TelnetParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)ApiData\WindowsStoreProxy.xml" />

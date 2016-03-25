@@ -98,10 +98,10 @@
             </StackPanel>
         </Grid>
         <StackPanel x:Name="adStackPanel" Grid.Row="2">
+            <WindowsPhone81:AdMediatorControl x:Name="AdMediator_1697A3" Height="50" Id="AdMediator-Id-4A459DAC-FC19-43F5-8711-E9B301AC878B" Width="320"/>
             <!--<UI1:AdControl Name="adPanel" AutoRefreshIntervalInSeconds="60" IsAutoRefreshEnabled="True"
                            ApplicationId="db2dbf68-7bb6-46c2-b7b4-605bf442a234" AdUnitId="218478" 
                            Height="50" Width="320" ErrorOccurred="ad_ErrorOccurred" />-->
-            <WindowsPhone81:AdMediatorControl x:Name="ad01" Height="50" Width="320" HorizontalAlignment="Center" Id="mainPageAd01" />
         </StackPanel>
     </Grid>
 </Page>

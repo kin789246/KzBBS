@@ -51,7 +51,7 @@
             <StackPanel Grid.Column="2" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="22" FontFamily="Arial" Height="30" />
-                    <TextBox Name="sendCmd" Padding="2,0" FontSize="22" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" HorizontalAlignment="Left"
+                    <TextBox Name="sendCmd" Padding="2,0" FontSize="22" Width="110" KeyDown="cmdOrText_KeyDown" KeyUp="cmdOrText_KeyUp" HorizontalAlignment="Left"
                    Text="" MinWidth="15" Height="33" MinHeight="30" IsSpellCheckEnabled="False" Opacity="0.7" Margin="5,0"/>
                     <Button Content="Enter" FontSize="28" Width="100" MinHeight="40" Click="Enter_Click" BorderThickness="1" />
                     <Button Content="y" FontSize="28" Width="60" MinHeight="40" Click="hotKey_Click" BorderThickness="1" />
