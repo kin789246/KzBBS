@@ -155,11 +155,11 @@ namespace KzBBS
             //}
             //#endregion
 
-            if (!checkIfKeepPage(lastChar))
-            {
-                currentMode = lastMode;
-                return;
-            }
+            //if (!checkIfKeepPage(lastChar))
+            //{
+            //    currentMode = lastMode;
+            //    return;
+            //}
 
             //start to analyze data
             currentPage = new PTTPage();

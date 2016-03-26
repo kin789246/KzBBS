@@ -21,24 +21,28 @@
         </Grid.RowDefinitions>
 
         <!--TODO: Content should be placed within the following grid-->
+       
+        <!-- Title Panel -->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="0,-5,0,0">
             <ScrollViewer Name="normalScrollViewer" Width="600" Height="360" VerticalAlignment="Top"
                           SizeChanged="SV_sizeChanged">
-                <Canvas Name="PTTCanvas" Width="600" Height="360" VerticalAlignment="Top" />
+                <Canvas>
+                    <Canvas Name="PTTCanvas" Width="600" Height="360" VerticalAlignment="Top" />
+                </Canvas>
             </ScrollViewer>
             <ScrollViewer Name="pttScrollViewer" Width="600" Height="360" VerticalAlignment="Top"
                           SizeChanged="SV_sizeChanged">
-            <StackPanel Name="BBSStackPanel" Width="600" Height="360" VerticalAlignment="Top" >
-                <StackPanel Name="topStackPanel" Height="45" />
-                <ListView Name="BBSListView" Width="600" Height="300" VerticalAlignment="Top" SelectionMode="None" 
+                <StackPanel Name="BBSStackPanel" Width="600" Height="360" VerticalAlignment="Top" >
+                    <StackPanel Name="topStackPanel" Height="45" />
+                    <ListView Name="BBSListView" Width="600" Height="300" VerticalAlignment="Top" SelectionMode="None" 
                       ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" RightTapped="BBSListViewItem_RTapped"
                       ItemClick="BBSListViewItem_Click" IsItemClickEnabled="True" />
 
-                <StackPanel Name="bottomStackPanel" Height="15" />
-            </StackPanel>
+                    <StackPanel Name="bottomStackPanel" Height="15" />
+                </StackPanel>
             </ScrollViewer>
             <Canvas Name="operationBoard" Width="600" Height="360" VerticalAlignment="Top"
-                     ManipulationStarted="BBS_MStarted" ManipulationCompleted="BBS_MCompleted" ManipulationMode="TranslateX,TranslateY" />
+                     ManipulationStarted="BBS_MStarted" ManipulationCompleted="BBS_MCompleted" ManipulationDelta="BBS_MDelta" ManipulationMode="TranslateX,TranslateY" />
             <Viewbox Name="boundControlBtns" Width="600" Height="360" VerticalAlignment="Top" >
                 <Canvas Width="600" Height="360" >
                     <RepeatButton Content="▲" Foreground="Transparent" Style="{StaticResource RepeatButtonNoPadding}" Canvas.Left="220" Width="160" Height="40" MinHeight="40" BorderThickness="0" Click="hotKey_Click" />
@@ -52,8 +56,37 @@
                     <!--<Button Content="Enter" Foreground="Transparent" Style="{StaticResource ButtonNoPadding}" Canvas.Left="240" Canvas.Top="120" Width="120" Height="120" Click="Enter_Click" BorderThickness="0" />-->
                 </Canvas>
             </Viewbox>
+
+            <Canvas Name="naviBoardCanvas">
+                <Grid Name="NaviButton" Canvas.Top="40" Canvas.Left="100" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Row="0" Grid.ColumnSpan="4" Height="20" Background="White" />
+                    <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="SPACE" FontSize="15" Click="hotKey_Click" MinWidth="90" MinHeight="45" Style="{StaticResource ButtonNoPadding}"/>
+                    <Button Grid.Row="2" Grid.Column="0" Content="y" FontSize="15" Click="hotKey_Click" MinWidth="45" MinHeight="45" Style="{StaticResource ButtonNoPadding}"/>
+                    <Button Grid.Row="3" Grid.Column="0" Content="n" FontSize="15" Click="hotKey_Click" MinWidth="45" MinHeight="45" Style="{StaticResource ButtonNoPadding}"/>
+                    <Button Grid.Row="1" Grid.Column="2" Content="↵" FontSize="18" Click="Enter_Click" MinWidth="45" MinHeight="45" Style="{StaticResource ButtonNoPadding}"/>
+                    <RepeatButton Grid.Row="1" Grid.Column="3" Content="←" FontSize="15" Click="hotKey_Click" MinHeight="45" MinWidth="45" Style="{StaticResource RepeatButtonNoPadding}"/>
+                    <RepeatButton Grid.Row="2" Grid.Column="2" Content="▲" FontSize="15" Click="hotKey_Click" MinHeight="45" MinWidth="45" Style="{StaticResource RepeatButtonNoPadding}"/>
+                    <RepeatButton Grid.Row="3" Grid.Column="2" Content="▼" FontSize="15" Click="hotKey_Click" MinHeight="45" MinWidth="45" Style="{StaticResource RepeatButtonNoPadding}"/>
+                    <RepeatButton Grid.Row="3" Grid.Column="1" Content="◄" FontSize="15" Click="hotKey_Click" MinHeight="45" FontFamily="Arial" MinWidth="45" Style="{StaticResource RepeatButtonNoPadding}"/>
+                    <RepeatButton Grid.Row="3" Grid.Column="3" Content="►" FontSize="15" Click="hotKey_Click" MinHeight="45" FontFamily="Arial" MinWidth="45" Style="{StaticResource RepeatButtonNoPadding}"/>
+                    <Button Grid.Row="2" Grid.Column="1" Content="PgUp" FontSize="12" Padding="0" Click="hotKey_Click" MinHeight="45" MinWidth="45" Style="{StaticResource ButtonNoPadding}"/>
+                    <Button Grid.Row="2" Grid.Column="3" Content="PgDn" FontSize="12" Padding="0" Click="hotKey_Click" MinHeight="45" MinWidth="45" Style="{StaticResource ButtonNoPadding}"/>
+                </Grid>
+            </Canvas>
         </Grid>
-        <!-- Title Panel -->
+        
         <StackPanel Grid.Row="0" Margin="10,0,0,0" Orientation="Horizontal" >
             <TextBlock Text="KzBBS" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,0,10,0" VerticalAlignment="Top"/>
             <CheckBox Name="ctrlChecked" Content="Ctrl" FontSize="11" RequestedTheme="Dark" Foreground="White" FontFamily="Arial" 
@@ -68,6 +101,8 @@
             <Button Content="y" Style="{StaticResource ButtonNoPadding}" MinWidth="30" Width="30" MinHeight="30" 
                     Click="hotKey_Click" BorderThickness="1" />
             <Button Content="n" Style="{StaticResource ButtonNoPadding}" MinWidth="30" Width="30" MinHeight="30" 
+                    Click="hotKey_Click" BorderThickness="1" />
+            <Button Content="Navi" Style="{StaticResource ButtonNoPadding}" MinWidth="45" Width="45" MinHeight="30" 
                     Click="hotKey_Click" BorderThickness="1" />
 
             <Button Content="選單" x:Name="mainMenuBtn" Style="{StaticResource ButtonNoPadding}" Visibility="Collapsed"
@@ -134,7 +169,7 @@
                     </MenuFlyout>
                 </Button.Flyout>
             </Button>
-            
+
             <TextBlock Name="statusBar" Height="15" FontSize="12" Padding="1" Margin="5,0,0,0" />
             <Button Visibility="Collapsed">
                 <Button.Flyout>

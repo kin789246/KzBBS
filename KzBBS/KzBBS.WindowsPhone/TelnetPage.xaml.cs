@@ -771,6 +771,23 @@ namespace KzBBS
             {
                 await MainPage.connection.sendCommand(new byte[] { 27, 91, 53, 126 }); //ESC [ 5 ~ PageUp key
             }
+            //reset the position
+            Canvas.SetLeft(PTTCanvas, 0);
+            Canvas.SetTop(PTTCanvas, 0);
+        }
+
+        private void BBS_MDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse)
+            {
+                return;
+            }
+
+            double uiL = Canvas.GetLeft(PTTCanvas);
+            double uiT = Canvas.GetTop(PTTCanvas);
+            Canvas.SetLeft(PTTCanvas, uiL + e.Delta.Translation.X);
+            Canvas.SetTop(PTTCanvas, uiT + e.Delta.Translation.Y);
+            e.Handled = true;
         }
     }
 }
