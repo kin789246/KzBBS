@@ -93,8 +93,13 @@ namespace KzBBS
 
             if (modeL0 == modeL23)
             {
-                string text22 = getLineText(BBSPage, 22, 0, 46);
+                string text22 = getLineText(BBSPage, 22, 0, 10);
+                string text1 = getLineText(BBSPage, 1, 0, 10);
                 if (text22.Contains("▲ 回應至") || text22.Contains("請輸入看板"))
+                {
+                    currentMode = BBSMode.Other;
+                }
+                else if (text1.Contains("請確定刪除"))
                 {
                     currentMode = BBSMode.Other;
                 }
@@ -116,7 +121,7 @@ namespace KzBBS
                 if (modeL0 == BBSMode.ClassBoard)
                 {
                     currentMode = modeL0;
-                    string text22 = getLineText(BBSPage, 22, 0, 46);
+                    string text22 = getLineText(BBSPage, 22, 0, 10);
                     if (text22.Contains("▲ 回應至") || text22.Contains("請輸入看板"))
                     {
                         currentMode = BBSMode.Other;
@@ -281,7 +286,7 @@ namespace KzBBS
                 {
                     pttline.UniqueId = onePage[line, 23].Text;
                     pttline.number.text = getLineText(onePage, line, 22, 34);
-                    pttline.title.text = getLineText(onePage, line, 36, 79);
+                    pttline.title.text = getLineText(onePage, line, 36, 79).TrimEnd('\xA0');
                     if (!Regex.IsMatch(pttline.UniqueId, @"[A-Z0-9]"))
                     {
                         pttline.UniqueId = "";
@@ -301,8 +306,8 @@ namespace KzBBS
                     pttline.number.text = pttline.UniqueId;
                     pttline.isRead.text = getLineText(onePage, line, 8, 9);
                     pttline.isRead.fgColor = onePage[line, 8].ForeColor;
-                    pttline.title.text = getLineText(onePage, line, 11, 53);
-                    pttline.Author.text = getLineText(onePage, line, 55, 66);
+                    pttline.title.text = getLineText(onePage, line, 11, 53).TrimEnd('\xA0');
+                    pttline.Author.text = getLineText(onePage, line, 55, 66).TrimEnd('\xA0');
                     pttline.date.text = getLineText(onePage, line, 68, 79);
                 }
                 //debug
@@ -317,14 +322,14 @@ namespace KzBBS
                     pttline.number.text = pttline.UniqueId;
                     pttline.isRead.text = getLineText(onePage, line, 8, 9);
                     pttline.isRead.fgColor = onePage[line, 8].ForeColor;
-                    pttline.board.text = getLineText(onePage, line, 10, 21);
+                    pttline.board.text = getLineText(onePage, line, 10, 21).TrimEnd('\xA0');
                     pttline.board.fgColor = onePage[line, 10].ForeColor;
-                    pttline.category.text = getLineText(onePage, line, 23, 26);
+                    pttline.category.text = getLineText(onePage, line, 23, 26).TrimEnd('\xA0');
                     pttline.category.fgColor = onePage[line, 23].ForeColor;
-                    pttline.title.text = getLineText(onePage, line, 28, 63);
+                    pttline.title.text = getLineText(onePage, line, 28, 63).TrimEnd('\xA0');
                     pttline.hot.text = getLineText(onePage, line, 64, 66);
                     pttline.hot.fgColor = onePage[line, 64].ForeColor;
-                    pttline.Author.text = getLineText(onePage, line, 67, 79);
+                    pttline.Author.text = getLineText(onePage, line, 67, 79).TrimEnd('\xA0');
                 }
                 //debug
                 //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + " isRead: " + pttline.isRead.text + " board: " + pttline.board.text
@@ -338,8 +343,8 @@ namespace KzBBS
                     pttline.number.text = pttline.UniqueId;
                     pttline.isRead.text = getLineText(onePage, line, 18, 19);
                     pttline.isRead.fgColor = onePage[line, 18].ForeColor;
-                    pttline.title.text = getLineText(onePage, line, 20, 48);
-                    pttline.Author.text = getLineText(onePage, line, 61, 79);
+                    pttline.title.text = getLineText(onePage, line, 20, 48).TrimEnd('\xA0');
+                    pttline.Author.text = getLineText(onePage, line, 61, 79).TrimEnd('\xA0');
                 }
                 //debug
                 //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + " isRead: " + pttline.isRead.text
@@ -379,9 +384,9 @@ namespace KzBBS
                     pttline.hot.text = getLineText(onePage, line, 9, 10);
                     pttline.hot.fgColor = onePage[line, 9].ForeColor;
                     pttline.date.text = getLineText(onePage, line, 12, 15);
-                    pttline.Author.text = getLineText(onePage, line, 17, 28);
+                    pttline.Author.text = getLineText(onePage, line, 17, 28).TrimEnd('\xA0');
                     pttline.Author.fgColor = onePage[line, 17].ForeColor;
-                    pttline.title.text = getLineText(onePage, line, 30, 79);
+                    pttline.title.text = getLineText(onePage, line, 30, 79).TrimEnd('\xA0');
                     pttline.title.fgColor = onePage[line, 30].ForeColor;
                 }
                 //debug
@@ -397,8 +402,8 @@ namespace KzBBS
                     pttline.isRead.text = onePage[line, 7].Text;
                     pttline.isRead.fgColor = onePage[line, 7].ForeColor;
                     pttline.date.text = getLineText(onePage, line, 9, 13);
-                    pttline.Author.text = getLineText(onePage, line, 15, 28);
-                    pttline.title.text = getLineText(onePage, line, 30, 79);
+                    pttline.Author.text = getLineText(onePage, line, 15, 28).TrimEnd('\xA0');
+                    pttline.title.text = getLineText(onePage, line, 30, 79).TrimEnd('\xA0');
                 }
                 //debug
                 //Debug.WriteLine("UId: " + pttline.UniqueId + " number: " + pttline.number.text + " isRead: " + pttline.isRead.text
