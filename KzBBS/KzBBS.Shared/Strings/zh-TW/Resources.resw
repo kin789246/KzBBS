@@ -281,4 +281,28 @@
   <data name="plsConn" xml:space="preserve">
     <value>請先連線</value>
   </data>
+  <data name="disInvisible" xml:space="preserve">
+    <value>關閉隱形按鈕</value>
+  </data>
+  <data name="enInvisible" xml:space="preserve">
+    <value>開啓隱形按鈕</value>
+  </data>
+  <data name="hideNavi" xml:space="preserve">
+    <value>隱藏導覽按鈕</value>
+  </data>
+  <data name="NaviOpt.Content" xml:space="preserve">
+    <value>導覽鍵</value>
+  </data>
+  <data name="showNavi" xml:space="preserve">
+    <value>顯示導覽按鈕</value>
+  </data>
+  <data name="naviOpt.Width" xml:space="preserve">
+    <value>120</value>
+  </data>
+  <data name="naviOptWP.Content" xml:space="preserve">
+    <value>導覽鍵</value>
+  </data>
+  <data name="naviOptWP.Width" xml:space="preserve">
+    <value>60</value>
+  </data>
 </root>

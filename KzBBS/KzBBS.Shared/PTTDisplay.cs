@@ -17,12 +17,12 @@ namespace KzBBS
     class PTTDisplay
     {
         //#if WINDOWS_PHONE_APP
-        public static string cht_fontFamily = "Arial";
+        public static string cht_fontFamily = "Microsoft MHei";
         public static string ansi_fontFamily = "kaiu.ttf#DFKai-SB";
         //#endif
 
         //#if WINDOWS_APP
-        //        public static string cht_fontFamily = "Arial";
+        //        public static string cht_fontFamily = "Microsoft JhengHei";
         //        public static string ansi_fontFamily = "DFKai-SB";
         //#endif
         /*---------- define properties ----------*/
@@ -138,15 +138,15 @@ namespace KzBBS
             }
 
             //check partial data received at article browse mode
-            if (currentMode == BBSMode.ArticleBrowse)
-            {
-                string currentPageLastLine = getLineText(BBSPage, 23, 0, 79);
-                if (currentPageLastLine == LastPage.Lines.Last().Text)
-                {
-                    currentMode = lastMode;
-                    return;
-                }
-            }
+            //if (currentMode == BBSMode.ArticleBrowse)
+            //{
+            //    string currentPageLastLine = getLineText(BBSPage, 23, 0, 79);
+            //    if (currentPageLastLine == LastPage.Lines.Last().Text)
+            //    {
+            //        currentMode = lastMode;
+            //        return;
+            //    }
+            //}
 
             //#region debug
             //if (currentMode == BBSMode.AnimationPlay)
@@ -279,7 +279,20 @@ namespace KzBBS
                 //find login user, 48th to 51th == "我是", user = 52th to 65th
                 if (pttline.No == 23 && pttline.Text.Contains("我是"))
                 {
-                    User = getLineText(onePage, line, 52, 65).TrimEnd('\xA0');
+                    string[] afterSplit;
+                    string matchPattern = @"(我是\w+\s)";
+                    afterSplit = Regex.Split(pttline.Text, matchPattern);
+                    char[] Iam = { '我', '是' };
+                    foreach (var item in afterSplit)
+                    {
+                        if (Regex.IsMatch(item, matchPattern))
+                        {
+                            User = item.TrimStart(Iam).TrimEnd('\xA0');
+                            break;
+                        }
+                    }
+                    //User = getLineText(onePage, line, 52, 65).TrimEnd('\xA0');
+                    Debug.WriteLine("User is {0}", User);
                 }
                 //get uniqueId = the 23th text
                 if (pttline.No > 11 && pttline.No != 23)

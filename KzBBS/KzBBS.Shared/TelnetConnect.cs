@@ -156,7 +156,7 @@ namespace KzBBS
                     {
                         //if disconnected
                         //debug
-                        ShowMessage("Exit the while loop");
+                        Debug.WriteLine("Exit the while loop");
                         return;
                     }
                     rawdata = new byte[Message];

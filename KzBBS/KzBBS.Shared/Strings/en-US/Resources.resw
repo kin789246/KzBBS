@@ -280,4 +280,28 @@
   <data name="plsConn" xml:space="preserve">
     <value>Please connect first</value>
   </data>
+  <data name="disInvisible" xml:space="preserve">
+    <value>Disable Invisible Button</value>
+  </data>
+  <data name="enInvisible" xml:space="preserve">
+    <value>Enable Invisible Button</value>
+  </data>
+  <data name="hideNavi" xml:space="preserve">
+    <value>Hide Navigation Button</value>
+  </data>
+  <data name="naviOpt.Content" xml:space="preserve">
+    <value>Navi</value>
+  </data>
+  <data name="showNavi" xml:space="preserve">
+    <value>Show Navigation Button</value>
+  </data>
+  <data name="naviOpt.Width" xml:space="preserve">
+    <value>100</value>
+  </data>
+  <data name="naviOptWP.Content" xml:space="preserve">
+    <value>Navi</value>
+  </data>
+  <data name="naviOptWP.Width" xml:space="preserve">
+    <value>45</value>
+  </data>
 </root>

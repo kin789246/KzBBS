@@ -34,7 +34,7 @@ namespace KzBBS
             
             connection.SocketDisconnect += PTTSocket_SocketDisconnect;
             disconnBtn.IsEnabled = false;
-            PTTMode.IsChecked = true;
+            PTTMode.IsChecked = false;
             isBig5.IsChecked = true;
             loadProfile();
 
@@ -148,19 +148,6 @@ namespace KzBBS
         private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             loadProfile();
-            ////建立新的AdControl元件
-            //string ApplicationId = "db2dbf68-7bb6-46c2-b7b4-605bf442a234";
-            //string AdUnit = "218478";
-            //AdControl adControl = new AdControl(ApplicationId, AdUnit, true);
-            //adControl.Width = 320;
-            //adControl.Height = 50;
-            //adControl.IsAutoRefreshEnabled = true;
-            //adControl.AutoRefreshIntervalInSeconds = 60;
-            ////更新AdControl的Templated()
-            //adControl.ApplyTemplate();
-            //adStackPanel.Children.Add(adControl);
-            ////註冊ErrorOccurred事件
-            //adControl.ErrorOccurred += ad_ErrorOccurred;
         }
 
         /// <summary>

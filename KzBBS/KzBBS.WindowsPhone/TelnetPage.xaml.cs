@@ -21,6 +21,7 @@ namespace KzBBS
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
 
+        static Windows.ApplicationModel.Resources.ResourceLoader loader = new Windows.ApplicationModel.Resources.ResourceLoader();
         UIElement cursor;
         public static TelnetPage Current;
         public TelnetPage()
@@ -33,7 +34,7 @@ namespace KzBBS
 
             Window.Current.SizeChanged += Current_SizeChanged;
             DetermineSize();
-
+            check_Navi_Status();
             //set the cursor
             PTTCanvas.Children.Add(PTTDisplay.showBlinking("_", Colors.White, TelnetANSIParser.bg, PTTDisplay._fontSize / 2
                     , TelnetANSIParser.curPos.X * PTTDisplay._fontSize, TelnetANSIParser.curPos.Y * PTTDisplay._fontSize / 2, 1));
@@ -43,6 +44,75 @@ namespace KzBBS
             inpa.Showing += inpa_Showing;
             inpa.Hiding += inpa_Hiding;
             Current = this;
+        }
+
+        private void check_Navi_Status()
+        {
+            //load setting
+            Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+
+            if (roamingSettings.Values.ContainsKey("itemInvisibleSetting"))
+            {
+                ItemInvisible.Text = roamingSettings.Values["itemInvisibleSetting"].ToString();
+            }
+            else
+            {
+                ItemInvisible.Text = loader.GetString("disInvisible");
+            }
+            if (roamingSettings.Values.ContainsKey("itemNavigationSetting"))
+            {
+                ItemNavigation.Text = roamingSettings.Values["itemNavigationSetting"].ToString();
+            }
+            else
+            {
+                ItemNavigation.Text = loader.GetString("hideNavi");
+            }
+
+            //set the visibility
+            if (ItemInvisible.Text == loader.GetString("disInvisible"))
+            {
+                boundControlBtns.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                boundControlBtns.Visibility = Visibility.Collapsed;
+            }
+            if (ItemNavigation.Text == loader.GetString("showNavi"))
+            {
+                NaviButton.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                NaviButton.Visibility = Visibility.Visible;
+            }
+
+            //set NaviButton position
+            if (roamingSettings.Values.ContainsKey("NaviButtonLeft"))
+            {
+                double left = (double)roamingSettings.Values["NaviButtonLeft"];
+                Canvas.SetLeft(NaviButton, left);
+            }
+            if (roamingSettings.Values.ContainsKey("NaviButtonTop"))
+            {
+                double top = (double)roamingSettings.Values["NaviButtonTop"];
+                Canvas.SetTop(NaviButton, top);
+            }
+            check_UIElement_bound(NaviButton);
+        }
+
+        private void check_UIElement_bound(UIElement uielement)
+        {
+            Rect winSize = Window.Current.Bounds;
+            double left = Canvas.GetLeft(uielement);
+            double top = Canvas.GetTop(uielement);
+            if (left > winSize.Width)
+            {
+                Canvas.SetLeft(uielement, 10);
+            }
+            if (top > winSize.Height)
+            {
+                Canvas.SetTop(uielement, 10);
+            }
         }
 
         void inpa_Hiding(InputPane sender, InputPaneVisibilityEventArgs args)
@@ -74,11 +144,11 @@ namespace KzBBS
 
         private void SV_sizeChanged(object sender, SizeChangedEventArgs e)
         {
-            double cursorPosition = (TelnetANSIParser.curPos.X + 1) * PTTDisplay._fontSize;
+            double cursorPosition = TelnetANSIParser.curPos.X * PTTDisplay._fontSize;
             if (cursorPosition > normalScrollViewer.Height)
             {
-                normalScrollViewer.ChangeView(null, cursorPosition - normalScrollViewer.Height, null);
-                pttScrollViewer.ChangeView(null, cursorPosition - normalScrollViewer.Height, null);
+                normalScrollViewer.ChangeView(null, cursorPosition, null);
+                pttScrollViewer.ChangeView(null, cursorPosition, null);
             }
         }
 
@@ -107,6 +177,8 @@ namespace KzBBS
                 operationBoard.Height = 360 * factor;
                 boundControlBtns.Width = 600 * factor;
                 boundControlBtns.Height = 360 * factor;
+                PTTCanvasCanvas.Width = 600 * factor;
+                PTTCanvasCanvas.Height = 360 * factor;
                 PTTCanvas.Width = 600 * factor;
                 PTTCanvas.Height = 360 * factor;
 
@@ -163,6 +235,7 @@ namespace KzBBS
         /// session.  The state will be null the first time a page is visited.</param>
         private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
+            check_Navi_Status();
             if (PTTDisplay.CurrentPage.Lines.Count != 0)
             {
                 onDataChange();
@@ -179,6 +252,26 @@ namespace KzBBS
         /// serializable state.</param>
         private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
+            Windows.Storage.ApplicationDataContainer roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+            if (boundControlBtns.Visibility == Visibility.Visible)
+            {
+                roamingSettings.Values["itemInvisibleSetting"] = loader.GetString("disInvisible");
+            }
+            else
+            {
+                roamingSettings.Values["itemInvisibleSetting"] = loader.GetString("enInvisible");
+            }
+            if (NaviButton.Visibility == Visibility.Visible)
+            {
+                roamingSettings.Values["itemNavigationSetting"] = loader.GetString("hideNavi");
+            }
+            else
+            {
+                roamingSettings.Values["itemNavigationSetting"] = loader.GetString("showNavi");
+            }
+            //save the NaviButton position
+            roamingSettings.Values["NaviButtonLeft"] = Canvas.GetLeft(NaviButton);
+            roamingSettings.Values["NaviButtonTop"] = Canvas.GetTop(NaviButton);
         }
 
         #region NavigationHelper registration
@@ -615,6 +708,9 @@ namespace KzBBS
                     case "搜尋文章代碼 (#)":
                         await MainPage.connection.sendCommand("#");
                         break;
+                    case "搜尋推文數 (Z)":
+                        await MainPage.connection.sendCommand("Z");
+                        break;
                     case "精華區 (z)":
                         await MainPage.connection.sendCommand("z");
                         break;
@@ -772,8 +868,8 @@ namespace KzBBS
                 await MainPage.connection.sendCommand(new byte[] { 27, 91, 53, 126 }); //ESC [ 5 ~ PageUp key
             }
             //reset the position
-            Canvas.SetLeft(PTTCanvas, 0);
-            Canvas.SetTop(PTTCanvas, 0);
+            Canvas.SetLeft(normalScrollViewer, 0);
+            Canvas.SetTop(normalScrollViewer, 0);
         }
 
         private void BBS_MDelta(object sender, ManipulationDeltaRoutedEventArgs e)
@@ -782,11 +878,51 @@ namespace KzBBS
             {
                 return;
             }
+            double uiL = Canvas.GetLeft(normalScrollViewer);
+            double uiT = Canvas.GetTop(normalScrollViewer);
+            Canvas.SetLeft(normalScrollViewer, uiL + e.Delta.Translation.X);
+            Canvas.SetTop(normalScrollViewer, uiT + e.Delta.Translation.Y);
+            //double uiL = Canvas.GetLeft(PTTCanvas);
+            //double uiT = Canvas.GetTop(PTTCanvas);
+            //Canvas.SetLeft(PTTCanvas, uiL + e.Delta.Translation.X);
+            //Canvas.SetTop(PTTCanvas, uiT + e.Delta.Translation.Y);
+            e.Handled = true;
+        }
 
-            double uiL = Canvas.GetLeft(PTTCanvas);
-            double uiT = Canvas.GetTop(PTTCanvas);
-            Canvas.SetLeft(PTTCanvas, uiL + e.Delta.Translation.X);
-            Canvas.SetTop(PTTCanvas, uiT + e.Delta.Translation.Y);
+        private void select_click(object sender, RoutedEventArgs e)
+        {
+            MenuFlyoutItem mfi = sender as MenuFlyoutItem;
+            if (mfi != null)
+            {
+                if (mfi.Text == loader.GetString("enInvisible"))
+                {
+                    boundControlBtns.Visibility = Visibility.Visible;
+                    mfi.Text = loader.GetString("disInvisible");
+                }
+                else if (mfi.Text == loader.GetString("showNavi"))
+                {
+                    NaviButton.Visibility = Visibility.Visible;
+                    mfi.Text = loader.GetString("hideNavi");
+                }
+                else if (mfi.Text == loader.GetString("disInvisible"))
+                {
+                    boundControlBtns.Visibility = Visibility.Collapsed;
+                    mfi.Text = loader.GetString("enInvisible");
+                }
+                else if (mfi.Text == loader.GetString("hideNavi"))
+                {
+                    NaviButton.Visibility = Visibility.Collapsed;
+                    mfi.Text = loader.GetString("showNavi");
+                }
+            }
+        }
+
+        private void NaviBtn_MDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            double uiL = Canvas.GetLeft(NaviButton);
+            double uiT = Canvas.GetTop(NaviButton);
+            Canvas.SetLeft(NaviButton, uiL + e.Delta.Translation.X);
+            Canvas.SetTop(NaviButton, uiT + e.Delta.Translation.Y);
             e.Handled = true;
         }
     }

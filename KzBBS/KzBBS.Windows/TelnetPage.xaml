@@ -56,8 +56,15 @@
                     <Button Content="Enter" FontSize="28" Width="100" MinHeight="40" Click="Enter_Click" BorderThickness="1" />
                     <Button Content="y" FontSize="28" Width="60" MinHeight="40" Click="hotKey_Click" BorderThickness="1" />
                     <Button Content="n" FontSize="28" Width="60" MinHeight="40" Click="hotKey_Click" BorderThickness="1" />
-                    <Button Content="Navi" FontSize="28" Width="100" MinHeight="40" Click="hotKey_Click" BorderThickness="1" />
-                    
+                    <Button x:Uid="naviOpt" Content="Navi" FontSize="28" Width="100" MinHeight="40" Click="hotKey_Click" BorderThickness="1" >
+                        <Button.Flyout>
+                            <MenuFlyout x:Name="navigationOption" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}">
+                                <MenuFlyoutItem Name="ItemInvisible" Text="Disable Invisible Button" Click="select_click" />
+                                <MenuFlyoutItem Name="ItemNavigation" Text="Show Naviation Button" Click="select_click" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+
                     <Button Content="選單" x:Name="mainMenuBtn" FontSize="28" Width="120" MinHeight="40" BorderThickness="1" Visibility="Collapsed">
                         <Button.Flyout>
                             <MenuFlyout x:Name="mainMenuFlyout" ScrollViewer.HorizontalScrollMode="Enabled" MenuFlyoutPresenterStyle="{StaticResource resizeHeightMenuFlyout}" >
@@ -72,6 +79,7 @@
                                 <MenuFlyoutItem Text="發表文章 (Ctrl+P)" Click="mfi_Click" />
                                 <MenuFlyoutItem Text="搜尋文章 (/)" Click="mfi_Click" />
                                 <MenuFlyoutItem Text="搜尋作者 (a)" Click="mfi_Click" />
+                                <MenuFlyoutItem Text="搜尋推文數 (Z)" Click="mfi_Click" />
                                 <MenuFlyoutItem Text="搜尋文章代碼 (#)" Click="mfi_Click" />
                                 <MenuFlyoutItem Text="精華區 (z)" Click="mfi_Click" />
                                 <MenuFlyoutItem Text="說明 (h)" Click="mfi_Click" />
@@ -144,12 +152,12 @@
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">
-            <ScrollViewer Name="normalScrollViewer" Width="1200" Height="720" VerticalAlignment="Top"
+            <Canvas Name="PTTCanvasCanvas" Width="1200" Height="720" VerticalAlignment="Top">
+                <ScrollViewer Name="normalScrollViewer" Width="1200" Height="720" VerticalAlignment="Top"
                           SizeChanged="SV_sizeChanged">
-                <Canvas>
                     <Canvas Name="PTTCanvas" Width="1200" Height="720" VerticalAlignment="Top" />
-                </Canvas>
-            </ScrollViewer>
+                </ScrollViewer>
+            </Canvas>
             <ScrollViewer Name="pttScrollViewer" Width="1200" Height="720" VerticalAlignment="Top" 
                           SizeChanged="SV_sizeChanged">
                 <StackPanel Name="BBSStackPanel" Width="1200" Height="720" VerticalAlignment="Top" >
@@ -178,7 +186,7 @@
                 </Canvas>
             </Viewbox>
             <Canvas Name="naviBoardCanvas">
-                <Grid Name="NaviButton" Canvas.Top="40" Canvas.Left="100">
+                <Grid Name="NaviButton" Canvas.Top="40" Canvas.Left="100" Opacity="0.7">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
@@ -191,18 +199,21 @@
                         <ColumnDefinition />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Row="0" Grid.ColumnSpan="4" Height="20" Background="White" />
-                    <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="SPACE" FontSize="30" Click="hotKey_Click" MinWidth="160" MinHeight="80" IsTabStop="False" />
-                    <Button Grid.Row="2" Grid.Column="0" Content="y" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
-                    <Button Grid.Row="3" Grid.Column="0" Content="n" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
-                    <Button Grid.Row="1" Grid.Column="2" Content="↵" FontSize="30" Click="Enter_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
-                    <RepeatButton Grid.Row="1" Grid.Column="3" Content="←" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                    <Border Grid.Row="0" Grid.ColumnSpan="4" Background="Gray" Height="40" BorderThickness="2" BorderBrush="White" 
+                          ManipulationMode="TranslateX,TranslateY" ManipulationDelta="NaviBtn_MDelta" />
+                    <Border Grid.ColumnSpan="4" Grid.RowSpan="4" BorderThickness="2" BorderBrush="White" />
+                    <Button Grid.Row="1" Grid.Column="0" Content="Home" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                    <Button Grid.Row="1" Grid.Column="1" Content="End" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                    <Button Grid.Row="1" Grid.Column="2" Content="PgUp" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                    <Button Grid.Row="1" Grid.Column="3" Content="PgDn" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                    <Button Grid.Row="2" Grid.Column="1" Content="y" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                    <Button Grid.Row="2" Grid.Column="3" Content="n" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                    <Button Grid.Row="3" Grid.Column="0" Content="↵" FontSize="30" Click="Enter_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
+                    <RepeatButton Grid.Row="2" Grid.Column="0" Content="←" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
                     <RepeatButton Grid.Row="2" Grid.Column="2" Content="▲" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
                     <RepeatButton Grid.Row="3" Grid.Column="2" Content="▼" FontSize="30" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
                     <RepeatButton Grid.Row="3" Grid.Column="1" Content="◄" FontSize="30" Click="hotKey_Click" MinHeight="80" FontFamily="Arial" MinWidth="80" IsTabStop="False"/>
                     <RepeatButton Grid.Row="3" Grid.Column="3" Content="►" FontSize="30" Click="hotKey_Click" MinHeight="80" FontFamily="Arial" MinWidth="80" IsTabStop="False"/>
-                    <Button Grid.Row="2" Grid.Column="1" Content="PgUp" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
-                    <Button Grid.Row="2" Grid.Column="3" Content="PgDn" FontSize="24" Padding="0" Click="hotKey_Click" MinWidth="80" MinHeight="80" IsTabStop="False"/>
                 </Grid>
             </Canvas>
         </Grid>

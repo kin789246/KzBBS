@@ -52,7 +52,7 @@ namespace KzBBS
             
             connection.SocketDisconnect += PTTSocket_SocketDisconnect;
             disconnBtn.IsEnabled = false;
-            PTTMode.IsChecked = true;
+            PTTMode.IsChecked = false;
             isBig5.IsChecked = true;
             loadProfile();
             Current = this;
