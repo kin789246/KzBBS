@@ -1,0 +1,612 @@
+//
+//  swift
+//  KzBBS
+//
+//  Created by Chia-Ching Chiu on 5/20/15.
+//  Copyright (c) 2015 ChiaChing_Chiu. All rights reserved.
+//
+
+import Foundation
+import UIKit
+
+enum Telnet:UInt8 {
+    //escape
+    case IAC = 255,
+    
+    //commands
+    SE = 240,
+    NoOperation = 241,
+    DataMark = 242,
+    Break = 243,
+    InterruptProcess = 244,
+    AbortOutput = 245,
+    AreYouThere = 246,
+    EraseCharacter = 247,
+    EraseLine = 248,
+    GoAhead = 249,
+    SB = 250,
+    
+    //negotiation
+    WILL = 251,
+    WONT = 252,
+    DO = 253,
+    DONT = 254,
+
+    //options (common)
+    SuppressGoAhead = 3,
+    Status = 5,
+    Echo = 1,
+    TimingMark = 6,
+    TerminalType = 24,
+    TerminalSpeed = 32,
+    RemoteFlowControl = 33,
+    LineMode = 34,
+    EnvironmentVariables = 36,
+    NAWS = 31
+    
+    //options (MUD-specific)
+    /*MSDP = 69,
+    MXP = 91,
+    MCCP1 = 85,
+    MCCP2 = 86,
+    MSP = 90*/
+}
+
+class TelnetAnsiParser {
+    let ROW:Int = 24;
+    let COL:Int = 80;
+    var BBSPage = [[TelnetData]]()
+    //var lastBBSPage = [[TelnetData]]()
+    var curPos = Point()
+    var beforeMoveCursor = Point(x:24,y:0)
+    var AnsiCode = [UInt8]();
+    var AnsiZone = false;
+    var forAppliedAnsi:[UInt8] = [ 37, 40, 255, 255, 255, 255 ]
+    var lastAttr = AnsiAttr()
+    var savedPos = Point()
+    var fg = TelnetColor.nGray, bg = TelnetColor.nBlack
+    var isBlinking = false
+    var isDualColor = false
+    var bright = false
+    var IACNego = false
+    var highByte:UInt8 = 0
+    var hiPosition = Point()
+    
+    func analyzeAnsiCode(AnsiCode:[UInt8])-> [UInt8] {
+        var AnsiIndex = 0
+        var ANSI:[UInt8] = [255,255,255,255,255,255]
+        var temp = ""
+        
+        if  AnsiCode[0] == 59 {
+            ANSI[AnsiIndex] = 0
+            AnsiIndex++
+        }
+        
+        for var i=0; i<AnsiCode.count; i++ {
+            if AnsiCode[i] != 59 {
+                temp.append(UnicodeScalar(AnsiCode[i]))
+            }
+            else {
+                if temp.isEmpty { continue }
+                ANSI[AnsiIndex] = UInt8(Int(temp)!);
+                temp = "";
+                AnsiIndex++;
+            }
+        }
+        if !temp.isEmpty {
+            ANSI[AnsiIndex] = UInt8(Int(temp)!);
+        }
+        return ANSI
+    }
+    
+    func analyzeWordAttr(ansiCode: [UInt8]) {
+        var arrangedAnsi:[UInt8] = [255, 255]
+        for var i=0; i<ansiCode.count; i++ {
+            if ansiCode[i] == 0 {
+                fg = TelnetColor.nGray
+                bg = TelnetColor.nBlack
+                isBlinking = false
+                bright = false
+            }
+            if ansiCode[i] == 1 {
+                bright = true
+            }
+            if ansiCode[i] == 5 {
+                isBlinking = true
+            }
+            //swap foreground and background
+            if ansiCode[i] == 7 {
+                let temp = fg
+                fg = bg
+                bg = temp
+            }
+            if ansiCode[i] / 10 == 3 {
+                arrangedAnsi[0] = ansiCode[i]
+            }
+            if ansiCode[i] / 10 == 4 {
+                arrangedAnsi[1] = ansiCode[i]
+            }
+            
+            if bright {
+                if arrangedAnsi[0] == 30 { fg = TelnetColor.bGray }
+                else if arrangedAnsi[0] == 31 { fg = TelnetColor.bRed }
+                else if arrangedAnsi[0] == 32 { fg = TelnetColor.bGreen }
+                else if arrangedAnsi[0] == 33 { fg = TelnetColor.bYellow }
+                else if arrangedAnsi[0] == 34 { fg = TelnetColor.bBlue }
+                else if arrangedAnsi[0] == 35 { fg = TelnetColor.bMagenta }
+                else if arrangedAnsi[0] == 36 { fg = TelnetColor.bCyan }
+                else if arrangedAnsi[0] == 37 { fg = TelnetColor.bWhite }
+                
+                else if fg == TelnetColor.nBlack { fg = TelnetColor.bGray }
+                else if fg == TelnetColor.nRed { fg = TelnetColor.bRed }
+                else if fg == TelnetColor.nGreen { fg = TelnetColor.bGreen }
+                else if fg == TelnetColor.nYellow { fg = TelnetColor.bYellow }
+                else if fg == TelnetColor.nBlue { fg = TelnetColor.bBlue }
+                else if fg == TelnetColor.nMagenta { fg = TelnetColor.bMagenta }
+                else if fg == TelnetColor.nCyan { fg = TelnetColor.bCyan }
+                else if fg == TelnetColor.nGray { fg = TelnetColor.bWhite }
+            }
+            else {
+                if arrangedAnsi[0] == 30 { fg = TelnetColor.nBlack }
+                else if arrangedAnsi[0] == 31 { fg = TelnetColor.nRed }
+                else if arrangedAnsi[0] == 32 { fg = TelnetColor.nGreen }
+                else if arrangedAnsi[0] == 33 { fg = TelnetColor.nYellow }
+                else if arrangedAnsi[0] == 34 { fg = TelnetColor.nBlue }
+                else if arrangedAnsi[0] == 35 { fg = TelnetColor.nMagenta }
+                else if arrangedAnsi[0] == 36 { fg = TelnetColor.nCyan }
+                else if arrangedAnsi[0] == 37 { fg = TelnetColor.nGray }
+            }
+            if arrangedAnsi[1] == 40 { bg = TelnetColor.nBlack }
+            else if arrangedAnsi[1] == 41 { bg = TelnetColor.nRed }
+            else if arrangedAnsi[1] == 42 { bg = TelnetColor.nGreen }
+            else if arrangedAnsi[1] == 43 { bg = TelnetColor.nYellow }
+            else if arrangedAnsi[1] == 44 { bg = TelnetColor.nBlue }
+            else if arrangedAnsi[1] == 45 { bg = TelnetColor.nMagenta }
+            else if arrangedAnsi[1] == 46 { bg = TelnetColor.nCyan }
+            else if arrangedAnsi[1] == 47 { bg = TelnetColor.nGray }
+            
+        }
+    }
+    
+    func resetAllSetting() {
+        curPos = Point()
+        AnsiCode = [UInt8]()
+        forAppliedAnsi = [ 37, 40, 255, 255, 255, 255 ]
+        lastAttr = AnsiAttr()
+        savedPos = Point()
+        fg = TelnetColor.nGray
+        bg = TelnetColor.nBlack
+        isBlinking = false
+        isDualColor = false
+        bright = false
+        IACNego = false
+        highByte = 0
+        
+        for row in 0..<BBSPage.count {
+            for col in 0..<BBSPage[row].count {
+                BBSPage[row][col] = TelnetData()
+            }
+        }
+    }
+    
+    func checkHiByte() {
+        if highByte != 0
+        {
+            storeASCII(0x3F, row: hiPosition.x, col: hiPosition.y, attr: lastAttr)
+            highByte = 0;
+            hiPosition = Point()
+            curPos.y--
+        }
+    }
+    
+    func storeASCII(word:UInt8, row:Int, col:Int, attr:AnsiAttr) {
+        if (word == 13) //for "\r"
+        {
+            checkHiByte();
+            curPos.y = 0;
+        }
+        else if (word == 10) //for "\n"
+        {
+            checkHiByte();
+            curPos.x++;
+            
+            if curPos.x == 24 //scroll down one line (line24.reset(), line1=line2)
+            {
+                curPos.x = 23
+                for var r = 0; r < ROW-1; r++ {
+                    for var c = 0; c < COL; c++ {
+                        BBSPage[r][c] = BBSPage[r + 1][c]
+                        BBSPage[r][c].position = BBSPage[r + 1][c].position
+                    }
+                }
+                for var c = 0; c < COL; c++ {
+                    BBSPage[23][c] = TelnetData()
+                }
+            }
+        }
+        else if word == 8 //back space "\b"
+        {
+            checkHiByte();
+            curPos.y--
+        }
+        else if word == 0
+        {
+            print(word)
+        }
+        else if word == 7 //bel code "\a"
+        {
+            print(word)
+        }
+        else if word == 9
+        {
+            print(word)
+        }
+        else if word == 11
+        {
+            print(word)
+        }
+        else if word == 12
+        {
+            print(word)
+        }
+        else
+        {
+            //if word == 32 //non-breaking space
+            //{ word = 0xA0 }
+            if curPos.y < 80 && curPos.x < 24 //make sure mud display won't over screen
+            {
+                BBSPage[row][col].text = ""
+                BBSPage[row][col].text.append(UnicodeScalar(word))
+                BBSPage[row][col].count = 1;
+                BBSPage[row][col].setData(attr.fgColor, bg: attr.bgColor, blink: attr.blinking, twWord: false, pos: Point(x:row,y:col))
+                BBSPage[row][col].dualColor = false
+                curPos.y++
+            }
+        }
+    }
+    
+    func escapeK() //erase current line from cursor
+    {
+        let row = curPos.x;
+        for var col = curPos.y; col < COL; col++ {
+            BBSPage[row][col].resetData()
+        }
+    }
+    
+    func storeDualBytes(word:String, row:Int, col:Int, attr:AnsiAttr) {
+        if (curPos.y < 80 && curPos.x < 24) //make sure mud display won't over screen
+        {
+            var isTwWord = false;
+            if word == "" {
+                isTwWord = BBSPage[row][col - 1].twWord
+            }
+            else if word.utf16[word.utf16.startIndex] > 0x3040 {
+                isTwWord = true
+            }
+            else
+            { isTwWord = false }
+            BBSPage[row][col].setData(attr.fgColor, bg:attr.bgColor, blink: attr.blinking, twWord: isTwWord, pos: Point(x:row, y:col))
+            BBSPage[row][col].dualColor = false
+            BBSPage[row][col].text = word
+            BBSPage[row][col].count = 1
+            if isDualColor {
+                BBSPage[row][col].dualColor = true
+                isDualColor = false
+            }
+        }
+    }
+    
+    func HandleAnsiEscape(rawdata:[UInt8]) {
+        var currentIndex = 0
+        //set bbs page at the first time
+        if BBSPage.count == 0 {
+            for row in 0..<ROW {
+                BBSPage.append([TelnetData]())
+                for _ in 0..<COL {
+                    BBSPage[row].append(TelnetData())
+                }
+            }
+        }
+        ///debug
+        //println(Encoder.toUni(rawdata) + " ----> received")
+        ////////
+        
+        while currentIndex < rawdata.count {
+            //start ESC sequences
+            if rawdata[currentIndex] == 27 {
+                AnsiZone = true
+                currentIndex++
+            }
+            //if last time ended with ESC(27), this time start with [ (91)
+            else if AnsiZone && rawdata[currentIndex] == 91 {
+                currentIndex++
+            }
+            //handle IAC code
+            else if rawdata[currentIndex] == Telnet.IAC.rawValue {
+                if currentIndex + 1 < rawdata.count && rawdata[currentIndex + 1] == 255 {
+                    currentIndex += 2;
+                }
+                else if currentIndex + 1 < rawdata.count &&
+                    (rawdata[currentIndex + 1] == Telnet.DO.rawValue || rawdata[currentIndex + 1] == Telnet.DONT.rawValue
+                        || rawdata[currentIndex + 1] == Telnet.WILL.rawValue
+                        || rawdata[currentIndex + 1] == Telnet.WONT.rawValue) {
+                        currentIndex += 3
+                }
+                else if currentIndex + 1 < rawdata.count && rawdata[currentIndex + 1] == Telnet.SB.rawValue {
+                    IACNego = true
+                    currentIndex += 2
+                }
+                else if IACNego && currentIndex + 1 < rawdata.count && rawdata[currentIndex + 1] == Telnet.SE.rawValue {
+                    IACNego = false
+                    currentIndex += 2
+                }
+                else if currentIndex + 1 < rawdata.count && rawdata[currentIndex + 1] == Telnet.GoAhead.rawValue {
+                    currentIndex += 2
+                }
+            }
+            //end of Ansi zone
+            else if AnsiZone == true && rawdata[currentIndex] >= 64 && rawdata[currentIndex] <= 127 {
+                beforeMoveCursor = Point(x:curPos.x, y:curPos.y - 1)
+                if rawdata[currentIndex] == 72 // *[ H
+                {
+                    checkHiByte()
+                    if AnsiCode.count == 0 // move cursor to (0,0)
+                    {
+                        curPos.x = 0
+                        curPos.y = 0
+                    }
+                    else  // move cursor to *[ Y; X H
+                    {
+                        var tempAnsi = [UInt8]()
+                        tempAnsi = analyzeAnsiCode(AnsiCode);
+                        if (tempAnsi[1] == 255)
+                        {
+                            curPos.x = 0
+                            curPos.y = 0
+                        }
+                        else
+                        {
+                            curPos.x = Int(tempAnsi[0] - 1)
+                            curPos.y = Int(tempAnsi[1] - 1)
+                        }
+                    }
+                }
+                else if rawdata[currentIndex] == 74 // *[ J
+                {
+                    beforeMoveCursor = Point(x:curPos.x, y:curPos.y - 1)
+                    if AnsiCode.count == 0 // *[J = clear from cursor to the end of screen
+                    {
+                        for var col = 0; col < COL; col++ {
+                                BBSPage[curPos.x][col].resetData()
+                        }
+                        for var row = curPos.x + 1; row < ROW; row++ {
+                            for var col = 0; col < COL; col++ {
+                                    BBSPage[row][col].resetData()
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var tempAnsi = [UInt8]()
+                        tempAnsi = analyzeAnsiCode(AnsiCode)
+                        //clear entire screen = delete all stored words
+                        if (tempAnsi[0] == 2)
+                        {
+                            curPos.y = 0;
+                            curPos.x = 0;
+                            for var row = 0; row < ROW; row++ {
+                                for var col = 0; col < COL; col++ {
+                                    BBSPage[row][col].resetData()
+                                }
+                            }
+                        }
+                        else if tempAnsi[0] == 1 { }
+                    }
+                }
+                else if rawdata[currentIndex] == 75 // *[ K
+                {
+                    escapeK()
+                }
+                else if rawdata[currentIndex] == 109 // *[ m
+                {
+                    if AnsiCode.count != 0 {
+                        forAppliedAnsi = analyzeAnsiCode(AnsiCode)
+                    }
+                    else
+                    {
+                        let resetColor:[UInt8] = [ 0, 255, 255, 255, 255, 255 ]
+                        forAppliedAnsi = resetColor;
+                    }
+                    analyzeWordAttr(forAppliedAnsi)
+                }
+                else if rawdata[currentIndex] == 77 // *[ M scroll up one line (line 24 = line 23, line0.reset())
+                {
+                    if AnsiCode.count == 0 {
+                        for var row = ROW-1; row > 0; row-- {
+                            for var col = 0; col < COL; col++ {
+                                BBSPage[row][col] = BBSPage[row - 1][col]
+                                BBSPage[row][col].position = BBSPage[row - 1][col].position
+                            }
+                        }
+                        for var col = 0; col < COL; col++ {
+                            BBSPage[0][col] = TelnetData()
+                        }
+                    }
+                }
+                else if rawdata[currentIndex] == 115 //*[s save cursor
+                {
+                    savedPos = curPos
+                }
+                else if rawdata[currentIndex] == 117 //*[u load cursor
+                {
+                    checkHiByte()
+                    curPos = savedPos
+                }
+                else if rawdata[currentIndex] == 65 //*[nA move cursor n up
+                {
+                    checkHiByte();
+                    beforeMoveCursor = Point(x:curPos.x, y:curPos.y - 1)
+                    if AnsiCode.count == 0 //*[A
+                    {
+                        curPos.x--
+                        if curPos.x < 0 { curPos.x = 0 }
+                    }
+                    else
+                    {
+                        var tempAnsi = [UInt8]()
+                        tempAnsi = analyzeAnsiCode(AnsiCode)
+                        curPos.x -= Int(tempAnsi[0])
+                        if curPos.x < 0 { curPos.x = 0 }
+                    }
+                }
+                else if rawdata[currentIndex] == 66 //*[nB move cursor n down
+                {
+                    checkHiByte()
+                    beforeMoveCursor = Point(x:curPos.x, y:curPos.y - 1)
+                    if AnsiCode.count == 0 //*[B
+                    {
+                        curPos.x++;
+                        if curPos.x >= 24 { curPos.x = 23 }
+                    }
+                    else
+                    {
+                        var tempAnsi = [UInt8]()
+                        tempAnsi = analyzeAnsiCode(AnsiCode)
+                        curPos.x += Int(tempAnsi[0])
+                        if curPos.x >= 24 { curPos.x = 23 }
+                    }
+                }
+                else if rawdata[currentIndex] == 67 //*[nC move cursor n right
+                {
+                    checkHiByte()
+                    beforeMoveCursor = Point(x:curPos.x, y:curPos.y - 1)
+                    if AnsiCode.count == 0 //*[C
+                    {
+                        curPos.y++
+                        if curPos.y >= 80 { curPos.y = 79 }
+                    }
+                    else
+                    {
+                        var tempAnsi = [UInt8]()
+                        tempAnsi = analyzeAnsiCode(AnsiCode)
+                        curPos.y += Int(tempAnsi[0])
+                        if curPos.y >= 80 { curPos.y = 79 }
+                    }
+                }
+                else if rawdata[currentIndex] == 68 //*[nD move cursor n left
+                {
+                    checkHiByte();
+                    beforeMoveCursor = Point(x:curPos.x, y:curPos.y - 1)
+                    if AnsiCode.count == 0 //*[D
+                    {
+                        curPos.y--
+                        if curPos.y < 0 { curPos.y = 0 }
+                    }
+                    else
+                    {
+                        var tempAnsi = [UInt8]()
+                        tempAnsi = analyzeAnsiCode(AnsiCode)
+                        curPos.y -= Int(tempAnsi[0])
+                        if curPos.y < 0 { curPos.y = 0 }
+                    }
+                }
+                else
+                {
+                    print("can't analyze: " + rawdata[currentIndex].description)
+                }
+                currentIndex++;
+                AnsiZone = false
+                AnsiCode.removeAll(keepCapacity: false)
+            }
+            //non-ansi or non-IACNegotiation
+            else
+            {
+                if (AnsiZone == true && IACNego == false)
+                {
+                    AnsiCode.append(rawdata[currentIndex++])
+                }
+                else if (IACNego == false && AnsiZone == false)
+                {
+                    //store word
+                    if highByte != 0 //dual color low-byte
+                    {
+                        if rawdata[currentIndex] > 0x3F //big5 low-byte
+                        {
+                            let big5Word = Encoder.toUni([highByte, rawdata[currentIndex]])
+                            storeDualBytes(big5Word, row: hiPosition.x, col: hiPosition.y, attr: lastAttr)
+                            isDualColor = true
+                            storeDualBytes(big5Word, row: curPos.x, col: curPos.y, attr: AnsiAttr(fg: fg, bg: bg, blink: isBlinking))
+                            curPos.y++
+                        }
+                        else //non-big5 low-byte
+                        {
+                            storeASCII(0x3F, row: hiPosition.x, col: hiPosition.y, attr: lastAttr)
+                            curPos.y--
+                            storeASCII(rawdata[currentIndex], row: curPos.x, col: curPos.y, attr: AnsiAttr(fg: fg, bg: bg, blink: isBlinking)) //0x3F=='?'
+                        }
+                        highByte = 0
+                        hiPosition = Point()
+        
+                        currentIndex++;
+                        continue;
+                    }
+                    if rawdata[currentIndex] < 128 //ASCII
+                    {
+                        storeASCII(rawdata[currentIndex], row: curPos.x, col: curPos.y, attr: AnsiAttr(fg: fg, bg: bg, blink: isBlinking))
+                        currentIndex++;
+                    }
+                    else if currentIndex + 1 < rawdata.count
+                    {
+                        if rawdata[currentIndex + 1] != 27 //Big5
+                        {
+                            if rawdata[currentIndex + 1] > 0x3F //big5 low-byte
+                            {
+                                let big5Word = Encoder.toUni([rawdata[currentIndex], rawdata[currentIndex + 1] ])
+                                storeDualBytes(big5Word, row: curPos.x, col: curPos.y, attr: AnsiAttr(fg: fg, bg: bg, blink: isBlinking))
+                                storeDualBytes("", row: curPos.x, col: curPos.y + 1, attr: AnsiAttr(fg: fg, bg: bg, blink: isBlinking))
+                                curPos.y += 2
+                            }
+                            else
+                            {
+                                storeASCII(0x3F, row: curPos.x, col: curPos.y, attr: AnsiAttr(fg: fg, bg: bg, blink: isBlinking))
+                                storeASCII(rawdata[currentIndex + 1], row: curPos.x, col: curPos.y, attr: AnsiAttr(fg: fg, bg: bg, blink: isBlinking))
+                            }
+        
+                            currentIndex += 2
+                        }
+                        else //Dual color
+                        {
+                            highByte = rawdata[currentIndex]
+                            lastAttr.setAttr(fg, bg: bg, blink: isBlinking)
+                            hiPosition = curPos
+                            curPos.y++
+                            currentIndex++
+                        }
+                    }
+                    else //if the 79th byte > 128
+                    {
+                        highByte = rawdata[currentIndex]
+                        lastAttr.setAttr(fg, bg: bg, blink: isBlinking)
+                        hiPosition = curPos
+                        curPos.y++
+                        if curPos.y > 79 { curPos.y = 0 }
+                        currentIndex++
+                    }
+                }
+                else
+                { currentIndex++; }
+            }
+        }
+        
+//        //debug///
+//        var received = ""
+//        for row in 0..<BBSPage.count {
+//            for col in 0..<BBSPage[row].count {
+//                received += BBSPage[row][col].text
+//            }
+//            received += "\n"
+//        }
+//        println("data: \(received) - received")
+//        //////////
+    }
+}

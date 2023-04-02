@@ -1,0 +1,130 @@
+﻿<Page
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:KzBBS"
+    xmlns:common="using:KzBBS.Common"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:UI="using:Microsoft.Advertising.WinRT.UI"
+    xmlns:Windows81="using:Microsoft.AdMediator.Windows81"
+    x:Name="pageRoot"
+    x:Class="KzBBS.MainPage"
+    DataContext="{Binding DefaultViewModel, RelativeSource={RelativeSource Mode=Self}}"
+    mc:Ignorable="d"
+    Background="Black">
+
+    <Page.Resources>
+        <!-- TODO: Delete this line if the key AppName is declared in App.xaml -->
+        <x:String x:Key="AppName">KzBBS</x:String>
+    </Page.Resources>
+
+    <!--
+        This grid acts as a root panel for the page that defines two rows:
+        * Row 0 contains the back button and page title
+        * Row 1 contains the rest of the page layout
+    -->
+    <Grid Background="Black">
+        <Grid.ChildrenTransitions>
+            <TransitionCollection>
+                <EntranceThemeTransition/>
+            </TransitionCollection>
+        </Grid.ChildrenTransitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="95"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="100" />
+        </Grid.RowDefinitions>
+
+        <!-- Back button and page title -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <!--<Button x:Name="backButton" Margin="39,59,39,0" Command="{Binding NavigationHelper.GoBackCommand, ElementName=pageRoot}"
+                        Style="{StaticResource NavigationBackButtonNormalStyle}"
+                        VerticalAlignment="Top"
+                        AutomationProperties.Name="Back"
+                        AutomationProperties.AutomationId="BackButton"
+                        AutomationProperties.ItemType="Navigation Button"/>-->
+            <TextBlock x:Name="pageTitle" Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="0" 
+				IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="10,0,0,0"/>
+        </Grid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Grid Margin="10,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60" />
+                    <RowDefinition Height="60" />
+                    <RowDefinition Height="60" />
+                    <RowDefinition Height="60" />
+                    <RowDefinition Height="70" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Uid="addressTag" Text="Addr:" FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <TextBox Grid.Column="1" x:Uid="addressTbox" x:Name="tIP" Text="ptt.cc" FontSize="26" MinWidth="200" MinHeight="45" IsSpellCheckEnabled="False"
+					VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <TextBlock Grid.Row="1" Text="Port:" FontSize="26" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="tPort" Text="23" FontSize="26" MinWidth="200" MinHeight="45"
+					VerticalAlignment="Center" HorizontalAlignment="Left" IsSpellCheckEnabled="False" />
+                <TextBlock Grid.Row="2" x:Uid="account" Text="Acct:" FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <TextBox Grid.Row="2" Grid.Column="1" x:Uid="accountTbox" x:Name="tAccount" FontSize="26" MinWidth="200" MinHeight="45"
+					VerticalAlignment="Center" HorizontalAlignment="Left" IsSpellCheckEnabled="False" />
+                <TextBlock Grid.Row="3" x:Uid="password" Text="Pwd:" FontSize="26" MinWidth="200" MinHeight="45" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <PasswordBox Grid.Row="3" Grid.Column="1" x:Uid="passwordTbox" x:Name="tPwd" FontSize="26" PasswordChar="*" 
+					VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="200" MinHeight="45" />
+                <!--<StackPanel Orientation="Horizontal" Margin="7,10,0,0">
+                    <CheckBox x:Uid="remember" Name="rememberAcPd" FontSize="22" MinWidth="60" MinHeight="20" Content="記住" Checked="remember_Checked"
+                              Style="{StaticResource WP81CheckboxStyle}" />
+                    <Button x:Uid="clearSaved" Name="clearSaved" FontSize="24" MinWidth="120" Padding="0,1,0,0" 
+                           IsEnabled="False" BorderThickness="0" Content="清除已存" Click="clearSaved_Click" />
+                </StackPanel>-->
+                <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal"
+					VerticalAlignment="Center" HorizontalAlignment="Left" >
+                    <Button x:Uid="connBtn" x:Name="connBtn" Content="Conn" FontSize="26" Click="connect_Click" MinHeight="60" />
+                    <Button x:Uid="disconnBtn" x:Name="disconnBtn" Content="Disconn" FontSize="26" Click="disconnect_Click" MinHeight="60"
+						Margin="10,0" />
+                    <Button x:Name="toTelnetPage" Style="{StaticResource NavigationForwardButtonNormalStyle}" Click="goTelnetPage"
+						VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+            <StackPanel x:Name="settingPanel" Margin="20,0,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="isBig5" Content="BIG5" GroupName="encodeGroup" Style="{StaticResource centerRadioButton}"
+						Checked="encode_Checked" FontSize="25" />
+                    <RadioButton x:Name="isGBK" Content="GBK" GroupName="encodeGroup" Style="{StaticResource centerRadioButton}"
+						Checked="encode_Checked" FontSize="25" />
+                </StackPanel>
+                <CheckBox x:Name="PTTMode" IsChecked="True" FontSize="30" Content="PTT" Checked="PTT_Checked" Unchecked="PTT_Unchecked"
+					HorizontalAlignment="Left" Style="{StaticResource WP81CheckboxStyle}" />
+                <Grid x:Name="aboutPanel">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="70" />
+                    </Grid.RowDefinitions>
+                    <!--<Border BorderThickness="5" CornerRadius="5" Grid.RowSpan="2" BorderBrush="White" Background="Black" />-->
+                    <StackPanel Orientation="Horizontal" >
+                        <!--<Image Source="Assets/StoreLogo.scale-180.png" Stretch="None" Margin="0,0,10,0" VerticalAlignment="Top" />-->
+                        <StackPanel>
+                            <TextBlock x:Uid="aboutContent" Text="這是個可以連線BBS的APP, 如果你是第一次連上該BBS站台, 請在連上該BBS站台後依照指示註冊帳號登入. 感謝您的使用."
+								Width="300" TextWrapping="Wrap" FontSize="20" HorizontalAlignment="Right" />
+                            <TextBlock x:Name="versionText" Text="v1.0.0.0" FontSize="25" HorizontalAlignment="Right" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Uid="aboutBuy" Content="購買" FontSize="26" Click="buy_Click" IsTabStop="False"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="2">
+            <!--<UI:AdControl Name="adPanel" ApplicationId="d12bebc7-1374-4a8f-a8c6-36f384b9ba3d" 
+                      AdUnitId="218480" 
+                      HorizontalAlignment="Center" VerticalAlignment="Top" ErrorOccurred="ad_ErrorOccurred"
+                      Height="90" Width="728" />-->
+            <Windows81:AdMediatorControl x:Name="AdMediator_DFBB4E" Id="AdMediator-Id-D1E257D4-03C7-4EB3-B76A-8CF737697C37" Width="728"  Height="90" />
+        </StackPanel>
+    </Grid>
+</Page>

@@ -1,0 +1,421 @@
+class TelnetDisplay {
+	static var lastChar = ""
+	var pttOn = true
+	var User:String
+	var LoginScreen:Bool
+	var accPwdKeyIn:Bool
+	var currentMode:BBSMode
+	var lastMode:BBSMode
+    var fontSize:CGFloat
+	var cht_fontFamily:String
+	var ansi_fontFamily:String
+	var currentPage:PTTPage
+	var lastPage:PTTPage
+	
+	var delegate:TelnetDisplayProtocol?
+	
+	init() {
+		User = ""
+		LoginScreen = false
+		accPwdKeyIn = false
+		currentMode = BBSMode.Other
+		lastMode = BBSMode.Other
+		fontSize = 15.0
+		cht_fontFamily = "Heiti TC"
+		ansi_fontFamily = "DFKai-SB"
+		currentPage = PTTPage()
+		lastPage = PTTPage()
+		delegate = nil
+	}
+	
+	init(delegate:TelnetDisplayProtocol) {
+		User = ""
+		LoginScreen = false
+		accPwdKeyIn = false
+		currentMode = BBSMode.Other
+		lastMode = BBSMode.Other
+		fontSize = 15.0
+		cht_fontFamily = "Heiti TC"
+		ansi_fontFamily = "DFKai-SB"
+		currentPage = PTTPage()
+		lastPage = PTTPage()
+		self.delegate = delegate
+	}
+	
+	func resetAll() {
+		User = ""
+		LoginScreen = false
+		accPwdKeyIn = false
+		currentMode = BBSMode.Other
+		lastMode = BBSMode.Other
+		currentPage = PTTPage()
+		lastPage = PTTPage()
+	}
+	
+    func LoadFromSource(BBSPage:[[TelnetData]]) {
+		lastPage = PTTPage(page: currentPage)
+		lastMode = currentMode
+		
+		//check page mode
+		//check line 0 and line 23, if matched, set BBSmode
+		let textL23 = getLineText(BBSPage[23],start: 0, end: 46)
+		let	textL0 = getLineText(BBSPage[0],start: 0, end: 20)
+		
+		let modeL0 = checkMode(textL0)
+		let modeL23 = checkMode(textL23)
+		if modeL0 == modeL23 {
+			currentMode = modeL0
+		}
+		else if modeL23 == BBSMode.PressAnyKey || modeL23 == BBSMode.AnimationPlay || modeL23 == BBSMode.Editor {
+			currentMode = modeL23
+		}
+		else if modeL0 == BBSMode.Other && modeL23 == BBSMode.ArticleBrowse {
+			currentMode = modeL23
+		}
+		else if modeL23 == BBSMode.Other {
+			if modeL0 == BBSMode.ClassBoard {
+				currentMode = modeL0
+			}
+			else {
+				currentMode = modeL23
+			}
+		}
+		else {
+			return
+		}
+		
+		//check partial data received at article browse mode
+		if currentMode == BBSMode.ArticleBrowse {
+			let currentPageLastLine = getLineText(BBSPage[23], start: 0, end: 79)
+			if currentPageLastLine == lastPage.Lines.last!.Text {
+				currentMode = lastMode
+				return
+			}
+		}
+		
+		if !checkIfKeepPage(TelnetDisplay.lastChar) {
+			currentMode = lastMode
+			return
+		}
+		
+		//println("BBS mode = \(currentMode.description)")
+		
+		//start analyze data
+		currentPage = PTTPage()
+		currentPage.Mode = currentMode
+		
+		lastId = ""
+		var point = TelnetData()
+        for var row=0; row < 24; row++ {
+            let pttline = PTTLine()
+            pttline.No = row
+            point = TelnetData()
+            point.cloneFrom(BBSPage[row][0])
+            point.position = Point(x:row, y:0)
+            for var col=1; col < 80; col++ {
+                if point == BBSPage[row][col] //only check backColor, forColor, blinking, dualcolor, isTwWord
+                {
+                    point.text += BBSPage[row][col].text
+                }
+				//save the block with same attribute
+                else
+                {
+                    point.count = col - point.position.y;
+                    if point.text == ""
+                    { point.text = " " }
+                    pttline.Blocks.append(getBlock(point))
+                    point = TelnetData()
+                    point.cloneFrom(BBSPage[row][col])
+                    point.position = Point(x:row, y:col)
+                }
+            }
+			//record the final portion
+            if point.text == ""
+            {
+                point.text = " "
+            }
+            point.count = 80 - point.position.y
+            pttline.Blocks.append(getBlock(point))
+			getLineProp(pttline,rawLine:BBSPage[row])
+            currentPage.Lines.append(pttline)
+        }
+		
+		self.delegate!.didDataChanged()
+    }
+	
+	func getLineText(line:[TelnetData],start:Int,end:Int)->String {
+		var result = ""
+		for var i=start; i<=end; i++ {
+			result += line[i].text
+		}
+		if result.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()).isEmpty {
+			result = ""
+		}
+		
+		//result may have duplicate words because of dual color word
+		return result
+	}
+	
+	func checkIfKeepPage(lastChar:String) -> Bool {
+		var keep = true
+		switch currentMode {
+		case .ArticleList, .BoardList, .Essence, .MailList:
+			keep = true
+		default:
+			keep = false
+		}
+		if keep && pttOn {
+			if lastChar != "H" {
+				return false
+			}
+		}
+		return true
+	}
+	
+    func getBlock(point:TelnetData)->PTTBlock
+    {
+        let pb = PTTBlock()
+        pb.Text = point.text
+        pb.TopPoint = CGFloat(point.position.x) * fontSize
+        pb.LeftPoint = CGFloat(point.position.y) * fontSize/2
+        pb.Width = CGFloat(point.count) * fontSize/2
+        pb.ForeColor = point.foreColor
+        pb.BackColor = point.backColor
+        pb.ZIndex = 1
+        if point.twWord {
+            pb.FontName = cht_fontFamily
+        }
+        else {
+            pb.FontName = ansi_fontFamily
+        }
+        pb.Blinking = point.blinking
+        pb.DualColor = point.dualColor
+        return pb;
+    }
+	
+	var lastId = ""
+	func getLineProp(pttline:PTTLine, rawLine:[TelnetData]) {
+		//get line text
+		for item in pttline.Blocks {
+            pttline.Text += item.Text
+        }
+		//remove "●" for compare page Text only
+		if let rangeOfCursor = pttline.Text.rangeOfString("●") {
+			pttline.Text.replaceRange(rangeOfCursor, with: "  ")
+		}
+    
+        //check login screen
+        if pttline.No == 22 || pttline.No == 20 || pttline.No == 23 || pttline.No == 21 {
+            if pttline.Text.rangeOfString("請輸入代號") != nil || pttline.Text.rangeOfString("請輸入勇者代號") != nil
+                || pttline.Text.rangeOfString("您的帳號") != nil {
+					if !accPwdKeyIn {
+						LoginScreen = true
+					}
+            }
+        }
+
+		//get line's special properties
+		let forTrim = NSCharacterSet(charactersInString: ".X●\u{a0} ()")
+		if currentMode == BBSMode.MainList {
+			//find login user, 48th to 51th == "我是", user = 52th to 65th
+			if pttline.No == 23 && pttline.Text.rangeOfString("我是") != nil {
+				User = getLineText(rawLine, start: 52, end: 65).stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+			}
+			//get uniqueId = the 23th text
+			if pttline.No > 11 && pttline.No != 23 {
+				pttline.UniqueId = rawLine[23].text
+				pttline.number.text = getLineText(rawLine, start: 22, end: 34)
+				pttline.title.text = getLineText(rawLine, start: 36, end: 79)
+				if !isRegexMatches(pttline.UniqueId, pattern: "[0-9]|[A-Z]") {
+					//pttline.UniqueId.rangeOfCharacterFromSet(NSCharacterSet.uppercaseLetterCharacterSet()) == nil {
+					pttline.UniqueId = ""
+					pttline.number.text = ""
+					pttline.title.text = ""
+				}
+			}
+			//println("number: \(pttline.number.text), uniqueID: \(pttline.UniqueId), title:\(pttline.title.text)")
+		}
+		else if currentMode == BBSMode.Essence {
+			if pttline.No > 1 && pttline.No != 23 {
+				let uId = getLineText(rawLine, start: 0, end: 6)
+				pttline.UniqueId = uId.stringByTrimmingCharactersInSet(forTrim)
+				pttline.number.text = pttline.UniqueId
+				pttline.IsRead.text = getLineText(rawLine, start: 8, end: 9)
+				pttline.title.text = getLineText(rawLine, start: 11, end: 53)
+				pttline.Author.text = getLineText(rawLine, start: 55, end: 66)
+				pttline.date.text = getLineText(rawLine, start: 68, end: 79)
+			}
+			//println("number: \(pttline.number.text), uniqueID: \(pttline.UniqueId), isRead: \(pttline.IsRead.text), hot: \(pttline.hot.text)\ndate:\(pttline.date.text), title:\(pttline.title.text)\nAuthor: \(pttline.Author.text)")
+		}
+		else if currentMode == BBSMode.BoardList {
+			if pttline.No > 2 && pttline.No != 23 {
+				let uId = getLineText(rawLine, start: 0, end: 6)
+				pttline.UniqueId = uId.stringByTrimmingCharactersInSet(forTrim)
+				pttline.number.text = pttline.UniqueId
+				pttline.IsRead.text = getLineText(rawLine, start: 8, end: 9)
+				pttline.IsRead.fgColor = rawLine[8].foreColor
+				pttline.board.text = getLineText(rawLine, start: 10, end: 21)
+				pttline.board.fgColor = rawLine[10].foreColor
+				pttline.category.text = getLineText(rawLine, start: 23, end: 26)
+				pttline.category.fgColor = rawLine[23].foreColor
+				pttline.title.text = getLineText(rawLine, start: 28, end: 63)
+				pttline.hot.text = getLineText(rawLine, start: 64, end: 66)
+				pttline.hot.fgColor = rawLine[64].foreColor
+				pttline.Author.text = getLineText(rawLine, start: 67, end: 79)
+			}
+			//println("number: \(pttline.number.text), uniqueID: \(pttline.UniqueId), isRead: \(pttline.IsRead.text), hot: \(pttline.hot.text)\ntitle:\(pttline.title.text)\nAuthor: \(pttline.Author.text), baord: \(pttline.board.text), category: \(pttline.category.text)")
+		}
+		else if currentMode == BBSMode.ClassBoard {
+			if pttline.No > 6 {
+				let uId = getLineText(rawLine, start: 15, end: 16)
+				pttline.UniqueId = uId.stringByTrimmingCharactersInSet(forTrim)
+				pttline.number.text = pttline.UniqueId
+				pttline.IsRead.text = getLineText(rawLine, start: 18, end: 19)
+				pttline.IsRead.fgColor = rawLine[18].foreColor
+				pttline.title.text = getLineText(rawLine, start: 20, end: 48)
+				pttline.Author.text = getLineText(rawLine, start: 61, end: 79)
+			}
+			//println("number: \(pttline.number.text), uniqueID: \(pttline.UniqueId), isRead: \(pttline.IsRead.text)\ntitle:\(pttline.title.text)\nAuthor: \(pttline.Author.text)")
+		}
+		else if currentMode == BBSMode.ArticleList {
+			if pttline.No > 2 && pttline.No != 23 {
+				let uId = getLineText(rawLine, start: 0, end: 6)
+				if uId.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()).isEmpty {
+					pttline.UniqueId = ""
+				}
+				else {
+					pttline.UniqueId = uId.stringByTrimmingCharactersInSet(forTrim)
+					pttline.number.text = pttline.UniqueId
+				}
+				//for article no > 100,000 ex. Gossiping
+				if Int(lastId) != nil && Int(pttline.UniqueId) != nil {
+					if Int(pttline.UniqueId) < Int(lastId) {
+						let no = Int(pttline.UniqueId)! + Int(lastId)! / 100_000 * 100_000
+						pttline.UniqueId = no.description
+						pttline.number.text = pttline.UniqueId
+					}
+				}
+				if pttline.UniqueId == "★" && Int(lastId) != nil {
+					let id:Int = Int(lastId)! + 1
+					pttline.UniqueId = id.description
+					pttline.number.text = "★"
+					pttline.number.fgColor = rawLine[4].foreColor
+				}
+				if Int(pttline.UniqueId) != nil {
+					lastId = pttline.UniqueId
+				}
+				pttline.IsRead.text = rawLine[8].text
+				pttline.IsRead.fgColor = rawLine[8].foreColor
+				pttline.hot.text = getLineText(rawLine, start: 9, end: 10)
+				pttline.hot.fgColor = rawLine[9].foreColor
+				pttline.date.text = getLineText(rawLine, start: 12, end: 15)
+				pttline.Author.text = getLineText(rawLine, start: 17, end: 28)
+				pttline.Author.fgColor = rawLine[17].foreColor
+				pttline.title.text = getLineText(rawLine, start: 30, end: 79)
+				pttline.title.fgColor = rawLine[30].foreColor
+			}
+			//println("number: \(pttline.number.text), uniqueID: \(pttline.UniqueId), isRead: \(pttline.IsRead.text), hot: \(pttline.hot.text)\ndate:\(pttline.date.text), title:\(pttline.title.text)\nAuthor: \(pttline.Author.text)")
+		}
+		else if currentMode == BBSMode.MailList {
+			if pttline.No > 2 && pttline.No != 23 {
+				let uId = getLineText(rawLine, start: 0, end: 6)
+				pttline.UniqueId = uId.stringByTrimmingCharactersInSet(forTrim)
+				pttline.number.text = pttline.UniqueId
+				pttline.IsRead.text = rawLine[7].text
+				pttline.IsRead.fgColor = rawLine[7].foreColor
+				pttline.date.text = getLineText(rawLine, start: 9, end: 13)
+				pttline.Author.text = getLineText(rawLine, start: 15, end: 28)
+				pttline.title.text = getLineText(rawLine, start: 30, end: 79)
+			}
+			//println("number: \(pttline.number.text), uniqueID: \(pttline.UniqueId), isRead: \(pttline.IsRead.text)\ndate:\(pttline.date.text), title:\(pttline.title.text)\nAuthor: \(pttline.Author.text)")
+		}
+		else if currentMode == BBSMode.ArticleBrowse {
+			//get push
+			let firstText = getLineText(rawLine, start: 0, end: 1)
+			if firstText == "推" || firstText == "噓" || firstText == "→" {
+				pttline.push.text = firstText
+				pttline.date.text = getLineText(rawLine, start: 67, end: 79)
+				pttline.title.text = getLineText(rawLine, start: 3, end: 65)
+			}
+			//don't record the non-push line
+			//date format = 08/23 10:51
+			let matchPattern = "\\d{2}/\\d{2}\\s\\d{2}:\\d{2}"
+			if !isRegexMatches(pttline.date.text, pattern: matchPattern) {
+				pttline.push.text = ""
+				pttline.title.text = ""
+				pttline.date.text = ""
+			}
+			//println("date:\(pttline.date.text), title:\(pttline.title.text) push: \(pttline.push.text)")
+		}
+    }
+    
+    func checkMode(text:String)->BBSMode {
+		var result:BBSMode = BBSMode.Other
+        if text.rangeOfString("動畫播放中") != nil {
+            result = BBSMode.AnimationPlay
+        }
+        else if text.rangeOfString("任意鍵繼續") != nil || text.rangeOfString("開始播放") != nil
+            || text.rangeOfString("空白鍵") != nil {
+            result = BBSMode.PressAnyKey
+        }
+        else if text.rangeOfString("瀏覽") != nil || text.rangeOfString("作者") != nil {
+            result = BBSMode.ArticleBrowse
+        }
+        else if text.rangeOfString("編輯文章") != nil {
+            result = BBSMode.Editor
+        }
+        else if text.rangeOfString("看板列表") != nil || text.rangeOfString("選擇看板") != nil {
+            result = BBSMode.BoardList
+        }
+        else if text.rangeOfString("文章選讀") != nil || text.rangeOfString("【板主:") != nil || text.rangeOfString("徵求中") != nil {
+            result = BBSMode.ArticleList
+        }
+        else if text.rangeOfString("郵件選單") != nil || text.rangeOfString("鴻雁往返") != nil {
+            result = BBSMode.MailList
+        }
+        else if text.rangeOfString("呼叫") != nil || text.rangeOfString("星期") != nil
+        || text.rangeOfString("電子郵件") != nil || text.rangeOfString("聊天說話") != nil
+        || text.rangeOfString("個人") != nil || text.rangeOfString("工具程式") != nil
+        || text.rangeOfString("熱門話題") != nil || text.rangeOfString("使用者統計") != nil
+        || text.rangeOfString("網路遊樂場") != nil || text.rangeOfString("Ｐtt量販店") != nil
+        || text.rangeOfString("Ｐtt棋院") != nil || text.rangeOfString("名單編輯") != nil
+		|| text.rangeOfString("主功能表") != nil
+        {
+            result = BBSMode.MainList
+        }
+        else if text.rangeOfString("功能鍵") != nil || text.rangeOfString("精華文章") != nil {
+            result = BBSMode.Essence
+        }
+        else if text.rangeOfString("分類看板") != nil {
+            result = BBSMode.ClassBoard
+        }
+        else {
+            result = BBSMode.Other
+        }
+		return result
+    }
+    
+    func getSelectedID(source:String)->String {
+        var id = ""
+        let forTrim = NSCharacterSet(charactersInString: ".X●\u{a0} ()")
+        var matchResult = ""
+        let matchPattern = "(\\d+\\s)|(\\d+[\\.X\\)])|(\\([A-Z]\\))|(\\s\\u2605\\s)"
+		//let matchPattern = "\\u2605\\s"
+		if var matches = RegexMatches(source, pattern: matchPattern) {
+			if matches.count > 0 {
+				matchResult = matches[0].stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+				if matchResult == "(X)" {
+					id = "X"
+				}
+				else if matchResult == "★" {
+					id = "★"
+				}
+				else {
+					id = matchResult.stringByTrimmingCharactersInSet(forTrim)
+				}
+			}
+        }
+        return id
+        //char[] forTrim = { '.', 'X', '●', '\xa0', '(', ')' };
+    }
+}

@@ -1,0 +1,6 @@
+MainPackage=C:\Users\VM\Desktop\KzBBS\KzBBS\KzBBS.Windows\bin\ARM\Release\KzBBS.Windows_3.1.0.0_ARM.appx
+SymbolPackage=C:\Users\VM\Desktop\KzBBS\KzBBS\KzBBS.Windows\AppPackages\KzBBS.Windows_3.1.0.0_Test\KzBBS.Windows_3.1.0.0_ARM.appxsym
+ResourcePack=C:\Users\VM\Desktop\KzBBS\KzBBS\KzBBS.Windows\bin\ARM\Release\KzBBS.Windows_3.1.0.0_language-en.appx
+ResourcePack=C:\Users\VM\Desktop\KzBBS\KzBBS\KzBBS.Windows\bin\ARM\Release\KzBBS.Windows_3.1.0.0_language-zh-hant.appx
+ResourcePack=C:\Users\VM\Desktop\KzBBS\KzBBS\KzBBS.Windows\bin\ARM\Release\KzBBS.Windows_3.1.0.0_scale-140.appx
+ResourcePack=C:\Users\VM\Desktop\KzBBS\KzBBS\KzBBS.Windows\bin\ARM\Release\KzBBS.Windows_3.1.0.0_scale-180.appx
